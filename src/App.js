@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Header from './components/Header';
+import Home from './pages/Home';
 import Portfolio from './pages/Portfolio';
 import Blog from './pages/Blog';
 import Login from './pages/Login';
@@ -8,6 +9,7 @@ import Admin from './pages/Admin';
 import AddProject from './pages/admin/AddProject';
 import AddBlog from './pages/admin/AddBlog';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import './styles/global.css';
 import './styles/admin.css';
 import './styles/auth.css';
 import './styles/project.css';
@@ -20,9 +22,10 @@ function App() {
   return (
     <BrowserRouter>
       <div className="App">
-        <Navbar />
+        <Header />
         <Routes>
-          <Route path="/" element={<Portfolio />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/project/:id" element={<ProjectDetails />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/login" element={<Login />} />

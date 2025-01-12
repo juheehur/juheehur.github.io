@@ -1,0 +1,207 @@
+/* Modern Portfolio Styles with Animation */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+* {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.portfolio {
+  padding: 2rem 1rem;
+  background: white;
+  min-height: 100vh;
+}
+
+.portfolio h1 {
+  color: #1C3D5A;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 0.8rem;
+}
+
+.portfolio h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 2px;
+  background: #4A90E2;
+}
+
+.portfolio h3 {
+  color: #1C3D5A;
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.filter-section {
+  padding: 1.2rem 0;
+  margin-bottom: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.role-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.role-tag {
+  border: 1px solid #A1C4FD;
+  padding: 0.5rem 1rem;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  background: white;
+  color: #4A90E2;
+  font-weight: 400;
+}
+
+.role-tag:hover {
+  background: #F5F7FA;
+}
+
+.role-tag.active {
+  background: #4A90E2;
+  color: white;
+  border-color: #4A90E2;
+}
+
+.skill-filter {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.skill-select {
+  border: 1px solid #A1C4FD;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  color: #1C3D5A;
+  font-weight: 400;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.skill-select:hover {
+  border-color: #4A90E2;
+  background: #F5F7FA;
+}
+
+.skill-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #A1C4FD;
+  border-radius: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.skill-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+
+.skill-dropdown::-webkit-scrollbar-track {
+  background: #F5F7FA;
+}
+
+.skill-dropdown::-webkit-scrollbar-thumb {
+  background: #A1C4FD;
+  border-radius: 2px;
+}
+
+.skill-option {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  color: #1C3D5A;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.skill-option:hover {
+  background: #F5F7FA;
+  color: #4A90E2;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+  padding: 0.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.project-card {
+  border: 1px solid #E5E9F0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.project-card:hover {
+  border-color: #A1C4FD;
+}
+
+.no-projects {
+  text-align: center;
+  padding: 2.5rem 1.2rem;
+  color: #1C3D5A;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  grid-column: 1 / -1;
+  border: 1px dashed #A1C4FD;
+}
+
+@media (max-width: 768px) {
+  .portfolio {
+    padding: 1.2rem 0.8rem;
+  }
+
+  .portfolio h1 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-section {
+    padding: 0.8rem 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .projects-grid {
+    gap: 1rem;
+    padding: 0.3rem;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  .role-tag {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8125rem;
+  }
+
+  .skill-select {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8125rem;
+  }
+} 
