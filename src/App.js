@@ -12,7 +12,6 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import './styles/global.css';
 import './styles/admin.css';
 import './styles/auth.css';
-import './styles/project.css';
 import Profile from './pages/Profile';
 import './styles/profile.css';
 import EditProject from './pages/admin/EditProject';

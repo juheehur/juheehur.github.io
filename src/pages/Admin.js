@@ -90,7 +90,7 @@ const ProjectActions = styled.div`
 `;
 
 const ActionButton = styled.button`
-  background: ${props => props.delete ? '#dc3545' : '#4A90E2'};
+  background: ${props => props.isDelete ? '#dc3545' : '#4A90E2'};
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -213,7 +213,7 @@ function Admin() {
                 Edit
               </EditButton>
               <ActionButton 
-                delete 
+                isDelete 
                 onClick={() => handleDelete(project.id)}
               >
                 Delete

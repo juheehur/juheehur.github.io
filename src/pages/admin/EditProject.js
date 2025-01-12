@@ -21,12 +21,12 @@ function EditProject() {
         const projectDoc = await getDoc(doc(db, 'projects', projectId));
         if (projectDoc.exists()) {
           const data = projectDoc.data();
-          setTitle(data.title);
-          setDescription(data.description);
-          setTechnologies(data.technologies.join(', '));
-          setLiveUrl(data.liveUrl);
-          setGithubUrl(data.githubUrl);
-          setCurrentImage(data.imageUrl);
+          setTitle(data.title || '');
+          setDescription(data.description || '');
+          setTechnologies(data.technologies?.join(', ') || '');
+          setLiveUrl(data.liveUrl || '');
+          setGithubUrl(data.githubUrl || '');
+          setCurrentImage(data.imageUrl || '');
         } else {
           setError('Project not found');
         }
