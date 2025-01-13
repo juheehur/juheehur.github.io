@@ -1,33 +1,20 @@
-import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/config';
-import BlogPost from '../components/BlogPost';
+import React from 'react';
 
 function Blog() {
-  const [posts, setPosts] = useState([]);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const postsCollection = collection(db, 'blog-posts');
-      const postSnapshot = await getDocs(postsCollection);
-      const postList = postSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setPosts(postList);
-    };
-
-    fetchPosts();
-  }, []);
-
   return (
-    <div className="blog">
-      <h1>Blog Posts</h1>
-      <div className="posts-container">
-        {posts.map(post => (
-          <BlogPost key={post.id} post={post} />
-        ))}
-      </div>
+    <div className="blog" style={{ 
+      display: 'flex', 
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '60vh',
+      textAlign: 'center',
+      padding: '20px'
+    }}>
+      <h1>Blog</h1>
+      <p style={{ fontSize: '1.2rem', marginTop: '20px' }}>
+        Blog page is under construction 🚧
+      </p>
     </div>
   );
 }

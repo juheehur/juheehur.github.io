@@ -141,6 +141,9 @@ function AddProject() {
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [document, setDocument] = useState('');
+  const [duration, setDuration] = useState('');
+  const [totalTime, setTotalTime] = useState('');
+  const [projectType, setProjectType] = useState('individual');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -302,6 +305,9 @@ function AddProject() {
         liveUrl,
         githubUrl,
         imageUrl,
+        duration,
+        totalTime,
+        projectType,
         createdAt: new Date().toISOString()
       });
 
@@ -436,6 +442,52 @@ function AddProject() {
             accept="image/*"
             onChange={(e) => setImage(e.target.files[0])}
           />
+        </div>
+
+        <div className="form-group">
+          <label>Project Duration:</label>
+          <input
+            type="text"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            placeholder="e.g. Jan 2023 - Mar 2023"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Total Time Taken:</label>
+          <input
+            type="text"
+            value={totalTime}
+            onChange={(e) => setTotalTime(e.target.value)}
+            placeholder="e.g. 120 hours"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Project Type:</label>
+          <div className="radio-group">
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="projectType"
+                value="individual"
+                checked={projectType === 'individual'}
+                onChange={(e) => setProjectType(e.target.value)}
+              />
+              Individual Project
+            </label>
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="projectType"
+                value="team"
+                checked={projectType === 'team'}
+                onChange={(e) => setProjectType(e.target.value)}
+              />
+              Team Project
+            </label>
+          </div>
         </div>
 
         <div className="form-group">

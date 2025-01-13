@@ -2,140 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
-
-const ProjectContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-`;
-
-const ProjectHeader = styled.div`
-  margin-bottom: 2rem;
-  text-align: center;
-`;
-
-const ProjectTitle = styled.h1`
-  color: #1C3D5A;
-  margin-bottom: 1rem;
-`;
-
-const ProjectLinks = styled.div`
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 2rem;
-`;
-
-const ProjectLink = styled.a`
-  background: #4A90E2;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: #357ABD;
-  }
-`;
-
-const ProjectContent = styled.div`
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: 1fr;
-
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 1fr;
-  }
-`;
-
-const ProjectImage = styled.img`
-  width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const ProjectInfo = styled.div`
-  h2 {
-    color: #1C3D5A;
-    margin: 1.5rem 0 1rem;
-    
-    &:first-child {
-      margin-top: 0;
-    }
-  }
-
-  p {
-    color: #666;
-    line-height: 1.6;
-    margin-bottom: 1rem;
-  }
-`;
-
-const TagsContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0;
-`;
-
-const Tag = styled.span`
-  background: ${props => props.type === 'role' ? '#E3F2FD' : '#F5F5F5'};
-  color: ${props => props.type === 'role' ? '#1976D2' : '#333'};
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-`;
-
-const DocumentContainer = styled.div`
-  grid-column: 1 / -1;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
-
-  .custom-html-style {
-    font-family: 'Pretendard', sans-serif;
-    line-height: 1.6;
-    
-    h1, h2, h3, h4, h5, h6 {
-      color: #1C3D5A;
-      margin: 1.5rem 0 1rem;
-    }
-
-    p {
-      margin-bottom: 1rem;
-    }
-
-    img {
-      max-width: 100%;
-      border-radius: 4px;
-      margin: 1rem 0;
-    }
-
-    code {
-      background: #f5f5f5;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-      font-family: monospace;
-    }
-
-    pre {
-      background: #f5f5f5;
-      padding: 1rem;
-      border-radius: 4px;
-      overflow-x: auto;
-      
-      code {
-        background: none;
-        padding: 0;
-      }
-    }
-  }
-`;
+import '../styles/projectDetails.css';
 
 function ProjectDetails() {
   const { id } = useParams();
@@ -165,69 +35,123 @@ function ProjectDetails() {
   if (!project) return <div>Project not found</div>;
 
   return (
-    <ProjectContainer>
-      <ProjectHeader>
-        <ProjectTitle>{project.title}</ProjectTitle>
-        <ProjectLinks>
+    <div className="project-details-container">
+      <div className="project-details-header">
+        <h1 className="project-details-title">{project.title}</h1>
+        {project.description && (
+          <p className="project-details-description">{project.description}</p>
+        )}
+        <div className="project-details-links">
           {project.liveUrl && (
-            <ProjectLink 
+            <a 
+              className="project-details-link"
               href={project.liveUrl} 
               target="_blank" 
               rel="noopener noreferrer"
             >
               Live Demo
-            </ProjectLink>
+            </a>
           )}
           {project.githubUrl && (
-            <ProjectLink 
+            <a 
+              className="project-details-link"
               href={project.githubUrl} 
               target="_blank" 
               rel="noopener noreferrer"
             >
               GitHub
-            </ProjectLink>
+            </a>
           )}
-        </ProjectLinks>
-      </ProjectHeader>
-
-      <ProjectContent>
+        </div>
+      </div>
+      <div className="project-details-content">
         {project.imageUrl && (
-          <ProjectImage src={project.imageUrl} alt={project.title} />
+          <img 
+            className="project-details-image" 
+            src={project.imageUrl} 
+            alt={project.title} 
+          />
         )}
-        
-        <ProjectInfo>
-          <h2>Description</h2>
-          <p>{project.description}</p>
 
-          <h2>Skills & Technologies</h2>
-          <TagsContainer>
-            {project.skillTags?.map((skill, index) => (
-              <Tag key={index} type="skill">{skill}</Tag>
-            ))}
-          </TagsContainer>
+        <div className="project-details-info-grid">
+          <div className="project-details-info-section">
+            <h2>Project Overview</h2>
+            <div className="project-details-meta">
+              {project.projectType && (
+                <div className="project-details-meta-item">
+                  <span className="project-details-meta-label">Project Type:</span>
+                  <span className="project-details-meta-value">
+                    {project.projectType === 'individual' ? 'Individual Project' : 'Team Project'}
+                  </span>
+                </div>
+              )}
+              {project.duration && (
+                <div className="project-details-meta-item">
+                  <span className="project-details-meta-label">Duration:</span>
+                  <span className="project-details-meta-value">{project.duration}</span>
+                </div>
+              )}
+              {project.totalTime && (
+                <div className="project-details-meta-item">
+                  <span className="project-details-meta-label">Total Time:</span>
+                  <span className="project-details-meta-value">{project.totalTime}</span>
+                </div>
+              )}
+            </div>
+          </div>
 
-          <h2>Role Types</h2>
-          <TagsContainer>
-            {project.roleTags?.map((role, index) => (
-              <Tag key={`role-${index}`} type="role">{role}</Tag>
-            ))}
-          </TagsContainer>
-        </ProjectInfo>
+          <div className="project-details-info-section">
+            <h2>Technologies</h2>
+            {project.skillTags && (
+              <div className="project-details-tag-section">
+                <h3>Skills & Tools</h3>
+                <div className="project-details-tags">
+                  {project.skillTags.map((skill, index) => (
+                    <span key={`skill-${index}`} className="project-details-tag">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {project.roleTags && (
+              <div className="project-details-tag-section">
+                <h3>Roles</h3>
+                <div className="project-details-tags">
+                  {project.roleTags.map((role, index) => (
+                    <span key={`role-${index}`} className="project-details-tag">
+                      {role}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         {project.document && (
-          <DocumentContainer>
-            <h2>Project Documentation</h2>
-            <ReactMarkdown
-              rehypePlugins={[rehypeRaw]}
-              remarkPlugins={[remarkGfm]}
-              className="custom-html-style"
-            >
-              {project.document}
-            </ReactMarkdown>
-          </DocumentContainer>
+          <div className="project-details-info-section">
+            <div className="project-details-markdown">
+              <ReactMarkdown 
+                rehypePlugins={[rehypeRaw]} 
+                remarkPlugins={[remarkGfm]}
+              >
+                {project.document}
+              </ReactMarkdown>
+            </div>
+          </div>
         )}
-      </ProjectContent>
-    </ProjectContainer>
+
+        <div className="project-details-markdown">
+          <ReactMarkdown 
+            rehypePlugins={[rehypeRaw]} 
+            remarkPlugins={[remarkGfm]}
+          >
+            {project.content}
+          </ReactMarkdown>
+        </div>
+      </div>
+    </div>
   );
 }
 

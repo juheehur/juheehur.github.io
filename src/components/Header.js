@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../hooks/useAuth';
+import { auth } from '../firebase/config';
+import { signOut } from 'firebase/auth';
 
 const HeaderContainer = styled.header`
   background-color: #fff;
@@ -125,8 +127,24 @@ const SearchIcon = () => (
   </svg>
 );
 
+const LogoutButton = styled.button`
+  background: none;
+  border: none;
+  color: #1C3D5A;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+
+  &:hover {
+    color: #4A90E2;
+  }
+`;
+
 function Header() {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
@@ -140,6 +158,15 @@ function Header() {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSearch(e);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   };
 
@@ -166,6 +193,7 @@ function Header() {
           <NavLink to="/blog">Blog</NavLink>
           <NavLink to="/profile">Profile</NavLink>
           {role === 'admin' && <NavLink to="/admin">Admin</NavLink>}
+          {user && <LogoutButton onClick={handleLogout}>Logout</LogoutButton>}
         </Nav>
       </HeaderContent>
     </HeaderContainer>

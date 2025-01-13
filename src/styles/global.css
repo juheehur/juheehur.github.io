@@ -16,7 +16,7 @@
 
 body {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  background-color: var(--neutral);
+  background-color: white;
   color: var(--deep-blue);
   padding-top: 64px; /* Height of the fixed header */
 }

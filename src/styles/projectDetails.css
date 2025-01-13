@@ -1,0 +1,219 @@
+.project-details-container {
+  max-width: 1200px;
+  margin: 0.8rem auto;
+  padding: 0 1rem;
+}
+
+.project-details-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.project-details-title {
+  font-size: 2rem;
+  color: #000000;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+}
+
+.project-details-description {
+  color: #666666;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.project-details-links {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.project-details-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #333333;
+  text-decoration: none;
+  border: 1px solid #666666;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.project-details-link:hover {
+  background-color: #333333;
+  color: #FFFFFF;
+}
+
+.project-details-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.project-details-image {
+  width: 100%;
+  max-height: 450px;
+  object-fit: cover;
+  margin-bottom: 2rem;
+}
+
+.project-details-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid #E5E5E5;
+  padding-bottom: 2rem;
+}
+
+.project-details-info-section {
+  color: #333333;
+}
+
+.project-details-info-section h2 {
+  color: #000000;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.project-details-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.project-details-meta-item {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  font-size: 0.875rem;
+}
+
+.project-details-meta-label {
+  font-weight: 500;
+  color: #333333;
+  min-width: 100px;
+}
+
+.project-details-meta-value {
+  color: #666666;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.project-details-tag-section {
+  margin-bottom: 1.25rem;
+}
+
+.project-details-tag-section h3 {
+  color: #333333;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.project-details-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.project-details-tag {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #E5E5E5;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  color: #666666;
+  background-color: white;
+}
+
+.project-details-markdown {
+  line-height: 1.6;
+  color: #333333;
+  font-size: 0.9375rem;
+}
+
+.project-details-markdown h1,
+.project-details-markdown h2,
+.project-details-markdown h3 {
+  color: #000000;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.project-details-markdown h1 {
+  font-size: 1.5rem;
+}
+
+.project-details-markdown h2 {
+  font-size: 1.25rem;
+}
+
+.project-details-markdown h3 {
+  font-size: 1.125rem;
+}
+
+.project-details-markdown p {
+  color: #666666;
+  margin-bottom: 1rem;
+}
+
+.project-details-markdown img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem 0;
+}
+
+.project-details-markdown code {
+  background-color: #F5F5F5;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #333333;
+  border: 1px solid #E5E5E5;
+}
+
+.project-details-markdown pre {
+  background-color: #F5F5F5;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid #E5E5E5;
+}
+
+/* Documentation section styles */
+.project-details-info-section:has(h2:contains("Documentation")) {
+  background-color: #FAFAFA;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+  border: 1px solid #E5E5E5;
+}
+
+.project-details-info-section:has(h2:contains("Documentation")) h2 {
+  color: #000000;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown {
+  color: #333333;
+}
+
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown h1,
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown h2,
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown h3 {
+  color: #000000;
+}
+
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown p {
+  color: #666666;
+}

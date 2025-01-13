@@ -12,6 +12,9 @@ function EditProject() {
   const [liveUrl, setLiveUrl] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
   const [currentImage, setCurrentImage] = useState('');
+  const [duration, setDuration] = useState('');
+  const [totalTime, setTotalTime] = useState('');
+  const [projectType, setProjectType] = useState('individual');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,6 +30,9 @@ function EditProject() {
           setLiveUrl(data.liveUrl || '');
           setGithubUrl(data.githubUrl || '');
           setCurrentImage(data.imageUrl || '');
+          setDuration(data.duration || '');
+          setTotalTime(data.totalTime || '');
+          setProjectType(data.projectType || 'individual');
         } else {
           setError('Project not found');
         }
@@ -51,6 +57,9 @@ function EditProject() {
         technologies: technologies.split(',').map(tech => tech.trim()),
         liveUrl,
         githubUrl,
+        duration,
+        totalTime,
+        projectType,
         updatedAt: new Date().toISOString()
       });
 
@@ -119,6 +128,54 @@ function EditProject() {
             onChange={(e) => setGithubUrl(e.target.value)}
             required
           />
+        </div>
+
+        <div className="form-group">
+          <label>Project Duration:</label>
+          <input
+            type="text"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            placeholder="e.g. Jan 2023 - Mar 2023"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Total Time Taken:</label>
+          <input
+            type="text"
+            value={totalTime}
+            onChange={(e) => setTotalTime(e.target.value)}
+            placeholder="e.g. 120 hours"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Project Type:</label>
+          <div className="radio-group">
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="projectType"
+                value="individual"
+                checked={projectType === 'individual'}
+                onChange={(e) => setProjectType(e.target.value)}
+              />
+              Individual Project
+            </label>
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="projectType"
+                value="team"
+                checked={projectType === 'team'}
+                onChange={(e) => setProjectType(e.target.value)}
+              />
+              Team Project
+            </label>
+          </div>
         </div>
 
         <div className="form-group">
