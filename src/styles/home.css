@@ -1,0 +1,215 @@
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 0 5%;
+  background-color: #1a1a1a;
+  color: white;
+}
+
+.content-section {
+  flex: 1;
+  padding-right: 5%;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.image-section {
+  flex: 1;
+  position: relative;
+}
+
+.role-tags {
+  position: fixed;
+  top: 100px;
+  left: 5%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  z-index: 100;
+}
+
+.role-tag {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.role-tag:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.role-tag.active {
+  background: #4A90E2;
+}
+
+.role-tag.active:hover {
+  background: #357ABD;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: -40px;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+  font-family: 'Courier New', monospace;
+  color: #4A90E2;
+  white-space: pre-wrap;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #a0a0a0;
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.button {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primary-button {
+  background-color: #6c5ce7;
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: #5b4bc4;
+  transform: translateY(-2px);
+}
+
+.secondary-button {
+  background-color: transparent;
+  color: white;
+  border: 2px solid #6c5ce7;
+}
+
+.secondary-button:hover {
+  background-color: rgba(108, 92, 231, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Mobile Styles */
+@media screen and (max-width: 768px) {
+  .home-container {
+    flex-direction: column-reverse;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .content-section {
+    padding: 24px 20px;
+    margin-top: 0;
+    text-align: left;
+    background: linear-gradient(to top, #1a1a1a 80%, rgba(26, 26, 26, 0.9) 90%, rgba(26, 26, 26, 0.8) 100%);
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .image-section {
+    margin-top: 0;
+    width: 100%;
+    height: 50vh;
+    position: sticky;
+    top: 0;
+  }
+
+  .role-tags {
+    position: relative;
+    left: 0;
+    top: 0;
+    padding: 16px 0;
+    overflow-x: auto;
+    justify-content: flex-start;
+    margin: 0 0 20px 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  .role-tags::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  .role-tag {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .role-tag.active {
+    background: rgba(74, 144, 226, 0.8);
+  }
+
+  .title {
+    font-size: 1.8rem;
+    margin: 0 0 16px 0;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+    opacity: 0.9;
+  }
+
+  .button-group {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .button {
+    flex: 1;
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .primary-button {
+    background: rgba(108, 92, 231, 0.9);
+  }
+
+  .secondary-button {
+    border: 1.5px solid rgba(108, 92, 231, 0.5);
+  }
+
+  /* Additional styles for better touch interaction */
+  .button:active {
+    transform: scale(0.98);
+  }
+
+  /* Prevent text selection on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+} 

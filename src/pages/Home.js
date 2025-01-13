@@ -1,111 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
 import ImageCarousel from '../components/ImageCarousel';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
-
-const HomeContainer = styled.div`
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 0 5%;
-  background-color: #1a1a1a;
-  color: white;
-`;
-
-const ContentSection = styled.div`
-  flex: 1;
-  padding-right: 5%;
-  margin-top: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`;
-
-const ImageSection = styled.div`
-  flex: 1;
-  position: relative;
-`;
-
-const RoleTags = styled.div`
-  position: fixed;
-  top: 100px;
-  left: 5%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  z-index: 100;
-`;
-
-const RoleTag = styled.button`
-  background: ${props => props.active ? '#4A90E2' : 'rgba(255, 255, 255, 0.1)'};
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.active ? '#357ABD' : 'rgba(255, 255, 255, 0.2)'};
-  }
-`;
-
-const Title = styled.pre`
-  font-size: 2rem;
-  font-weight: bold;
-  margin-top: -40px;
-  margin-bottom: 1.5rem;
-  line-height: 1.4;
-  font-family: 'Courier New', monospace;
-  color: #4A90E2;
-  white-space: pre-wrap;
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.2rem;
-  color: #a0a0a0;
-  margin-bottom: 2rem;
-  max-width: 600px;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 1rem;
-`;
-
-const Button = styled.button`
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-`;
-
-const PrimaryButton = styled(Button)`
-  background-color: #6c5ce7;
-  color: white;
-
-  &:hover {
-    background-color: #5b4bc4;
-    transform: translateY(-2px);
-  }
-`;
-
-const SecondaryButton = styled(Button)`
-  background-color: transparent;
-  color: white;
-  border: 2px solid #6c5ce7;
-
-  &:hover {
-    background-color: rgba(108, 92, 231, 0.1);
-    transform: translateY(-2px);
-  }
-`;
+import '../styles/home.css';
 
 const Home = () => {
   const [roleTypes, setRoleTypes] = useState([]);
@@ -164,32 +62,32 @@ awesome-developer
   };
 
   return (
-    <HomeContainer>
-      <ContentSection>
-        <RoleTags>
+    <div className="home-container">
+      <div className="content-section">
+        <div className="role-tags">
           {roleTypes.map(role => (
-            <RoleTag
+            <button
               key={role}
-              active={selectedRole === role}
+              className={`role-tag ${selectedRole === role ? 'active' : ''}`}
               onClick={() => setSelectedRole(role)}
             >
               {role}
-            </RoleTag>
+            </button>
           ))}
-        </RoleTags>
-        <Title>{getHeadline(selectedRole)}</Title>
-        <Subtitle>
+        </div>
+        <pre className="title">{getHeadline(selectedRole)}</pre>
+        <p className="subtitle">
           A hackathon nerd who learns new tech on the fly to bring bold, spur-of-the-moment ideas to life.
-        </Subtitle>
-        <ButtonGroup>
-          <PrimaryButton onClick={handleContact}>Contact Juheehur</PrimaryButton>
-          <SecondaryButton onClick={handleViewProjects}>View Projects</SecondaryButton>
-        </ButtonGroup>
-      </ContentSection>
-      <ImageSection>
+        </p>
+        <div className="button-group">
+          <button className="button primary-button" onClick={handleContact}>Contact Juheehur</button>
+          <button className="button secondary-button" onClick={handleViewProjects}>View Projects</button>
+        </div>
+      </div>
+      <div className="image-section">
         <ImageCarousel />
-      </ImageSection>
-    </HomeContainer>
+      </div>
+    </div>
   );
 };
 
