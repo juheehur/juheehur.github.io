@@ -15,15 +15,20 @@
 }
 
 .role-tags {
-  padding: 20px 0;
-  margin-bottom: 0;
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 100%;
   z-index: 100;
+  display: flex;
+  justify-content: center;
 }
 
 .content-wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex: 1;
+  padding-top: 5%;
 }
 
 .content-section {
@@ -31,12 +36,33 @@
   padding-right: 5%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+  margin-top: 3%;
 }
 
 .image-section {
   flex: 1;
   position: relative;
+  max-height: 70vh;
+  min-height: 450px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  margin-top: 3%;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+  transform: perspective(1000px) rotateY(-5deg);
+  transition: transform 0.3s ease;
+}
+
+.profile-image:hover {
+  transform: perspective(1000px) rotateY(0deg);
 }
 
 .role-tag {
@@ -65,13 +91,13 @@
 .title {
   font-size: 1.5rem;
   font-weight: bold;
-  margin-top: -220px;
+  margin-top: -20px;
   margin-bottom: 1.5rem;
   line-height: 1.4;
   font-family: 'Courier New', monospace;
   color: #1a6dff;
   white-space: pre-wrap;
-  min-height: 200px;
+  min-height: 150px;
   display: flex;
   align-items: flex-start;
 }
@@ -379,6 +405,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  padding: 0;
+  justify-content: center;
+  width: 90%;
+  max-width: 800px;
 }
 
 .mobile-role-button {
@@ -551,6 +581,49 @@
 
   .testimonial-card {
     padding: 20px;
+  }
+}
+
+.testimonials-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.testimonials-title {
+  text-align: center;
+  font-size: 2rem;
+  color: white;
+  font-weight: 600;
+  margin: 0;
+}
+
+.answer-button {
+  padding: 10px 20px;
+  background-color: rgba(26, 109, 255, 0.1);
+  border: 2px solid #1a6dff;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.answer-button:hover {
+  background-color: #1a6dff;
+  transform: translateY(-2px);
+}
+
+@media screen and (max-width: 768px) {
+  .testimonials-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .testimonials-title {
+    font-size: 1.5rem;
   }
 }
 

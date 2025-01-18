@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import ImageCarousel from '../components/ImageCarousel';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
 import '../styles/home.css';
+import meImage from '../picture/me.png';
 
 const Home = () => {
   const [roleTypes, setRoleTypes] = useState([]);
@@ -168,13 +168,21 @@ INVEST NOW!`;
             </div>
           </div>
           <div className="image-section">
-            <ImageCarousel />
+            <img src={meImage} alt="Emily Juhee Hur" className="profile-image" />
           </div>
         </div>
       </div>
       
       <div className="testimonials-section">
-        <h2 className="testimonials-title">What People Say about Juhee Hur</h2>
+        <div className="testimonials-header">
+          <h2 className="testimonials-title">What People Say about Juhee Hur</h2>
+          <button 
+            className="answer-button"
+            onClick={() => navigate('/question/p7vhLZOjfrgZWD9x0w4G')}
+          >
+            Click to Answer
+          </button>
+        </div>
         <div className="testimonials-grid">
           {testimonials.map((testimonial) => (
             <div key={testimonial.id} className="testimonial-card">

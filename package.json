@@ -2,7 +2,7 @@
   "name": "juheehur-portfolio",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "https://juheehur.github.io",
   "dependencies": {
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-html": "^6.4.9",
@@ -28,16 +28,16 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "styled-components": "^6.1.14",
-    "web-vitals": "^4.2.4"
+    "web-vitals": "^4.2.4",
+    "cross-env": "^7.0.3"
   },
   "scripts": {
+    "dev": "react-scripts start",
     "start": "react-scripts start",
-    "build": "react-scripts build",
-    "build:github": "cross-env REACT_APP_DEPLOY_TARGET=github react-scripts build",
-    "build:vercel": "cross-env REACT_APP_DEPLOY_TARGET=vercel react-scripts build",
+    "build": "set \"CI=false\" && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy": "npm run build:github",
+    "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
   "repository": {
