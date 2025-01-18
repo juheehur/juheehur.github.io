@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './pages/Home';
 import Portfolio from './pages/Portfolio';
@@ -23,6 +23,7 @@ import Duplicate from './pages/Duplicate';
 import BlogDetails from './pages/BlogDetails';
 import EditBlog from './pages/admin/EditBlog';
 import PortfolioSummary from './pages/admin/PortfolioSummary';
+import AddTodo from './pages/admin/AddTodo';
 
 // Check if we're in the GitHub Pages environment
 const isGithubPages = process.env.REACT_APP_DEPLOY_TARGET === 'github';
@@ -51,6 +52,8 @@ function App() {
               <Route path="/admin/portfolio-summary" element={<ProtectedRoute adminOnly><PortfolioSummary /></ProtectedRoute>} />
               <Route path="/admin/edit-project/:projectId" element={<ProtectedRoute adminOnly><EditProject /></ProtectedRoute>} />
               <Route path="/admin/edit-blog/:postId" element={<ProtectedRoute adminOnly><EditBlog /></ProtectedRoute>} />
+              <Route path="/admin/add-todo" element={<ProtectedRoute adminOnly><AddTodo /></ProtectedRoute>} />
+              <Route path="/admin/todos" element={<Navigate to="/admin/add-todo" replace />} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/duplicate" element={<Duplicate />} />
             </>

@@ -285,6 +285,9 @@ function Admin() {
           <AdminButton to="/admin/portfolio-summary">
             Portfolio Summary
           </AdminButton>
+          <AdminButton to="/admin/todos">
+            Todo List
+          </AdminButton>
         </AdminActions>
       </AdminHeader>
 
