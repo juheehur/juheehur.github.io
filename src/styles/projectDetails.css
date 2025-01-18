@@ -1,0 +1,469 @@
+.project-details-container {
+  max-width: 1200px;
+  margin: 0.8rem auto;
+  padding: 0 1rem;
+}
+
+.project-details-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.project-details-title {
+  font-size: 2rem;
+  color: #000000;
+  margin-bottom: 0.8rem;
+  margin-top:50px;
+  font-weight: 600;
+}
+
+.project-details-description {
+  color: #666666;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.project-details-links {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.project-details-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #333333;
+  text-decoration: none;
+  border: 1px solid #666666;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.project-details-link:hover {
+  background-color: #1a6dff;
+  color: #FFFFFF;
+  border-color: #1a6dff;
+}
+
+.project-details-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.project-details-image {
+  width: 100%;
+  max-height: 450px;
+  object-fit: cover;
+  margin-bottom: 2rem;
+  loading: lazy;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.project-details-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid #E5E5E5;
+  padding-bottom: 2rem;
+}
+
+.project-details-info-section {
+  color: #333333;
+}
+
+.project-details-info-section h2 {
+  color: #000000;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.project-details-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.project-details-meta-item {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  font-size: 0.875rem;
+}
+
+.project-details-meta-label {
+  font-weight: 500;
+  color: #333333;
+  min-width: 100px;
+}
+
+.project-details-meta-value {
+  color: #666666;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.project-details-tag-section {
+  margin-bottom: 1.25rem;
+}
+
+.project-details-tag-section h3 {
+  color: #333333;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.project-details-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.project-details-tag {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #E5E5E5;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  color: #666666;
+  background-color: white;
+}
+
+.project-details-markdown {
+  line-height: 1.8;
+  color: #2D3748;
+  font-size: 1rem;
+}
+
+.project-details-markdown h1,
+.project-details-markdown h2,
+.project-details-markdown h3 {
+  color: #1A202C;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.project-details-markdown h1 {
+  font-size: 2rem;
+  border-bottom: 2px solid #EDF2F7;
+  padding-bottom: 0.5rem;
+}
+
+.project-details-markdown h2 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid #EDF2F7;
+  padding-bottom: 0.5rem;
+}
+
+.project-details-markdown h3 {
+  font-size: 1.25rem;
+}
+
+.project-details-markdown p {
+  color: #4A5568;
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+}
+
+.project-details-markdown a {
+  color: #1a6dff;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.project-details-markdown a:hover {
+  border-bottom-color: #1a6dff;
+}
+
+.project-details-markdown img {
+  max-width: 100%;
+  height: auto;
+  margin: 2rem 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.project-details-markdown code {
+  background-color: #F7FAFC;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+  font-size: 0.875rem;
+  color: #2D3748;
+  border: 1px solid #EDF2F7;
+}
+
+.project-details-markdown pre {
+  background-color: #F7FAFC;
+  padding: 1.25rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid #EDF2F7;
+}
+
+.project-details-markdown pre code {
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.project-details-markdown blockquote {
+  border-left: 4px solid #1a6dff;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  background-color: rgba(26, 109, 255, 0.1);
+  border-radius: 0 8px 8px 0;
+}
+
+.project-details-markdown blockquote p {
+  margin: 0;
+  color: #2C5282;
+}
+
+.project-details-markdown ul,
+.project-details-markdown ol {
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.project-details-markdown li {
+  margin-bottom: 0.5rem;
+  color: #4A5568;
+}
+
+.project-details-markdown hr {
+  border: none;
+  border-top: 2px solid #EDF2F7;
+  margin: 2rem 0;
+}
+
+.project-details-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.project-details-markdown th,
+.project-details-markdown td {
+  padding: 0.75rem;
+  border: 1px solid #E2E8F0;
+  text-align: left;
+}
+
+.project-details-markdown th {
+  background-color: #F7FAFC;
+  font-weight: 600;
+}
+
+.project-details-markdown tr:nth-child(even) {
+  background-color: #F7FAFC;
+}
+
+/* Documentation section styles */
+.project-details-info-section:has(h2:contains("Documentation")) {
+  background-color: #FAFAFA;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+  border: 1px solid #E5E5E5;
+}
+
+.project-details-info-section:has(h2:contains("Documentation")) h2 {
+  color: #000000;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown {
+  color: #333333;
+}
+
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown h1,
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown h2,
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown h3 {
+  color: #000000;
+}
+
+.project-details-info-section:has(h2:contains("Documentation")) .project-details-markdown p {
+  color: #666666;
+}
+
+.language-toggle {
+  position: relative;
+  margin: 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  max-width: 1200px;
+  padding: 20px 1rem 0;
+}
+
+.language-button {
+  padding: 8px 16px;
+  background-color: #1a6dff;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(26, 109, 255, 0.2);
+}
+
+.language-button:hover {
+  background-color: #004bcc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(26, 109, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .language-toggle {
+    padding: 15px 1rem 0;
+  }
+
+  .language-button {
+    font-size: 0.9375rem;
+    padding: 8px 14px;
+  }
+}
+
+.related-posts-section {
+  margin-top: 3rem;
+}
+
+.related-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.related-post-card {
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.related-post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(26, 109, 255, 0.2);
+  border-color: rgba(26, 109, 255, 0.3);
+}
+
+.related-post-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.related-post-info {
+  padding: 1rem;
+}
+
+.related-post-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.related-post-metadata {
+  display: flex;
+  gap: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .project-details-title {
+    font-size: 1.75rem;
+    line-height: 1.3;
+    margin-bottom: 0.7rem;
+  }
+
+  .project-details-description {
+    font-size: 1.0625rem;
+    line-height: 1.47;
+  }
+
+  .project-details-link {
+    font-size: 0.9375rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .project-details-info-section h2 {
+    font-size: 1.3125rem;
+    line-height: 1.3;
+  }
+
+  .project-details-info-section h3 {
+    font-size: 1.0625rem;
+    line-height: 1.47;
+  }
+
+  .project-details-meta-item {
+    font-size: 0.9375rem;
+  }
+
+  .project-details-meta-value {
+    font-size: 0.9375rem;
+  }
+
+  .project-details-tag {
+    font-size: 0.8125rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  .project-details-markdown {
+    font-size: 1.0625rem;
+    line-height: 1.47;
+  }
+
+  .project-details-markdown h1 {
+    font-size: 1.75rem;
+    line-height: 1.3;
+  }
+
+  .project-details-markdown h2 {
+    font-size: 1.3125rem;
+    line-height: 1.3;
+  }
+
+  .project-details-markdown h3 {
+    font-size: 1.1875rem;
+    line-height: 1.3;
+  }
+
+  .project-details-markdown code {
+    font-size: 0.9375rem;
+  }
+
+  .language-button {
+    font-size: 0.9375rem;
+    padding: 8px 14px;
+  }
+
+  .related-post-info h3 {
+    font-size: 1.0625rem;
+    line-height: 1.47;
+  }
+
+  .related-post-metadata {
+    font-size: 0.8125rem;
+  }
+}

@@ -1,0 +1,123 @@
+.profile-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.profile-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.edit-button {
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.edit-button:hover {
+  background-color: #0056b3;
+}
+
+.profile-info {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.info-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.info-group label {
+  font-weight: bold;
+  color: #555;
+}
+
+.info-group p {
+  margin: 0;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.role {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.role.admin {
+  background-color: #dc3545;
+  color: white;
+}
+
+.role.visitor {
+  background-color: #28a745;
+  color: white;
+}
+
+.profile-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cancel-button:hover {
+  background-color: #5a6268;
+}
+
+.success-message {
+  padding: 1rem;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.profile-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  resize: vertical;
+} 

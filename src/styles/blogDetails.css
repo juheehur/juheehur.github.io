@@ -1,0 +1,131 @@
+.blog-details {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.blog-details-header {
+  margin-bottom: 2rem;
+}
+
+.blog-details-cover-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.blog-details-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blog-details-cover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.65);
+  z-index: 1;
+}
+
+.blog-details-title-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 90%;
+  max-width: 800px;
+  text-align: center;
+  color: white;
+}
+
+.blog-details-title-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+.blog-details-meta {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+.blog-details-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.blog-details-content h1,
+.blog-details-content h2,
+.blog-details-content h3 {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  font-weight: 600;
+}
+
+.blog-details-content p {
+  margin-bottom: 1.5rem;
+}
+
+.blog-details-related-project {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+.blog-details-related-project h3 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.related-project-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
+
+.related-project-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.related-project-link img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.related-project-link span {
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .blog-details-cover-container {
+    height: 300px;
+  }
+
+  .blog-details-title-container h1 {
+    font-size: 1.8rem;
+  }
+} 

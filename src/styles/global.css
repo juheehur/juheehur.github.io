@@ -1,0 +1,27 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+:root {
+  --primary: #4A90E2;
+  --deep-blue: #1C3D5A;
+  --light-blue: #A1C4FD;
+  --neutral: #F5F7FA;
+  --accent: #FFD66B;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  background-color: white;
+  color: var(--deep-blue);
+  padding-top: 64px; /* Height of the fixed header */
+}
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+} 

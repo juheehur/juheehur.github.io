@@ -1,0 +1,336 @@
+/* Modern Portfolio Styles with Animation */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+* {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.portfolio {
+  padding: 1rem 0.8rem;
+  background: white;
+  min-height: 100vh;
+  position: relative;
+  padding-top: 2rem;
+}
+
+.portfolio h1 {
+  color: black;
+  font-size: 1.3rem;
+  margin-bottom: rem;
+  text-align: center;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 0.6rem;
+}
+
+.portfolio h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 2px;
+  background: #1a6dff;
+}
+
+.portfolio h3 {
+  color: #333333;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.filter-section {
+  padding: 0.8rem 0;
+  margin-bottom: 1.5rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.role-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+  justify-content: center;
+}
+
+.role-tag {
+  border: 1px solid rgba(26, 109, 255, 0.3);
+  padding: 0.4rem 0.8rem;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  transition: all 0.2s ease;
+  background: white;
+  color: #1a6dff;
+  font-weight: 400;
+}
+
+.role-tag:hover {
+  background: rgba(26, 109, 255, 0.1);
+}
+
+.role-tag.active {
+  background: #1a6dff;
+  color: white;
+  border-color: #1a6dff;
+}
+
+.skill-filter {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.skill-select {
+  border: 1px solid rgba(26, 109, 255, 0.3);
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  color: #333333;
+  font-weight: 400;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  min-height: 42px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skill-select:hover {
+  border-color: #1a6dff;
+  background: rgba(26, 109, 255, 0.1);
+}
+
+.skill-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid rgba(26, 109, 255, 0.3);
+  border-radius: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.skill-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+
+.skill-dropdown::-webkit-scrollbar-track {
+  background: #F5F7FA;
+}
+
+.skill-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(26, 109, 255, 0.3);
+  border-radius: 2px;
+}
+
+.skill-option {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  color: #1C3D5A;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.skill-option:hover {
+  background: rgba(26, 109, 255, 0.1);
+  color: #1a6dff;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  padding: 0.3rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.project-card {
+  border: 1px solid #E5E9F0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.project-card:hover {
+  border-color: #A1C4FD;
+}
+
+.no-projects {
+  text-align: center;
+  padding: 2.5rem 1.2rem;
+  color: #1C3D5A;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  grid-column: 1 / -1;
+  border: 1px dashed #A1C4FD;
+}
+
+@media (max-width: 768px) {
+  .portfolio {
+    padding: 1rem 0.6rem;
+  }
+
+  .portfolio h1 {
+    font-size: 1.75rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.3;
+  }
+
+  .portfolio h3 {
+    font-size: 1.0625rem;
+    line-height: 1.47;
+    margin-bottom: 0.6rem;
+  }
+
+  .filter-section {
+    padding: 0.6rem 0;
+    margin-bottom: 1.2rem;
+  }
+
+  .projects-grid {
+    gap: 0.8rem;
+    padding: 0.2rem;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .role-tag {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9375rem;
+  }
+
+  .skill-select {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9375rem;
+  }
+
+  .skill-option {
+    font-size: 0.9375rem;
+  }
+
+  .language-button {
+    font-size: 0.9375rem;
+    padding: 8px 14px;
+  }
+
+  .no-projects {
+    font-size: 1.0625rem;
+    line-height: 1.47;
+  }
+
+  .skill-search input {
+    font-size: 0.9375rem;
+  }
+
+  .no-results {
+    font-size: 0.8125rem;
+  }
+}
+
+.language-toggle {
+  position: relative;
+  margin: 0 auto 1rem;
+  display: flex;
+  justify-content: flex-end;
+  max-width: 900px;
+  padding: 0 1rem;
+}
+
+.language-button {
+  padding: 8px 16px;
+  background-color: #1a6dff;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(26, 109, 255, 0.2);
+}
+
+.language-button:hover {
+  background-color: #004bcc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(26, 109, 255, 0.3);
+}
+
+.skill-option.selected {
+  background-color: rgba(26, 109, 255, 0.1);
+  color: #1a6dff;
+  font-weight: 500;
+}
+
+.skill-option.selected::after {
+  content: '✓';
+  float: right;
+  color: #1a6dff;
+}
+
+.clear-option {
+  border-bottom: 1px solid #E5E9F0;
+  color: #E74C3C;
+}
+
+.clear-option:hover {
+  background: #FEE7E6;
+  color: #E74C3C;
+}
+
+/* 검색 입력창 스타일 추가 */
+.skill-search {
+  padding: 8px;
+  border-bottom: 1px solid #E5E9F0;
+}
+
+.skill-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(26, 109, 255, 0.3);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.skill-search input:focus {
+  border-color: #1a6dff;
+  box-shadow: 0 0 0 2px rgba(26, 109, 255, 0.1);
+}
+
+.skill-search input::placeholder {
+  color: #A0AEC0;
+}
+
+.no-results {
+  padding: 12px;
+  text-align: center;
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .language-toggle {
+    margin: 0 auto 0.8rem;
+    padding: 0 0.8rem;
+  }
+
+  .language-button {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+} 
