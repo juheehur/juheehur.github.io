@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { db } from '../../firebase/config';
-import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/addTodo.css';
 
@@ -29,13 +29,32 @@ const AddTodo = () => {
 
   const fetchTodos = async () => {
     try {
-      const q = query(collection(db, 'todos'), orderBy('createdAt', 'desc'));
-      const querySnapshot = await getDocs(q);
-      const todos = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setAddedTodos(todos);
+      // Get all date collections
+      const dateCollectionsSnapshot = await getDocs(collection(db, 'todos'));
+      const allTodos = [];
+
+      // For each date, get its todos
+      for (const dateDoc of dateCollectionsSnapshot.docs) {
+        const todosQuery = query(
+          collection(db, `todos/${dateDoc.id}/todos`),
+          orderBy('createdAt', 'desc')
+        );
+        const todosSnapshot = await getDocs(todosQuery);
+        const dateTodos = todosSnapshot.docs.map(doc => ({
+          id: doc.id,
+          date: dateDoc.id,
+          ...doc.data()
+        }));
+        allTodos.push(...dateTodos);
+      }
+
+      // Sort all todos by date and createdAt
+      allTodos.sort((a, b) => {
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        return b.createdAt - a.createdAt;
+      });
+
+      setAddedTodos(allTodos);
     } catch (error) {
       console.error('Error fetching todos:', error);
     }
@@ -74,8 +93,8 @@ const AddTodo = () => {
     const now = new Date();
     if (notificationTime > now) {
       try {
-        // Update todo in Firestore
-        const todoRef = doc(db, 'todos', todo.id);
+        // Update todo in Firestore with new path
+        const todoRef = doc(db, `todos/${todo.date}/todos/${todo.id}`);
         await updateDoc(todoRef, {
           notificationScheduled: true,
           notifyMinutesBefore: minutesBefore,
@@ -84,7 +103,7 @@ const AddTodo = () => {
 
         // Update local state
         setAddedTodos(prev => prev.map(t => 
-          t.id === todo.id ? {
+          t.id === todo.id && t.date === todo.date ? {
             ...t, 
             notificationScheduled: true, 
             notifyMinutesBefore: minutesBefore
@@ -94,12 +113,13 @@ const AddTodo = () => {
         // Service Worker에 알림 스케줄링 요청
         if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
           const notification = {
-            id: todo.id,
+            id: `${todo.date}-${todo.id}`,
             title: '할 일 알림',
             body: `${minutesBefore}분 후 일정: ${todo.task}${todo.location ? ` @ ${todo.location}` : ''}`,
             time: notificationTime.getTime(),
             data: {
               todoId: todo.id,
+              date: todo.date,
               task: todo.task,
               location: todo.location,
               minutesBefore
@@ -170,14 +190,14 @@ const AddTodo = () => {
     );
   };
 
-  const handleToggleComplete = async (todoId, completed) => {
+  const handleToggleComplete = async (todoId, completed, date) => {
     try {
-      const todoRef = doc(db, 'todos', todoId);
+      const todoRef = doc(db, `todos/${date}/todos/${todoId}`);
       await updateDoc(todoRef, {
         completed: !completed
       });
       setAddedTodos(prev => prev.map(todo => 
-        todo.id === todoId ? {...todo, completed: !completed} : todo
+        todo.id === todoId && todo.date === date ? {...todo, completed: !completed} : todo
       ));
     } catch (error) {
       console.error('Error updating todo:', error);
@@ -263,6 +283,34 @@ const AddTodo = () => {
       const { todo, text: taskText } = parseCommand(lastLine);
       
       try {
+        const todayDate = todo.date || new Date().toISOString().split('T')[0];
+        
+        // Get reference to the date collection and its todos subcollection
+        const dateCollectionRef = doc(db, 'todos', todayDate);
+        const todosCollectionRef = collection(dateCollectionRef, 'todos');
+        
+        // Get current todos for the date to determine next number
+        const todosQuery = query(todosCollectionRef, orderBy('createdAt', 'desc'));
+        const todosSnapshot = await getDocs(todosQuery);
+        
+        // Calculate next number
+        let nextNumber = 1;
+        if (!todosSnapshot.empty) {
+          const numbers = todosSnapshot.docs
+            .map(doc => {
+              const match = doc.id.match(/todo-(\d+)/);
+              return match ? parseInt(match[1]) : 0;
+            })
+            .filter(num => !isNaN(num));
+          
+          if (numbers.length > 0) {
+            nextNumber = Math.max(...numbers) + 1;
+          }
+        }
+
+        // Create document ID
+        const docId = `todo-${String(nextNumber).padStart(3, '0')}`;
+
         // 알림 설정이 있는 경우 초기 상태에 포함
         const initialNotificationState = todo.notifyMinutesBefore ? {
           notificationScheduled: true,
@@ -271,7 +319,11 @@ const AddTodo = () => {
           notificationScheduled: false
         };
 
-        const docRef = await addDoc(collection(db, 'todos'), {
+        // Ensure date collection exists
+        await setDoc(dateCollectionRef, { createdAt: serverTimestamp() }, { merge: true });
+
+        // Add todo document to the subcollection
+        await setDoc(doc(todosCollectionRef, docId), {
           ...todo,
           task: taskText || lastLine,
           createdAt: serverTimestamp(),
@@ -279,9 +331,10 @@ const AddTodo = () => {
           ...initialNotificationState
         });
 
-        // Add the new todo to the list with notification status
+        // Add the new todo to the list
         const newTodo = {
-          id: docRef.id,
+          id: docId,
+          date: todayDate,
           ...todo,
           task: taskText || lastLine,
           completed: false,
@@ -333,7 +386,16 @@ const AddTodo = () => {
   return (
     <div className="memo-container">
       <div className="memo-header">
-        <h1>Quick Todo</h1>
+        <div className="memo-header-top">
+          <h1>Quick Todo</h1>
+          <button 
+            onClick={() => navigate('/admin/todo-management')} 
+            className="manage-todos-btn"
+            title="Todo 관리"
+          >
+            ⚙️
+          </button>
+        </div>
         <div className="memo-commands">
           <p>Commands:</p>
           <p onClick={() => handleCommandClick('/d')} className="command-btn">/d</p>
@@ -367,7 +429,7 @@ const AddTodo = () => {
             <div 
               key={todo.id} 
               className={`todo-item ${todo.completed ? 'completed' : ''}`}
-              onClick={() => handleToggleComplete(todo.id, todo.completed)}
+              onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
             >
               <input
                 type="checkbox"
