@@ -2,8 +2,8 @@ import { Octokit } from '@octokit/rest';
 
 // Use environment variables for sensitive data
 const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
-export const REPO_OWNER = 'juheehur';
-export const REPO_NAME = 'python-codingtest';
+export const REPO_OWNER = process.env.REACT_APP_REPO_OWNER || 'juheehur';
+export const REPO_NAME = process.env.REACT_APP_REPO_NAME || 'python-codingtest';
 
 const octokit = new Octokit({
   auth: GITHUB_TOKEN
