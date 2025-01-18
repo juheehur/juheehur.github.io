@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { db, getFCMToken } from '../../firebase/config';
+import { db } from '../../firebase/config';
 import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/addTodo.css';
@@ -18,7 +18,6 @@ const AddTodo = () => {
     location: ''
   });
   const [notificationPermission, setNotificationPermission] = useState('default');
-  const [fcmToken, setFcmToken] = useState(null);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -26,21 +25,7 @@ const AddTodo = () => {
     }
     fetchTodos();
     checkNotificationPermission();
-    checkScheduledNotifications();
-    initializeFCM();
   }, []);
-
-  const initializeFCM = async () => {
-    try {
-      const token = await getFCMToken();
-      if (token) {
-        setFcmToken(token);
-        console.log('FCM Token:', token);
-      }
-    } catch (error) {
-      console.error('FCM 초기화 실패:', error);
-    }
-  };
 
   const fetchTodos = async () => {
     try {
@@ -72,27 +57,6 @@ const AddTodo = () => {
     return false;
   };
 
-  const checkScheduledNotifications = () => {
-    const savedNotifications = JSON.parse(localStorage.getItem('scheduledNotifications') || '[]');
-    const now = new Date().getTime();
-
-    savedNotifications.forEach(notification => {
-      const timeUntilNotification = notification.time - now;
-      
-      if (timeUntilNotification > 0) {
-        setTimeout(() => {
-          new Notification('할 일 알림', {
-            body: `${notification.minutesBefore}분 후 일정: ${notification.task}${notification.location ? ` @ ${notification.location}` : ''}`,
-            icon: '/diatomicarbon-icon.ico'
-          });
-        }, timeUntilNotification);
-      }
-    });
-
-    const futureNotifications = savedNotifications.filter(n => n.time > now);
-    localStorage.setItem('scheduledNotifications', JSON.stringify(futureNotifications));
-  };
-
   const scheduleNotification = async (todo, customMinutes) => {
     if (!todo.startTime || !todo.date) return;
 
@@ -109,53 +73,44 @@ const AddTodo = () => {
 
     const now = new Date();
     if (notificationTime > now) {
-      const timeUntilNotification = notificationTime.getTime() - now.getTime();
-      
       try {
-        // Update todo in Firestore with notification status
+        // Update todo in Firestore
         const todoRef = doc(db, 'todos', todo.id);
         await updateDoc(todoRef, {
           notificationScheduled: true,
           notifyMinutesBefore: minutesBefore,
-          fcmToken: fcmToken // FCM 토큰 저장
+          notificationTime: notificationTime.getTime()
         });
 
         // Update local state
         setAddedTodos(prev => prev.map(t => 
-          t.id === todo.id ? {...t, notificationScheduled: true, notifyMinutesBefore: minutesBefore} : t
+          t.id === todo.id ? {
+            ...t, 
+            notificationScheduled: true, 
+            notifyMinutesBefore: minutesBefore
+          } : t
         ));
 
-        // Save notification to localStorage
-        const savedNotifications = JSON.parse(localStorage.getItem('scheduledNotifications') || '[]');
-        savedNotifications.push({
-          id: todo.id,
-          task: todo.task,
-          location: todo.location,
-          time: notificationTime.getTime(),
-          minutesBefore,
-          fcmToken
-        });
-        localStorage.setItem('scheduledNotifications', JSON.stringify(savedNotifications));
-
-        // Schedule both local and FCM notifications
-        setTimeout(() => {
-          // Local notification
-          new Notification('할 일 알림', {
+        // Service Worker에 알림 스케줄링 요청
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          const notification = {
+            id: todo.id,
+            title: '할 일 알림',
             body: `${minutesBefore}분 후 일정: ${todo.task}${todo.location ? ` @ ${todo.location}` : ''}`,
-            icon: '/diatomicarbon-icon.ico'
+            time: notificationTime.getTime(),
+            data: {
+              todoId: todo.id,
+              task: todo.task,
+              location: todo.location,
+              minutesBefore
+            }
+          };
+
+          navigator.serviceWorker.controller.postMessage({
+            type: 'SCHEDULE_NOTIFICATION',
+            notification
           });
-
-          // FCM notification (서버에서 처리해야 하는 부분입니다)
-          // 여기서는 예시로만 표시합니다
-          if (fcmToken) {
-            console.log('FCM notification would be sent to:', fcmToken);
-          }
-
-          // Remove notification from localStorage after it's fired
-          const remainingNotifications = JSON.parse(localStorage.getItem('scheduledNotifications') || '[]')
-            .filter(n => n.id !== todo.id);
-          localStorage.setItem('scheduledNotifications', JSON.stringify(remainingNotifications));
-        }, timeUntilNotification);
+        }
 
       } catch (error) {
         console.error('Error scheduling notification:', error);
