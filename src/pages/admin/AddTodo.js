@@ -2,14 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import { db } from '../../firebase/config';
 import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import '../../styles/addTodo.css';
 
 const AddTodo = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [notes, setNotes] = useState('');
   const [addedTodos, setAddedTodos] = useState([]);
   const textareaRef = useRef(null);
   const [isExampleVisible, setIsExampleVisible] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState(false);
   const [currentTodo, setCurrentTodo] = useState({
     task: '',
     date: new Date().toISOString().split('T')[0],
@@ -23,7 +26,70 @@ const AddTodo = () => {
       textareaRef.current.focus();
     }
     fetchTodos();
+    checkNotificationPermission();
   }, []);
+
+  useEffect(() => {
+    // 알람 체크를 위한 인터벌 설정
+    const interval = setInterval(checkTodoAlarms, 60000); // 1분마다 체크
+    return () => clearInterval(interval);
+  }, [addedTodos]);
+
+  const checkNotificationPermission = async () => {
+    if (!isAdmin) return; // admin이 아니면 알림 권한 요청하지 않음
+    
+    if (!("Notification" in window)) {
+      alert("이 브라우저는 알림을 지원하지 않습니다.");
+      return;
+    }
+
+    if (Notification.permission === "granted") {
+      setNotificationPermission(true);
+    } else if (Notification.permission !== "denied") {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission === "granted");
+    }
+  };
+
+  const checkTodoAlarms = () => {
+    if (!isAdmin) return; // admin이 아니면 알림 체크하지 않음
+    
+    const now = new Date();
+    const currentTime = now.getTime();
+
+    addedTodos.forEach(todo => {
+      if (todo.completed) return;
+      
+      if (todo.date && todo.startTime) {
+        const [hours, minutes] = todo.startTime.split(':');
+        const todoDate = new Date(todo.date);
+        todoDate.setHours(parseInt(hours), parseInt(minutes), 0);
+        
+        const timeDiff = todoDate.getTime() - currentTime;
+        
+        // 15분 전에 알림
+        if (timeDiff > 0 && timeDiff <= 15 * 60 * 1000) {
+          sendNotification(todo);
+        }
+      }
+    });
+  };
+
+  const sendNotification = (todo) => {
+    if (!isAdmin || !notificationPermission) return; // admin이 아니면 알림 보내지 않음
+
+    const timeUntilStart = new Date(todo.date + ' ' + todo.startTime) - new Date();
+    const minutesUntilStart = Math.floor(timeUntilStart / (1000 * 60));
+
+    const notification = new Notification("할 일 알림", {
+      body: `${minutesUntilStart}분 후 일정: ${todo.task}${todo.location ? ` @ ${todo.location}` : ''}`,
+      icon: "/favicon.ico",
+    });
+
+    notification.onclick = () => {
+      window.focus();
+    };
+  };
 
   const fetchTodos = async () => {
     try {
