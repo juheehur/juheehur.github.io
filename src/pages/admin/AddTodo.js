@@ -1,18 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { db } from '../../firebase/config';
+import { db, getFCMToken } from '../../firebase/config';
 import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
 import '../../styles/addTodo.css';
 
 const AddTodo = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
   const [notes, setNotes] = useState('');
   const [addedTodos, setAddedTodos] = useState([]);
   const textareaRef = useRef(null);
   const [isExampleVisible, setIsExampleVisible] = useState(false);
-  const [notificationPermission, setNotificationPermission] = useState(false);
   const [currentTodo, setCurrentTodo] = useState({
     task: '',
     date: new Date().toISOString().split('T')[0],
@@ -20,6 +17,8 @@ const AddTodo = () => {
     endTime: '',
     location: ''
   });
+  const [notificationPermission, setNotificationPermission] = useState('default');
+  const [fcmToken, setFcmToken] = useState(null);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -27,68 +26,20 @@ const AddTodo = () => {
     }
     fetchTodos();
     checkNotificationPermission();
+    checkScheduledNotifications();
+    initializeFCM();
   }, []);
 
-  useEffect(() => {
-    // 알람 체크를 위한 인터벌 설정
-    const interval = setInterval(checkTodoAlarms, 60000); // 1분마다 체크
-    return () => clearInterval(interval);
-  }, [addedTodos]);
-
-  const checkNotificationPermission = async () => {
-    if (!isAdmin) return; // admin이 아니면 알림 권한 요청하지 않음
-    
-    if (!("Notification" in window)) {
-      alert("이 브라우저는 알림을 지원하지 않습니다.");
-      return;
-    }
-
-    if (Notification.permission === "granted") {
-      setNotificationPermission(true);
-    } else if (Notification.permission !== "denied") {
-      const permission = await Notification.requestPermission();
-      setNotificationPermission(permission === "granted");
-    }
-  };
-
-  const checkTodoAlarms = () => {
-    if (!isAdmin) return; // admin이 아니면 알림 체크하지 않음
-    
-    const now = new Date();
-    const currentTime = now.getTime();
-
-    addedTodos.forEach(todo => {
-      if (todo.completed) return;
-      
-      if (todo.date && todo.startTime) {
-        const [hours, minutes] = todo.startTime.split(':');
-        const todoDate = new Date(todo.date);
-        todoDate.setHours(parseInt(hours), parseInt(minutes), 0);
-        
-        const timeDiff = todoDate.getTime() - currentTime;
-        
-        // 15분 전에 알림
-        if (timeDiff > 0 && timeDiff <= 15 * 60 * 1000) {
-          sendNotification(todo);
-        }
+  const initializeFCM = async () => {
+    try {
+      const token = await getFCMToken();
+      if (token) {
+        setFcmToken(token);
+        console.log('FCM Token:', token);
       }
-    });
-  };
-
-  const sendNotification = (todo) => {
-    if (!isAdmin || !notificationPermission) return; // admin이 아니면 알림 보내지 않음
-
-    const timeUntilStart = new Date(todo.date + ' ' + todo.startTime) - new Date();
-    const minutesUntilStart = Math.floor(timeUntilStart / (1000 * 60));
-
-    const notification = new Notification("할 일 알림", {
-      body: `${minutesUntilStart}분 후 일정: ${todo.task}${todo.location ? ` @ ${todo.location}` : ''}`,
-      icon: "/favicon.ico",
-    });
-
-    notification.onclick = () => {
-      window.focus();
-    };
+    } catch (error) {
+      console.error('FCM 초기화 실패:', error);
+    }
   };
 
   const fetchTodos = async () => {
@@ -105,8 +56,117 @@ const AddTodo = () => {
     }
   };
 
+  const checkNotificationPermission = async () => {
+    if ('Notification' in window) {
+      const permission = await Notification.permission;
+      setNotificationPermission(permission);
+    }
+  };
+
+  const requestNotificationPermission = async () => {
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      return permission === 'granted';
+    }
+    return false;
+  };
+
+  const checkScheduledNotifications = () => {
+    const savedNotifications = JSON.parse(localStorage.getItem('scheduledNotifications') || '[]');
+    const now = new Date().getTime();
+
+    savedNotifications.forEach(notification => {
+      const timeUntilNotification = notification.time - now;
+      
+      if (timeUntilNotification > 0) {
+        setTimeout(() => {
+          new Notification('할 일 알림', {
+            body: `${notification.minutesBefore}분 후 일정: ${notification.task}${notification.location ? ` @ ${notification.location}` : ''}`,
+            icon: '/diatomicarbon-icon.ico'
+          });
+        }, timeUntilNotification);
+      }
+    });
+
+    const futureNotifications = savedNotifications.filter(n => n.time > now);
+    localStorage.setItem('scheduledNotifications', JSON.stringify(futureNotifications));
+  };
+
+  const scheduleNotification = async (todo, customMinutes) => {
+    if (!todo.startTime || !todo.date) return;
+
+    const hasPermission = notificationPermission === 'granted' || await requestNotificationPermission();
+    if (!hasPermission) {
+      alert('알림 권한이 필요합니다.');
+      return;
+    }
+
+    const [hours, minutes] = todo.startTime.split(':');
+    const notificationTime = new Date(todo.date);
+    const minutesBefore = customMinutes || todo.notifyMinutesBefore || 30;
+    notificationTime.setHours(parseInt(hours), parseInt(minutes) - minutesBefore, 0);
+
+    const now = new Date();
+    if (notificationTime > now) {
+      const timeUntilNotification = notificationTime.getTime() - now.getTime();
+      
+      try {
+        // Update todo in Firestore with notification status
+        const todoRef = doc(db, 'todos', todo.id);
+        await updateDoc(todoRef, {
+          notificationScheduled: true,
+          notifyMinutesBefore: minutesBefore,
+          fcmToken: fcmToken // FCM 토큰 저장
+        });
+
+        // Update local state
+        setAddedTodos(prev => prev.map(t => 
+          t.id === todo.id ? {...t, notificationScheduled: true, notifyMinutesBefore: minutesBefore} : t
+        ));
+
+        // Save notification to localStorage
+        const savedNotifications = JSON.parse(localStorage.getItem('scheduledNotifications') || '[]');
+        savedNotifications.push({
+          id: todo.id,
+          task: todo.task,
+          location: todo.location,
+          time: notificationTime.getTime(),
+          minutesBefore,
+          fcmToken
+        });
+        localStorage.setItem('scheduledNotifications', JSON.stringify(savedNotifications));
+
+        // Schedule both local and FCM notifications
+        setTimeout(() => {
+          // Local notification
+          new Notification('할 일 알림', {
+            body: `${minutesBefore}분 후 일정: ${todo.task}${todo.location ? ` @ ${todo.location}` : ''}`,
+            icon: '/diatomicarbon-icon.ico'
+          });
+
+          // FCM notification (서버에서 처리해야 하는 부분입니다)
+          // 여기서는 예시로만 표시합니다
+          if (fcmToken) {
+            console.log('FCM notification would be sent to:', fcmToken);
+          }
+
+          // Remove notification from localStorage after it's fired
+          const remainingNotifications = JSON.parse(localStorage.getItem('scheduledNotifications') || '[]')
+            .filter(n => n.id !== todo.id);
+          localStorage.setItem('scheduledNotifications', JSON.stringify(remainingNotifications));
+        }, timeUntilNotification);
+
+      } catch (error) {
+        console.error('Error scheduling notification:', error);
+        alert('알림 설정 중 오류가 발생했습니다.');
+      }
+    } else {
+      alert('이미 지난 시간에는 알림을 설정할 수 없습니다.');
+    }
+  };
+
   const formatTodoDisplay = (todo) => {
-    let display = todo.task;
     const parts = [];
 
     if (todo.date) {
@@ -139,6 +199,10 @@ const AddTodo = () => {
       parts.push(`@ ${todo.location}`);
     }
 
+    if (todo.notificationScheduled && todo.startTime) {
+      parts.push(`🔔 ${todo.notifyMinutesBefore || 30}분 전 알림`);
+    }
+
     return (
       <div className="todo-content">
         <div className="todo-task">{todo.task}</div>
@@ -169,6 +233,7 @@ const AddTodo = () => {
     const dateMatch = text.match(/\/d\s+(\S+)/);
     const timeMatch = text.match(/\/t\s+(\S+)/);
     const locationMatch = text.match(/\/l\s+(.+)$/);
+    const alarmMatch = text.match(/\/a\s+(\d+)/);
 
     let updatedTodo = { ...currentTodo };
     let updatedText = text;
@@ -191,7 +256,6 @@ const AddTodo = () => {
           date = today.toISOString().split('T')[0];
           break;
         default:
-          // If it's a date in YYYY-MM-DD format, use it as is
           if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
             date = today.toISOString().split('T')[0];
           }
@@ -217,6 +281,12 @@ const AddTodo = () => {
       updatedText = updatedText.replace(/\/l\s+.+$/, '').trim();
     }
 
+    if (alarmMatch) {
+      const minutesBefore = parseInt(alarmMatch[1]);
+      updatedTodo.notifyMinutesBefore = minutesBefore;
+      updatedText = updatedText.replace(/\/a\s+\d+/, '').trim();
+    }
+
     return {
       todo: updatedTodo,
       text: updatedText
@@ -238,20 +308,36 @@ const AddTodo = () => {
       const { todo, text: taskText } = parseCommand(lastLine);
       
       try {
+        // 알림 설정이 있는 경우 초기 상태에 포함
+        const initialNotificationState = todo.notifyMinutesBefore ? {
+          notificationScheduled: true,
+          notifyMinutesBefore: todo.notifyMinutesBefore
+        } : {
+          notificationScheduled: false
+        };
+
         const docRef = await addDoc(collection(db, 'todos'), {
           ...todo,
           task: taskText || lastLine,
           createdAt: serverTimestamp(),
-          completed: false
+          completed: false,
+          ...initialNotificationState
         });
 
-        // Add the new todo to the list
+        // Add the new todo to the list with notification status
         const newTodo = {
           id: docRef.id,
           ...todo,
           task: taskText || lastLine,
-          completed: false
+          completed: false,
+          ...initialNotificationState
         };
+
+        // If /a command was used, schedule notification immediately
+        if (todo.notifyMinutesBefore) {
+          await scheduleNotification(newTodo, todo.notifyMinutesBefore);
+        }
+
         setAddedTodos(prev => [newTodo, ...prev]);
 
         // Clear only the last line
@@ -298,6 +384,7 @@ const AddTodo = () => {
           <p onClick={() => handleCommandClick('/d')} className="command-btn">/d</p>
           <p onClick={() => handleCommandClick('/t')} className="command-btn">/t</p>
           <p onClick={() => handleCommandClick('/l')} className="command-btn">/l</p>
+          <p onClick={() => handleCommandClick('/a')} className="command-btn">/a</p>
         </div>
         <div className="memo-command-examples">
           <p onClick={() => setIsExampleVisible(!isExampleVisible)} className="examples-toggle">
@@ -307,6 +394,7 @@ const AddTodo = () => {
             <p>/d td (today), tmr (tomorrow), nw (next week)</p>
             <p>/t 9-10:30 (time range)</p>
             <p>/l location</p>
+            <p>/a 20 (알림: 20분 전)</p>
           </div>
         </div>
       </div>
@@ -321,14 +409,32 @@ const AddTodo = () => {
         />
         <div className="added-todos">
           {addedTodos.map(todo => (
-            <div key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+            <div 
+              key={todo.id} 
+              className={`todo-item ${todo.completed ? 'completed' : ''}`}
+              onClick={() => handleToggleComplete(todo.id, todo.completed)}
+            >
               <input
                 type="checkbox"
                 checked={todo.completed}
-                onChange={() => handleToggleComplete(todo.id, todo.completed)}
                 className="todo-checkbox"
+                readOnly
               />
-              <span className="todo-text">{formatTodoDisplay(todo)}</span>
+              {formatTodoDisplay(todo)}
+              {todo.startTime && (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    scheduleNotification(todo);
+                  }}
+                  className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
+                  disabled={todo.notificationScheduled}
+                >
+                  {todo.notificationScheduled 
+                    ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
+                    : '30분 전 알림'}
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -337,4 +443,4 @@ const AddTodo = () => {
   );
 };
 
-export default AddTodo; 
+export default AddTodo;

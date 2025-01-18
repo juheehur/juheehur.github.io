@@ -1,6 +1,6 @@
 {
-  "short_name": "Emily Juhee Hur",
-  "name": "Emily Juhee Hur's Portfolio",
+  "short_name": "Portfolio",
+  "name": "Juhee Hur Portfolio",
   "icons": [
     {
       "src": "diatomicarbon-icon.ico",
@@ -11,5 +11,6 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "gcm_sender_id": "1098332409348"
 }

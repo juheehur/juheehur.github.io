@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getMessaging, getToken } from 'firebase/messaging';
 
 const firebaseConfig = {
   // Your Firebase configuration object here
@@ -19,7 +20,23 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export const githubProvider = new GithubAuthProvider();
 export const db = getFirestore(app);
-export const storage = getStorage(app); 
+export const storage = getStorage(app);
+const messaging = getMessaging(app);
+
+// FCM 토큰 가져오기
+export const getFCMToken = async () => {
+  try {
+    const token = await getToken(messaging, {
+      vapidKey: 'BPmu_8Iga0YqUh_MS7xmIfcTzsfj8Pj2BcV2wQ3EuyIXB636tfQBSlqn9oWTZ4Mo6lLClxXpK3wlq24owOsAtV8'
+    });
+    return token;
+  } catch (error) {
+    console.error('FCM 토큰 가져오기 실패:', error);
+    return null;
+  }
+};
+
+export { db, messaging };
 
 export const ADMIN_EMAILS = ['emily.hur.juhee@gmail.com'];
 
