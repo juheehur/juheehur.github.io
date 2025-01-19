@@ -350,30 +350,41 @@ function AddBlog() {
           </div>
           
           {codeEditorOpen && (
-            <div className="code-editor-container">
-              <select
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="language-select"
-              >
-                <option value="javascript">JavaScript</option>
-                <option value="python">Python</option>
-                <option value="css">CSS</option>
-                <option value="html">HTML</option>
-                <option value="markdown">Markdown</option>
-              </select>
-              <CodeEditor
-                code={codeContent}
-                onChange={(value) => setCodeContent(value)}
-                language={selectedLanguage}
-              />
-              <button 
-                type="button" 
-                onClick={handleCodeInsert}
-                className="insert-code-btn"
-              >
-                Insert Code
-              </button>
+            <div className="code-editor-split">
+              <div className="markdown-content">
+                <h4>Current Content:</h4>
+                <ReactMarkdown 
+                  rehypePlugins={[rehypeRaw]} 
+                  remarkPlugins={[remarkGfm]}
+                >
+                  {content}
+                </ReactMarkdown>
+              </div>
+              <div className="code-editor-container">
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="language-select"
+                >
+                  <option value="javascript">JavaScript</option>
+                  <option value="python">Python</option>
+                  <option value="css">CSS</option>
+                  <option value="html">HTML</option>
+                  <option value="markdown">Markdown</option>
+                </select>
+                <CodeEditor
+                  code={codeContent}
+                  onChange={(value) => setCodeContent(value)}
+                  language={selectedLanguage}
+                />
+                <button 
+                  type="button" 
+                  onClick={handleCodeInsert}
+                  className="insert-code-btn"
+                >
+                  Insert Code
+                </button>
+              </div>
             </div>
           )}
           
