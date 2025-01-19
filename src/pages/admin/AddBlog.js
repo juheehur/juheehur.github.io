@@ -7,6 +7,7 @@ import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import CodeEditor from '../../components/CodeEditor';
 import { pushCodeToGithub, REPO_OWNER, REPO_NAME } from '../../utils/gitUtils';
+import '../../styles/addBlog.css';
 
 function AddBlog() {
   const [title, setTitle] = useState('');
