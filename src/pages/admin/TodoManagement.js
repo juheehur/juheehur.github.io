@@ -69,28 +69,59 @@ const TodoManagement = () => {
   };
 
   const handleEdit = (todo) => {
-    setEditingTodo({ ...todo });
+    setEditingTodo({ 
+      ...todo,
+      originalDate: todo.date // Store original date to check if it changed
+    });
   };
 
   const handleSave = async () => {
     if (!editingTodo) return;
 
     try {
-      const todoRef = doc(db, `todos/${editingTodo.date}/todos/${editingTodo.id}`);
-      const updatedTodo = {
-        task: editingTodo.task,
-        startTime: editingTodo.startTime || '',
-        endTime: editingTodo.endTime || '',
-        location: editingTodo.location || ''
-      };
+      // If date has changed, we need to move the todo to a new collection
+      if (editingTodo.date !== editingTodo.originalDate) {
+        // Delete from old location
+        await deleteDoc(doc(db, `todos/${editingTodo.originalDate}/todos/${editingTodo.id}`));
+        
+        // Create in new location
+        const newTodoRef = doc(collection(db, `todos/${editingTodo.date}/todos`));
+        const updatedTodo = {
+          task: editingTodo.task,
+          startTime: editingTodo.startTime || '',
+          endTime: editingTodo.endTime || '',
+          location: editingTodo.location || '',
+          notification: editingTodo.notification || false,
+          notificationTime: editingTodo.notificationTime || '',
+          createdAt: editingTodo.createdAt,
+          completed: editingTodo.completed || false
+        };
 
-      await updateDoc(todoRef, updatedTodo);
+        await updateDoc(newTodoRef, updatedTodo);
+        
+        setTodos(prev => prev.filter(todo => !(todo.id === editingTodo.id && todo.date === editingTodo.originalDate))
+          .concat({...updatedTodo, id: newTodoRef.id, date: editingTodo.date}));
+      } else {
+        // Update in the same location
+        const todoRef = doc(db, `todos/${editingTodo.date}/todos/${editingTodo.id}`);
+        const updatedTodo = {
+          task: editingTodo.task,
+          startTime: editingTodo.startTime || '',
+          endTime: editingTodo.endTime || '',
+          location: editingTodo.location || '',
+          notification: editingTodo.notification || false,
+          notificationTime: editingTodo.notificationTime || ''
+        };
 
-      setTodos(prev => prev.map(todo => 
-        todo.id === editingTodo.id && todo.date === editingTodo.date
-          ? { ...todo, ...updatedTodo }
-          : todo
-      ));
+        await updateDoc(todoRef, updatedTodo);
+
+        setTodos(prev => prev.map(todo => 
+          todo.id === editingTodo.id && todo.date === editingTodo.date
+            ? { ...todo, ...updatedTodo }
+            : todo
+        ));
+      }
+      
       setEditingTodo(null);
     } catch (error) {
       console.error('Error updating todo:', error);
@@ -176,6 +207,11 @@ const TodoManagement = () => {
                           placeholder="할 일"
                         />
                         <input
+                          type="date"
+                          value={editingTodo.date}
+                          onChange={e => setEditingTodo({...editingTodo, date: e.target.value})}
+                        />
+                        <input
                           type="time"
                           value={editingTodo.startTime || ''}
                           onChange={e => setEditingTodo({...editingTodo, startTime: e.target.value})}
@@ -191,6 +227,23 @@ const TodoManagement = () => {
                           onChange={e => setEditingTodo({...editingTodo, location: e.target.value})}
                           placeholder="위치"
                         />
+                        <div className="notification-settings">
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={editingTodo.notification || false}
+                              onChange={e => setEditingTodo({...editingTodo, notification: e.target.checked})}
+                            />
+                            알림 설정
+                          </label>
+                          {editingTodo.notification && (
+                            <input
+                              type="time"
+                              value={editingTodo.notificationTime || ''}
+                              onChange={e => setEditingTodo({...editingTodo, notificationTime: e.target.value})}
+                            />
+                          )}
+                        </div>
                         <div className="edit-actions">
                           <button onClick={handleSave} className="save-btn">저장</button>
                           <button onClick={() => setEditingTodo(null)} className="cancel-btn">취소</button>
@@ -224,6 +277,11 @@ const TodoManagement = () => {
                           )}
                           {todo.location && (
                             <span className="location">@ {todo.location}</span>
+                          )}
+                          {todo.notification && (
+                            <span className="notification">
+                              🔔 {todo.notificationTime}
+                            </span>
                           )}
                         </div>
                         <div className="todo-actions">

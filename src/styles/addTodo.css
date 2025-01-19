@@ -1,10 +1,10 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
 
 .memo-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -146,8 +146,8 @@
 }
 
 .added-todos {
-  flex: 1;
   overflow-y: auto;
+  max-height: 400px;
   padding: 0.5rem;
   background: #ffffff;
   border-radius: 12px;
@@ -431,4 +431,303 @@
     height: 28px;
     font-size: 1rem;
   }
+}
+
+.todos-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.todos-calendar-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .todos-calendar-layout {
+    flex-direction: row;
+    gap: 2rem;
+  }
+
+  .todos-list-section {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .todos-list-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .calendar-section {
+    width: 360px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+}
+
+.today-todos {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.today-todos h2 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.calendar-section {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 16px;
+}
+
+.calendar-section h2 {
+  margin: 0 0 1.25rem 0;
+  color: #1d1d1f;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+
+.calendar-section .react-calendar {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, Pretendard, sans-serif;
+  line-height: 1.25;
+  user-select: none;
+}
+
+/* Calendar navigation */
+.react-calendar__navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding: 0 0.5rem;
+}
+
+.react-calendar__navigation button {
+  min-width: 32px;
+  height: 32px;
+  background: none;
+  font-size: 0.9375rem;
+  padding: 0;
+  color: #1d1d1f;
+  border: none;
+  margin: 0;
+  font-weight: 500;
+}
+
+.react-calendar__navigation button:disabled {
+  color: #86868b;
+}
+
+/* Month view */
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  text-transform: none;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  color: #86868b;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.react-calendar__month-view__weekdays abbr {
+  text-decoration: none;
+  cursor: default;
+}
+
+.react-calendar__month-view__days {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.react-calendar__month-view__days__day {
+  aspect-ratio: 1;
+  padding: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  color: #1d1d1f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 8px;
+  position: relative;
+  min-height: 80px;
+}
+
+.react-calendar__month-view__days__day--weekend {
+  color: #ff3b30;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #86868b;
+}
+
+.react-calendar__tile {
+  position: relative;
+  border: none;
+  background: transparent !important;
+  padding: 0;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.react-calendar__tile > abbr {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-top: 4px;
+  font-size: 0.875rem;
+  font-weight: 400;
+  transition: background-color 0.2s ease;
+}
+
+.react-calendar__tile--now > abbr {
+  color: #007aff;
+  font-weight: 600;
+}
+
+.react-calendar__tile--active > abbr {
+  background: #007aff;
+  color: #ffffff;
+}
+
+.react-calendar__month-view__days__day--weekend {
+  color: #ff3b30;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth > abbr {
+  color: #86868b;
+}
+
+/* Todo count badge */
+.calendar-todos {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  padding: 0 4px;
+}
+
+.todo-count {
+  background: #007aff;
+  color: white;
+  border-radius: 12px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin: 0 auto;
+}
+
+/* Mobile adjustments */
+@media (max-width: 1023px) {
+  .memo-container {
+    padding: 0.75rem;
+  }
+
+  .todos-list-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .calendar-section {
+    padding: 1rem;
+    background: transparent;
+  }
+
+  .react-calendar__tile {
+    height: 60px;
+  }
+
+  .react-calendar__tile > abbr {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8125rem;
+    margin-top: 2px;
+  }
+
+  .calendar-todos {
+    top: 32px;
+  }
+
+  .todo-count {
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.6875rem;
+    padding: 0 4px;
+  }
+
+  .today-todos, .selected-date-todos {
+    background: transparent;
+    padding: 1rem 0;
+    box-shadow: none;
+  }
+
+  .todo-item {
+    background: #ffffff;
+    border: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0.75rem;
+  }
+
+  .todo-item:hover {
+    transform: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Remove duplicate styles */
+.react-calendar {
+  border-radius: 0;
+}
+
+.selected-date-todos {
+  background: transparent;
+  padding: 1.5rem 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.selected-date-todos h3 {
+  margin: 0 0 1rem 0;
+  color: #1d1d1f;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
 } 

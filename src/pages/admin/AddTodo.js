@@ -3,6 +3,9 @@ import { db } from '../../firebase/config';
 import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/addTodo.css';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import moment from 'moment-timezone';
 
 const AddTodo = () => {
   const navigate = useNavigate();
@@ -12,12 +15,13 @@ const AddTodo = () => {
   const [isExampleVisible, setIsExampleVisible] = useState(false);
   const [currentTodo, setCurrentTodo] = useState({
     task: '',
-    date: new Date().toISOString().split('T')[0],
+    date: moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD'),
     startTime: '',
     endTime: '',
     location: ''
   });
   const [notificationPermission, setNotificationPermission] = useState('default');
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -29,11 +33,9 @@ const AddTodo = () => {
 
   const fetchTodos = async () => {
     try {
-      // Get all date collections
       const dateCollectionsSnapshot = await getDocs(collection(db, 'todos'));
       const allTodos = [];
 
-      // For each date, get its todos
       for (const dateDoc of dateCollectionsSnapshot.docs) {
         const todosQuery = query(
           collection(db, `todos/${dateDoc.id}/todos`),
@@ -48,10 +50,16 @@ const AddTodo = () => {
         allTodos.push(...dateTodos);
       }
 
-      // Sort all todos by date and createdAt
+      // Sort todos by date in Hong Kong timezone
       allTodos.sort((a, b) => {
-        if (a.date !== b.date) return b.date.localeCompare(a.date);
-        return b.createdAt - a.createdAt;
+        const dateA = moment.tz(a.date, 'Asia/Hong_Kong');
+        const dateB = moment.tz(b.date, 'Asia/Hong_Kong');
+        if (dateA.isSame(dateB, 'day')) {
+          return a.startTime && b.startTime ? 
+            a.startTime.localeCompare(b.startTime) : 
+            b.createdAt - a.createdAt;
+        }
+        return dateA.isBefore(dateB) ? -1 : 1;
       });
 
       setAddedTodos(allTodos);
@@ -216,23 +224,21 @@ const AddTodo = () => {
     if (dateMatch) {
       const dateStr = dateMatch[1].toLowerCase();
       let date = dateStr;
-      const today = new Date();
+      const today = moment().tz('Asia/Hong_Kong');
       
       switch(dateStr) {
         case 'td':
-          date = today.toISOString().split('T')[0];
+          date = today.format('YYYY-MM-DD');
           break;
         case 'tmr':
-          today.setDate(today.getDate() + 1);
-          date = today.toISOString().split('T')[0];
+          date = today.add(1, 'days').format('YYYY-MM-DD');
           break;
         case 'nw':
-          today.setDate(today.getDate() + 7);
-          date = today.toISOString().split('T')[0];
+          date = today.add(7, 'days').format('YYYY-MM-DD');
           break;
         default:
           if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-            date = today.toISOString().split('T')[0];
+            date = today.format('YYYY-MM-DD');
           }
       }
       
@@ -283,7 +289,7 @@ const AddTodo = () => {
       const { todo, text: taskText } = parseCommand(lastLine);
       
       try {
-        const todayDate = todo.date || new Date().toISOString().split('T')[0];
+        const todayDate = todo.date || moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD');
         
         // Get reference to the date collection and its todos subcollection
         const dateCollectionRef = doc(db, 'todos', todayDate);
@@ -353,7 +359,7 @@ const AddTodo = () => {
         setNotes(newNotes);
         setCurrentTodo({
           task: '',
-          date: new Date().toISOString().split('T')[0],
+          date: moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD'),
           startTime: '',
           endTime: '',
           location: ''
@@ -382,6 +388,27 @@ const AddTodo = () => {
       textareaRef.current.setSelectionRange(newPosition, newPosition);
     }, 0);
   };
+
+  // Helper function to check if a date is today in Hong Kong timezone
+  const isToday = (dateStr) => {
+    const today = moment().tz('Asia/Hong_Kong').startOf('day');
+    const date = moment.tz(dateStr, 'Asia/Hong_Kong').startOf('day');
+    return date.isSame(today);
+  };
+
+  // Filter todos for today and other days
+  const todayTodos = addedTodos.filter(todo => isToday(todo.date));
+  const otherTodos = addedTodos.filter(todo => !isToday(todo.date));
+
+  // Group todos by date for calendar view
+  const todosByDate = otherTodos.reduce((acc, todo) => {
+    const date = todo.date;
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(todo);
+    return acc;
+  }, {});
 
   return (
     <div className="memo-container">
@@ -424,36 +451,102 @@ const AddTodo = () => {
           className="memo-textarea"
           placeholder="Type your todos here..."
         />
-        <div className="added-todos">
-          {addedTodos.map(todo => (
-            <div 
-              key={todo.id} 
-              className={`todo-item ${todo.completed ? 'completed' : ''}`}
-              onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
-            >
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                className="todo-checkbox"
-                readOnly
-              />
-              {formatTodoDisplay(todo)}
-              {todo.startTime && (
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    scheduleNotification(todo);
-                  }}
-                  className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
-                  disabled={todo.notificationScheduled}
-                >
-                  {todo.notificationScheduled 
-                    ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
-                    : '30분 전 알림'}
-                </button>
+        <div className="todos-calendar-layout">
+          <div className="todos-list-section">
+            <div className="todos-list-content">
+              {todayTodos.length > 0 && (
+                <div className="today-todos">
+                  <h2>Today's Todos ({moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD ddd')})</h2>
+                  <div className="added-todos">
+                    {todayTodos.map(todo => (
+                      <div 
+                        key={todo.id} 
+                        className={`todo-item ${todo.completed ? 'completed' : ''}`}
+                        onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={todo.completed}
+                          className="todo-checkbox"
+                          readOnly
+                        />
+                        {formatTodoDisplay(todo)}
+                        {todo.startTime && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              scheduleNotification(todo);
+                            }}
+                            className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
+                            disabled={todo.notificationScheduled}
+                          >
+                            {todo.notificationScheduled 
+                              ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
+                              : '30분 전 알림'}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {selectedDate && !isToday(moment(selectedDate).format('YYYY-MM-DD')) && (
+                <div className="selected-date-todos">
+                  <h3>{moment(selectedDate).tz('Asia/Hong_Kong').format('YYYY-MM-DD ddd')}</h3>
+                  <div className="added-todos">
+                    {todosByDate[moment(selectedDate).format('YYYY-MM-DD')]?.map(todo => (
+                      <div 
+                        key={todo.id} 
+                        className={`todo-item ${todo.completed ? 'completed' : ''}`}
+                        onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={todo.completed}
+                          className="todo-checkbox"
+                          readOnly
+                        />
+                        {formatTodoDisplay(todo)}
+                        {todo.startTime && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              scheduleNotification(todo);
+                            }}
+                            className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
+                            disabled={todo.notificationScheduled}
+                          >
+                            {todo.notificationScheduled 
+                              ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
+                              : '30분 전 알림'}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
-          ))}
+          </div>
+          
+          <div className="calendar-section">
+            <h2>Calendar</h2>
+            <Calendar
+              onChange={setSelectedDate}
+              value={selectedDate}
+              locale="ko-KR"
+              tileContent={({ date }) => {
+                const dateStr = moment(date).format('YYYY-MM-DD');
+                const todosForDate = todosByDate[dateStr];
+                return todosForDate ? (
+                  <div className="calendar-todos">
+                    <div className="todo-count">{todosForDate.length}</div>
+                  </div>
+                ) : null;
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -276,7 +276,11 @@ button[type="submit"]:disabled {
 input[type="text"],
 input[type="number"],
 textarea,
-select {
+select,
+.code-editor textarea,
+.code-editor input,
+.code-editor-container textarea,
+.code-editor-container input {
   font-size: 16px !important;
 }
 
