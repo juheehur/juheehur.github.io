@@ -12,16 +12,7 @@
   flex-direction: column;
   min-height: 100vh;
   position: relative;
-}
-
-.role-tags {
-  position: absolute;
-  top: 5%;
-  left: 0;
-  width: 100%;
-  z-index: 100;
-  display: flex;
-  justify-content: center;
+  padding: 40px 0;
 }
 
 .content-wrapper {
@@ -65,6 +56,29 @@
   transform: perspective(1000px) rotateY(0deg);
 }
 
+/* Role Tags */
+
+
+.desktop-role-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  justify-content: center;
+  width: 90%;
+  max-width: 800px;
+}
+
+.role-tags {
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+}
+
 .role-tag {
   background: rgba(255, 255, 255, 0.1);
   color: white;
@@ -88,6 +102,7 @@
   background: #004bcc;
 }
 
+/* Title and Subtitle */
 .title {
   font-size: 1.5rem;
   font-weight: bold;
@@ -95,7 +110,7 @@
   margin-bottom: 1.5rem;
   line-height: 1.4;
   font-family: 'Courier New', monospace;
-  color: #1a6dff;
+  color: #ffff;
   white-space: pre-wrap;
   min-height: 150px;
   display: flex;
@@ -109,6 +124,7 @@
   max-width: 600px;
 }
 
+/* Buttons */
 .button-group {
   display: flex;
   gap: 1rem;
@@ -144,136 +160,47 @@
   transform: translateY(-2px);
 }
 
-.language-toggle {
-  position: relative;
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: flex-end;
-  padding-right: 20px;
-}
-
-.language-button {
-  padding: 8px 16px;
-  background-color: rgba(26, 109, 255, 0.9);
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-  color: white;
-  font-weight: 500;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(26, 109, 255, 0.2);
-}
-
-.language-button:hover {
-  background-color: #1a6dff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(26, 109, 255, 0.3);
-}
-
 /* Mobile Styles */
 @media screen and (max-width: 768px) {
   .home-container {
-    flex-direction: column;
     padding: 0;
-    background: #000000;
-    min-height: 100vh;
   }
 
   .main-content {
-    flex-direction: column;
-    min-height: 100vh;
-    position: relative;
     padding: 16px;
-  }
-
-  .role-tags {
-    width: 100%;
-    padding: 12px 0;
-    margin: 0;
-    background: transparent;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    padding-left: 16px;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .content-wrapper {
     flex-direction: column;
-    height: 100%;
-    margin-top: 60px;
+    margin-top: 20px;
+  }
+
+  .content-section {
+    width: 100%;
+    padding: 0;
+    margin-top: 0;
   }
 
   .image-section {
     width: 100%;
     height: 60vh;
-    position: relative;
     margin: 20px 0;
     border-radius: 30px;
-    overflow: hidden;
-  }
-
-  .content-section {
-    width: 100%;
-    padding: 0;
-    background: transparent;
-    position: relative;
-    z-index: 2;
-    box-sizing: border-box;
-    margin-top: 60px;
   }
 
   .title {
     font-size: 1.1rem;
-    line-height: 1.4;
-    margin: 20px 0 12px 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-    color: #1a6dff;
-    cursor: pointer;
-    transition: opacity 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .title:active {
-    opacity: 0.7;
-  }
-
-  .role-tags {
-    display: none;
-  }
-
-  .content-section {
-    width: 100%;
-    padding: 0;
-    background: transparent;
-    position: relative;
-    z-index: 2;
-    box-sizing: border-box;
-    margin-top: 20px;
-  }
-
-  .content-wrapper {
-    flex-direction: column;
-    height: 100%;
-    margin-top: 0;
+    margin: 0 0 40px 0;
+    min-height: 120px;
   }
 
   .subtitle {
     font-size: 0.875rem;
-    line-height: 1.5;
     margin: 0 0 24px 0;
     color: rgba(255, 255, 255, 0.7);
   }
 
   .button-group {
-    display: flex;
     gap: 12px;
     margin-top: 24px;
   }
@@ -286,1014 +213,617 @@
     font-weight: 500;
   }
 
-  .primary-button {
-    background: #1a6dff;
-    color: white;
-  }
-
-  .secondary-button {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-  }
-
-  .testimonials-section {
-    padding: 40px 16px;
-    background: #000000;
-  }
-
-  .testimonials-title {
-    font-size: 1.25rem;
-    margin-bottom: 24px;
-    color: white;
-    font-weight: 600;
-  }
-
-  .testimonials-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .testimonial-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .testimonial-title {
-    font-size: 1rem;
-    color: white;
-    margin-bottom: 8px;
-    font-weight: 500;
-  }
-
-  .testimonial-description {
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-
-  .testimonial-comment {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 16px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .comment-content {
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.5;
-    margin-bottom: 8px;
-  }
-
-  .comment-author {
-    font-size: 0.8125rem;
-    color: rgba(255, 255, 255, 0.5);
-    text-align: right;
-  }
-
-  .mobile-role-button {
-    display: none;
-  }
-
-  .role-count {
-    margin-left: 8px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 4px 10px;
-    border-radius: 100px;
-    letter-spacing: -0.1px;
-    flex-shrink: 0;
-  }
-
-  .content-section {
-    width: 100%;
-    padding: 0;
-    background: transparent;
-    position: relative;
-    z-index: 2;
-    box-sizing: border-box;
-    margin-top: 120px;
-  }
-
-  .title {
-    font-size: 1.1rem;
-    line-height: 1.4;
-    margin: 40px 0 12px 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-    color: #1a6dff;
-  }
-
-  .image-section {
-    width: 100%;
-    height: 60vh;
-    position: relative;
-    margin: 20px 0;
-    border-radius: 30px;
-    overflow: hidden;
-  }
-}
-
-.desktop-role-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0;
-  justify-content: center;
-  width: 90%;
-  max-width: 800px;
-}
-
-.mobile-role-button {
-  display: none;
-}
-
-@media screen and (max-width: 768px) {
-  .desktop-role-tags {
-    display: none;
-  }
-
   .role-tags {
-    width: auto;
-    padding: 16px 20px;
-    z-index: 90;
-    display: flex;
-    justify-content: flex-start;
-    background: none;
+    display: none;
   }
 
-  .mobile-role-button {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: auto;
-    padding: 10px 16px;
-    background: rgba(26, 109, 255, 0.95);
-    color: white;
-    border: none;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 2px 12px rgba(26, 109, 255, 0.3);
-    transition: all 0.3s ease;
-    cursor: pointer;
-  }
-
-  .mobile-role-button:active {
-    transform: scale(0.98);
-    background: rgba(26, 109, 255, 1);
-  }
-
-  .role-count {
-    margin-left: 10px;
-    font-size: 0.75rem;
-    opacity: 0.9;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 3px 8px;
-    border-radius: 12px;
-  }
 }
 
+/* Testimonials Section */
 .testimonials-section {
-  width: 100%;
-  padding: 60px 20px;
-  background: #000000;
-  margin-top: 0;
-  color: white;
-}
-
-.testimonials-title {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 40px;
-  color: white;
-  font-weight: 600;
-}
-
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.testimonial-card {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.testimonial-card:hover {
-  transform: translateY(-5px);
-}
-
-.testimonial-title {
-  font-size: 1.25rem;
-  color: white;
-  margin-bottom: 12px;
-  font-weight: 600;
-}
-
-.testimonial-description {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.testimonial-comments {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
-}
-
-.testimonial-comment {
-  margin-bottom: 16px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-}
-
-.comment-content {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.5;
-  margin-bottom: 8px;
-  font-style: italic;
-}
-
-.comment-author {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: right;
-  font-weight: 500;
-}
-
-@media screen and (max-width: 768px) {
-  .home-container {
-    flex-direction: column;
-    padding: 0;
-  }
-
-  .main-content {
-    flex-direction: column-reverse;
-    min-height: auto;
-  }
-
-  .content-section {
-    padding: 16px 20px;
-    margin-top: -40px;
-    text-align: left;
-    background: linear-gradient(to top, #000000 80%, rgba(0, 0, 0, 0.9) 90%, rgba(0, 0, 0, 0.8) 100%);
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .testimonials-section {
-    padding: 40px 16px;
-    margin-top: 0;
-  }
-
-  .testimonials-title {
-    font-size: 1.5rem;
-    margin-bottom: 30px;
-  }
-
-  .testimonials-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .testimonial-card {
-    padding: 20px;
-  }
+  padding: 100px 0;
+  background: linear-gradient(180deg, #000000 0%, #0A0A0A 100%);
 }
 
 .testimonials-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 40px;
+  margin-bottom: 60px;
+  padding: 0 5%;
 }
 
 .testimonials-title {
-  text-align: center;
-  font-size: 2rem;
-  color: white;
-  font-weight: 600;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #ffffff;
   margin: 0;
 }
 
 .answer-button {
-  padding: 10px 20px;
-  background-color: rgba(26, 109, 255, 0.1);
-  border: 2px solid #1a6dff;
-  border-radius: 20px;
-  color: white;
-  font-size: 0.9rem;
+  padding: 12px 24px;
+  background: rgba(26, 109, 255, 0.1);
+  border: 1px solid #1a6dff;
+  border-radius: 8px;
+  color: #1a6dff;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .answer-button:hover {
-  background-color: #1a6dff;
+  background: rgba(26, 109, 255, 0.2);
   transform: translateY(-2px);
 }
 
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  padding: 0 5%;
+}
+
+.testimonial-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 40px;
+  transition: all 0.3s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.testimonial-title {
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin: 0 0 20px 0;
+}
+
+.testimonial-description {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 30px 0;
+  line-height: 1.6;
+}
+
+.testimonial-comments {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.testimonial-comment {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+}
+
+.comment-content {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 10px 0;
+  line-height: 1.5;
+}
+
+.comment-author {
+  font-size: 0.9rem;
+  color: #1a6dff;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Mobile Styles */
 @media screen and (max-width: 768px) {
+  .testimonials-section {
+    padding: 60px 0;
+  }
+
   .testimonials-header {
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 0 20px;
   }
 
   .testimonials-title {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 0 20px;
+  }
+
+  .testimonial-card {
+    padding: 24px;
+  }
+
+  .testimonial-title {
+    font-size: 1.3rem;
+    margin-bottom: 16px;
   }
 }
 
-/* Calendar Section */
-.calendar-section {
-  padding: 4rem 2rem;
+/* Todos Section */
+.todos-section {
+  padding: 2rem;
   background-color: #000000;
   color: white;
 }
 
-.calendar-title {
-  font-size: 2.5rem;
-  font-weight: 600;
+.todos-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.todos-title {
+  font-size: 2.2rem;
   color: white;
-  letter-spacing: -0.5px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
-.calendar-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.calendar-header {
+.todos-view-buttons {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.view-button {
+  padding: 0.7rem 1.5rem;
+  border: 1px solid rgba(26, 109, 255, 0.3);
+  background: transparent;
+  color: #1a6dff;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.view-button:hover {
+  background: rgba(26, 109, 255, 0.1);
+  border-color: rgba(26, 109, 255, 0.5);
+}
+
+.view-button.active {
+  background: #1a6dff;
+  color: white;
+  border-color: #1a6dff;
+}
+
+.todos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
   padding: 0 1rem;
 }
 
-.calendar-header button {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #1a6dff;
-  padding: 0.5rem;
+.todo-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   transition: all 0.2s ease;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.todo-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.todo-card h3,
+.todo-card p {
+  color: white;
+  margin: 0;
+}
+
+.todo-task {
+  font-size: 1.1rem;
+  color: white !important;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.todo-info {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
 }
 
-.calendar-header button:hover {
-  background-color: rgba(26, 109, 255, 0.1);
+.todo-location {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-.calendar-header h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: white;
-  letter-spacing: -0.5px;
-}
-
-.calendar-grid {
-  width: 100%;
-}
-
-.calendar-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-bottom: 8px;
-  padding: 0 4px;
-}
-
-.calendar-weekday {
-  padding: 1rem 0.5rem;
-  text-align: center;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
+.todo-location::before {
+  content: "📍";
   font-size: 0.9rem;
 }
 
-.calendar-days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  padding: 4px;
-  aspect-ratio: 7/5;
-}
-
-.calendar-day {
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 0.75rem;
-  position: relative;
-  border-radius: 16px;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  width: 100%;
-  aspect-ratio: 1/1;
-  cursor: pointer;
-}
-
-.calendar-day.has-todos {
-  background-color: rgba(26, 109, 255, 0.1);
-  border-color: rgba(26, 109, 255, 0.2);
-}
-
-.calendar-day.has-todos:hover {
-  background-color: rgba(26, 109, 255, 0.15);
-  transform: translateY(-1px);
-}
-
-.day-number {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
+.todo-time {
+  color: #1a6dff !important;
+  font-size: 0.9rem;
   font-weight: 500;
-}
-
-.day-todos {
-  margin-top: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex: 1;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-  padding-right: 4px;
-}
-
-.day-todos::-webkit-scrollbar {
-  width: 4px;
-}
-
-.day-todos::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.day-todos::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-}
-
-.todo-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  padding: 0.5rem 0.75rem;
-  background-color: rgba(26, 109, 255, 0.15);
+  gap: 0.25rem;
+}
+
+.todo-time::before {
+  content: "🕒";
+  font-size: 0.9rem;
+}
+
+.no-todos {
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 2.5rem;
+  color: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.95rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Calendar Styles */
+.calendar-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Override react-calendar default styles */
+.react-calendar {
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.125em;
+  padding: 0.5rem;
+}
+
+.react-calendar__navigation {
+  display: flex;
+  margin-bottom: 1rem;
+  padding: 0 0.5rem;
+}
+
+.react-calendar__navigation button {
+  color: white !important;
+  min-width: 44px;
+  background: none;
+  font-size: 1rem;
+  padding: 8px;
+  border: 1px solid transparent;
   border-radius: 8px;
-  cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid rgba(26, 109, 255, 0.2);
+}
+
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  padding: 0.5rem;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.react-calendar__tile {
+  position: relative;
+  height: 70px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 0 !important;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  color: white !important;
+}
+
+.react-calendar__month-view__days__day {
+  color: white !important;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.react-calendar__tile--now {
+  background: rgba(26, 109, 255, 0.2) !important;
+  border-color: rgba(26, 109, 255, 0.4) !important;
+}
+
+.react-calendar__tile--active {
+  background: #1a6dff !important;
+  border-color: #1a6dff !important;
+}
+
+.calendar-todos {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.todo-count {
+  background: #1a6dff;
   color: white;
-  width: calc(100% - 4px);
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
-.todo-item:hover {
-  background-color: rgba(26, 109, 255, 0.25);
-  transform: translateY(-1px);
-}
-
-.todo-item.completed {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.todo-dot {
-  width: 8px;
-  height: 8px;
   border-radius: 50%;
-  background-color: #1a6dff;
-  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
-.todo-item.completed .todo-dot {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-.todo-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-  min-width: 0;
-  font-weight: 500;
-  max-width: 100%;
-}
-
-@media (max-width: 768px) {
-  .calendar-section {
-    padding: 2rem 1rem;
-  }
-
-  .calendar-title {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-  }
-
-  .calendar-container {
-    padding: 1rem;
-    border-radius: 20px;
-  }
-
-  .calendar-day {
-    min-height: 100px;
-    height: 100px;
-    padding: 0.5rem;
-    aspect-ratio: auto;
-  }
-
-  .day-number {
-    font-size: 0.9rem;
-  }
-
-  .todo-item {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.6rem;
-  }
-
-  .calendar-weekday {
-    font-size: 0.8rem;
-    padding: 0.75rem 0.5rem;
-  }
-}
-
-/* Todo Popup */
-.popup-overlay {
+/* Modal Styles */
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 20px;
 }
 
-.todo-popup {
-  background-color: rgba(30, 30, 30, 0.95);
-  border-radius: 24px;
-  padding: 2rem;
-  width: 90%;
+.modal-content {
+  background: rgba(28, 28, 30, 0.95);
+  border-radius: 14px;
+  width: 100%;
   max-width: 500px;
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 80vh;
+  overflow: hidden;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  animation: popupFadeIn 0.3s ease;
+  animation: modalSlideUp 0.3s ease-out;
 }
 
-@keyframes popupFadeIn {
+@keyframes modalSlideUp {
   from {
+    transform: translateY(20px);
     opacity: 0;
-    transform: scale(0.95);
   }
   to {
+    transform: translateY(0);
     opacity: 1;
-    transform: scale(1);
   }
 }
 
-.close-button {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.5rem;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.close-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.todo-popup-content {
-  color: white;
-}
-
-.todo-popup-content h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  line-height: 1.4;
-  color: white;
-}
-
-.todo-popup-content h3.completed {
-  color: rgba(255, 255, 255, 0.5);
-  text-decoration: line-through;
-}
-
-.todo-details {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.todo-details p {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.todo-details span {
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 500;
-  min-width: 80px;
-}
-
-@media (max-width: 768px) {
-  .todo-popup {
-    width: calc(100% - 32px);
-    padding: 1.5rem;
-    margin: 16px;
-    max-height: calc(100vh - 32px);
-    overflow-y: auto;
-  }
-
-  .popup-date {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-  }
-
-  .popup-todo-item {
-    padding: 0.875rem;
-  }
-
-  .popup-todo-task {
-    font-size: 0.95rem;
-  }
-}
-
-/* Update todo-item styles */
-.todo-item {
-  max-width: 100%;
-}
-
-.todo-text {
-  max-width: calc(100% - 24px);
-}
-
-/* Mobile Calendar List View */
-.mobile-calendar-container {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-}
-
-.mobile-date-group {
+.modal-header {
+  padding: 16px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.mobile-date-group:last-child {
-  border-bottom: none;
-}
-
-.mobile-date-header {
-  padding: 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.8);
-  background-color: rgba(255, 255, 255, 0.05);
-  letter-spacing: -0.5px;
-}
-
-.mobile-todos-list {
-  padding: 0.5rem 0;
-}
-
-.mobile-todo-item {
-  display: flex;
-  padding: 0.75rem 1rem;
-  gap: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.mobile-todo-item:active {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.mobile-todo-item.completed {
-  opacity: 0.5;
-}
-
-.mobile-todo-time {
-  font-size: 0.9rem;
-  color: #1a6dff;
-  min-width: 60px;
-  font-weight: 500;
-}
-
-.mobile-todo-content {
-  flex: 1;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.mobile-todo-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #1a6dff;
-  margin-top: 6px;
-  flex-shrink: 0;
-}
-
-.mobile-todo-item.completed .mobile-todo-dot {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-.mobile-todo-text {
-  flex: 1;
-  font-size: 0.95rem;
-  color: white;
-  line-height: 1.4;
-}
-
-.mobile-todo-location {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
-  margin-top: 0.25rem;
-}
-
-@media (max-width: 768px) {
-  .calendar-section {
-    padding: 1rem;
-  }
-
-  .calendar-title {
-    font-size: 1.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .mobile-calendar-container {
-    border-radius: 16px;
-  }
-
-  /* Hide desktop calendar on mobile */
-  .calendar-container {
-    display: none;
-  }
-}
-
-.popup-date {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: white;
-  letter-spacing: -0.5px;
-}
-
-.todos-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.popup-todo-item {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.popup-todo-item.completed {
-  opacity: 0.5;
-}
-
-.popup-todo-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
 }
 
-.popup-todo-time {
-  color: #1a6dff;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.popup-todo-status {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
-  padding: 0.25rem 0.75rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 100px;
-}
-
-.popup-todo-content {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-}
-
-.popup-todo-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #1a6dff;
-  margin-top: 0.5rem;
-  flex-shrink: 0;
-}
-
-.popup-todo-item.completed .popup-todo-dot {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-.popup-todo-details {
-  flex: 1;
-}
-
-.popup-todo-task {
-  font-size: 1rem;
+.modal-header h3 {
   color: white;
-  line-height: 1.4;
-  margin-bottom: 0.25rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
 }
 
-.popup-todo-location {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-@media (max-width: 768px) {
-  .todo-popup {
-    width: calc(100% - 32px);
-    padding: 1.5rem;
-    margin: 16px;
-    max-height: calc(100vh - 32px);
-    overflow-y: auto;
-  }
-
-  .popup-date {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-  }
-
-  .popup-todo-item {
-    padding: 0.875rem;
-  }
-
-  .popup-todo-task {
-    font-size: 0.95rem;
-  }
-}
-
-.mobile-view-toggle {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 1.5rem;
-}
-
-.toggle-button {
-  padding: 8px 24px;
-  border-radius: 100px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  font-weight: 500;
+.modal-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 24px;
   cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   transition: all 0.2s ease;
 }
 
-.toggle-button.active {
-  background: #1a6dff;
-  border-color: #1a6dff;
-  color: white;
-}
-
-.toggle-button:hover:not(.active) {
+.modal-close:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
 }
 
-/* Mobile Calendar View Styles */
-.mobile-calendar-container.calendar-view {
-  padding: 1rem;
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(80vh - 60px);
 }
 
+.modal-todo-item {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.modal-todo-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.todo-time-column {
+  min-width: 80px;
+  text-align: right;
+}
+
+.todo-time {
+  color: #1a6dff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.todo-end-time {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+}
+
+.todo-content-column {
+  flex: 1;
+}
+
+.todo-content-column h4 {
+  color: white;
+  font-size: 1rem;
+  margin: 0 0 4px 0;
+  font-weight: 500;
+}
+
+.todo-content-column .todo-location {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Mobile Styles */
 @media (max-width: 768px) {
-  .calendar-section {
-    padding: 1rem;
+  .react-calendar__tile {
+    height: 60px !important;
+    font-size: 0.9rem;
   }
 
-  .calendar-title {
-    font-size: 1.75rem;
-    margin-bottom: 1.5rem;
+  .calendar-todos {
+    top: 28px;
   }
 
-  .mobile-calendar-container {
-    border-radius: 16px;
-  }
-
-  .mobile-calendar-container.calendar-view .calendar-days {
-    aspect-ratio: auto;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-  }
-
-  .mobile-calendar-container.calendar-view .calendar-day {
-    aspect-ratio: 1/1;
-    padding: 4px;
-    min-height: 0;
-    height: auto;
-  }
-
-  .mobile-calendar-container.calendar-view .day-number {
-    font-size: 0.8rem;
-    top: 4px;
-    left: 4px;
-  }
-
-  .mobile-calendar-container.calendar-view .day-todos {
-    margin-top: 1.5rem;
-    gap: 2px;
-  }
-
-  .mobile-calendar-container.calendar-view .todo-item {
-    padding: 2px 4px;
+  .todo-count {
+    width: 18px;
+    height: 18px;
     font-size: 0.7rem;
   }
 
-  .mobile-calendar-container.calendar-view .todo-dot {
-    width: 4px;
-    height: 4px;
+  .todos-section {
+    padding: 1rem;
   }
 
-  /* Hide desktop calendar on mobile */
-  .calendar-container {
+  .todos-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0;
+  }
+
+  .todo-card {
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    margin: 0;
+  }
+
+  .todo-task {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .todo-info {
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .todo-time {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(26, 109, 255, 0.1);
+    border-radius: 6px;
+    color: #1a6dff !important;
+  }
+
+  .todo-time::before {
     display: none;
   }
-}
 
+  .todo-location {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .todo-location::before {
+    display: none;
+  }
+
+  .no-todos {
+    padding: 2rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    margin: 0;
+  }
+
+  .todos-title {
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .todos-view-buttons {
+    margin-bottom: 1rem;
+  }
+
+  .view-button {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+}
 

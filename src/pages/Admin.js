@@ -160,6 +160,77 @@ const BlogDetails = styled.div`
   }
 `;
 
+const TabContainer = styled.div`
+  margin-bottom: 2rem;
+`;
+
+const TabList = styled.div`
+  display: flex;
+  gap: 1rem;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 2rem;
+`;
+
+const Tab = styled.button`
+  padding: 0.8rem 1.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: ${props => props.active ? '#4A90E2' : '#666'};
+  border-bottom: 2px solid ${props => props.active ? '#4A90E2' : 'transparent'};
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #4A90E2;
+  }
+`;
+
+const SearchContainer = styled.div`
+  margin-bottom: 2rem;
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+
+  &:focus {
+    outline: none;
+    border-color: #4A90E2;
+  }
+`;
+
+const StatsContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+`;
+
+const StatCard = styled.div`
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  h3 {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  p {
+    margin: 0.5rem 0 0 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4A90E2;
+  }
+`;
+
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
@@ -167,6 +238,8 @@ function Admin() {
   const [dataLoading, setDataLoading] = useState(true);
   const [blogPosts, setBlogPosts] = useState([]);
   const [questions, setQuestions] = useState([]);
+  const [activeTab, setActiveTab] = useState('projects');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -260,6 +333,122 @@ function Admin() {
     });
   };
 
+  const filteredProjects = projects.filter(project =>
+    project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    project.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredBlogPosts = blogPosts.filter(post =>
+    post.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredQuestions = questions.filter(question =>
+    question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    question.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const renderStats = () => (
+    <StatsContainer>
+      <StatCard>
+        <h3>Total Projects</h3>
+        <p>{projects.length}</p>
+      </StatCard>
+      <StatCard>
+        <h3>Total Blog Posts</h3>
+        <p>{blogPosts.length}</p>
+      </StatCard>
+      <StatCard>
+        <h3>Total Questions</h3>
+        <p>{questions.length}</p>
+      </StatCard>
+    </StatsContainer>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'projects':
+        return (
+          <ProjectList>
+            {filteredProjects.map(project => (
+              <ProjectItem key={project.id}>
+                <ProjectInfo>
+                  {project.imageUrl && (
+                    <ProjectThumbnail src={project.imageUrl} alt={project.title} />
+                  )}
+                  <ProjectDetails>
+                    <h3>{project.title}</h3>
+                    <p>{project.description}</p>
+                    <TagsContainer>
+                      {project.skillTags?.map((skill, index) => (
+                        <Tag key={index}>{skill}</Tag>
+                      ))}
+                      {project.roleTags?.map((role, index) => (
+                        <Tag key={`role-${index}`}>{role}</Tag>
+                      ))}
+                    </TagsContainer>
+                  </ProjectDetails>
+                </ProjectInfo>
+                <ProjectActions>
+                  <EditButton to={`/admin/edit-project/${project.id}`}>Edit</EditButton>
+                  <ActionButton isDelete onClick={() => handleDelete(project.id)}>Delete</ActionButton>
+                </ProjectActions>
+              </ProjectItem>
+            ))}
+          </ProjectList>
+        );
+      case 'blog':
+        return (
+          <BlogList>
+            {filteredBlogPosts.map(post => (
+              <BlogItem key={post.id}>
+                <BlogInfo>
+                  {post.coverImageUrl && (
+                    <BlogThumbnail src={post.coverImageUrl} alt={post.title} />
+                  )}
+                  <BlogDetails>
+                    <h3>{post.title}</h3>
+                    <div className="metadata">
+                      <div>{formatDateTime(post.date)}</div>
+                      <div>{post.readTime} min read</div>
+                    </div>
+                  </BlogDetails>
+                </BlogInfo>
+                <ProjectActions>
+                  <EditButton to={`/admin/edit-blog/${post.id}`}>Edit</EditButton>
+                  <ActionButton isDelete onClick={() => handleDeleteBlog(post.id)}>Delete</ActionButton>
+                </ProjectActions>
+              </BlogItem>
+            ))}
+          </BlogList>
+        );
+      case 'questions':
+        return (
+          <BlogList>
+            {filteredQuestions.map(question => (
+              <BlogItem key={question.id}>
+                <BlogInfo>
+                  <BlogDetails>
+                    <h3>{question.title}</h3>
+                    <div className="metadata">
+                      <div>{formatDateTime(question.createdAt)}</div>
+                      <div>{question.comments?.length || 0} answers</div>
+                    </div>
+                    <p>{question.description}</p>
+                  </BlogDetails>
+                </BlogInfo>
+                <ProjectActions>
+                  <EditButton to={`/question/${question.id}`}>View Answers</EditButton>
+                  <ActionButton isDelete onClick={() => handleDeleteQuestion(question.id)}>Delete</ActionButton>
+                </ProjectActions>
+              </BlogItem>
+            ))}
+          </BlogList>
+        );
+      default:
+        return null;
+    }
+  };
+
   if (loading || dataLoading) {
     return <div className="loading">Loading...</div>;
   }
@@ -273,128 +462,40 @@ function Admin() {
       <AdminHeader>
         <h1>Admin Dashboard</h1>
         <AdminActions>
-          <AdminButton to="/admin/add-project">
-            Add New Project
-          </AdminButton>
-          <AdminButton to="/admin/add-blog">
-            Add New Blog Post
-          </AdminButton>
-          <AdminButton to="/admin/add-question">
-            Add New Question
-          </AdminButton>
-          <AdminButton to="/admin/portfolio-summary">
-            Portfolio Summary
-          </AdminButton>
-          <AdminButton to="/admin/todos">
-            Todo List
-          </AdminButton>
+          <AdminButton to="/admin/add-project">Add New Project</AdminButton>
+          <AdminButton to="/admin/add-blog">Add New Blog Post</AdminButton>
+          <AdminButton to="/admin/add-question">Add New Question</AdminButton>
+          <AdminButton to="/admin/portfolio-summary">Portfolio Summary</AdminButton>
+          <AdminButton to="/admin/todos">Todo List</AdminButton>
         </AdminActions>
       </AdminHeader>
 
-      <h2>Projects</h2>
-      <ProjectList>
-        {projects.map(project => (
-          <ProjectItem key={project.id}>
-            <ProjectInfo>
-              {project.imageUrl && (
-                <ProjectThumbnail 
-                  src={project.imageUrl} 
-                  alt={project.title} 
-                />
-              )}
-              <ProjectDetails>
-                <h3>{project.title}</h3>
-                <p>{project.description}</p>
-                <TagsContainer>
-                  {project.skillTags?.map((skill, index) => (
-                    <Tag key={index} className="skill-tag">{skill}</Tag>
-                  ))}
-                  {project.roleTags?.map((role, index) => (
-                    <Tag key={`role-${index}`} className="role-tag">{role}</Tag>
-                  ))}
-                </TagsContainer>
-              </ProjectDetails>
-            </ProjectInfo>
-            <ProjectActions>
-              <EditButton to={`/admin/edit-project/${project.id}`}>
-                Edit
-              </EditButton>
-              <ActionButton 
-                isDelete 
-                onClick={() => handleDelete(project.id)}
-              >
-                Delete
-              </ActionButton>
-            </ProjectActions>
-          </ProjectItem>
-        ))}
-      </ProjectList>
+      {renderStats()}
 
-      <h2>Blog Posts</h2>
-      <BlogList>
-        {blogPosts.map(post => (
-          <BlogItem key={post.id}>
-            <BlogInfo>
-              {post.coverImageUrl && (
-                <BlogThumbnail 
-                  src={post.coverImageUrl} 
-                  alt={post.title} 
-                />
-              )}
-              <BlogDetails>
-                <h3>{post.title}</h3>
-                <div className="metadata">
-                  <div>{formatDateTime(post.date)}</div>
-                  <div>{post.readTime} min read</div>
-                  {post.relatedProject && (
-                    <div>Related Project: {post.relatedProject.title}</div>
-                  )}
-                </div>
-              </BlogDetails>
-            </BlogInfo>
-            <ProjectActions>
-              <EditButton to={`/admin/edit-blog/${post.id}`}>
-                Edit
-              </EditButton>
-              <ActionButton 
-                isDelete 
-                onClick={() => handleDeleteBlog(post.id)}
-              >
-                Delete
-              </ActionButton>
-            </ProjectActions>
-          </BlogItem>
-        ))}
-      </BlogList>
+      <TabContainer>
+        <TabList>
+          <Tab active={activeTab === 'projects'} onClick={() => setActiveTab('projects')}>
+            Projects
+          </Tab>
+          <Tab active={activeTab === 'blog'} onClick={() => setActiveTab('blog')}>
+            Blog Posts
+          </Tab>
+          <Tab active={activeTab === 'questions'} onClick={() => setActiveTab('questions')}>
+            Questions
+          </Tab>
+        </TabList>
 
-      <h2>Questions</h2>
-      <BlogList>
-        {questions.map(question => (
-          <BlogItem key={question.id}>
-            <BlogInfo>
-              <BlogDetails>
-                <h3>{question.title}</h3>
-                <div className="metadata">
-                  <div>{formatDateTime(question.createdAt)}</div>
-                  <div>{question.comments?.length || 0} answers</div>
-                </div>
-                <p>{question.description}</p>
-              </BlogDetails>
-            </BlogInfo>
-            <ProjectActions>
-              <EditButton to={`/question/${question.id}`}>
-                View Answers
-              </EditButton>
-              <ActionButton 
-                isDelete 
-                onClick={() => handleDeleteQuestion(question.id)}
-              >
-                Delete
-              </ActionButton>
-            </ProjectActions>
-          </BlogItem>
-        ))}
-      </BlogList>
+        <SearchContainer>
+          <SearchInput
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </SearchContainer>
+
+        {renderContent()}
+      </TabContainer>
     </AdminDashboard>
   );
 }

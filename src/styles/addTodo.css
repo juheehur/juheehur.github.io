@@ -158,7 +158,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  color: #1d1d1f;
+  color: #000000 !important;
   transition: all 0.2s ease;
   border-radius: 12px;
   margin-bottom: 0.5rem;
@@ -212,7 +212,7 @@
 .todo-task {
   font-size: 1rem;
   line-height: 1.5;
-  color: #1d1d1f;
+  color: #000000 !important;
   margin-bottom: 0.375rem;
   word-break: break-word;
   font-weight: 500;
@@ -221,7 +221,7 @@
 
 .todo-details {
   font-size: 0.875rem;
-  color: #86868b;
+  color: #4a4a4a !important;
   line-height: 1.4;
   letter-spacing: -0.006em;
 }
@@ -279,11 +279,11 @@
 
 .todo-item.completed .todo-task {
   text-decoration: line-through;
-  color: #86868b;
+  color: #4a4a4a !important;
 }
 
 .todo-item.completed .todo-details {
-  color: #98989d;
+  color: #666666 !important;
 }
 
 /* Mobile Styles */
@@ -487,7 +487,7 @@
 
 .today-todos h2 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: #000000 !important;
   font-size: 1.2rem;
 }
 
@@ -499,7 +499,7 @@
 
 .calendar-section h2 {
   margin: 0 0 1.25rem 0;
-  color: #1d1d1f;
+  color: #000000 !important;
   font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: -0.022em;
@@ -529,14 +529,14 @@
   background: none;
   font-size: 0.9375rem;
   padding: 0;
-  color: #1d1d1f;
+  color: #000000 !important;
   border: none;
   margin: 0;
   font-weight: 500;
 }
 
 .react-calendar__navigation button:disabled {
-  color: #86868b;
+  color: #86868b !important;
 }
 
 /* Month view */
@@ -545,7 +545,7 @@
   text-transform: none;
   font-weight: 500;
   font-size: 0.8125rem;
-  color: #86868b;
+  color: #000000 !important;
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #f0f0f0;
@@ -571,7 +571,7 @@
   border: none;
   outline: none;
   font-size: 0.875rem;
-  color: #1d1d1f;
+  color: #000000 !important;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -582,11 +582,11 @@
 }
 
 .react-calendar__month-view__days__day--weekend {
-  color: #ff3b30;
+  color: #ff3b30 !important;
 }
 
 .react-calendar__month-view__days__day--neighboringMonth {
-  color: #86868b;
+  color: #86868b !important;
 }
 
 .react-calendar__tile {
@@ -611,24 +611,25 @@
   font-size: 0.875rem;
   font-weight: 400;
   transition: background-color 0.2s ease;
+  color: #000000 !important;
 }
 
 .react-calendar__tile--now > abbr {
-  color: #007aff;
+  color: #007aff !important;
   font-weight: 600;
 }
 
 .react-calendar__tile--active > abbr {
-  background: #007aff;
-  color: #ffffff;
+  background: #007aff !important;
+  color: #ffffff !important;
 }
 
 .react-calendar__month-view__days__day--weekend {
-  color: #ff3b30;
+  color: #ff3b30 !important;
 }
 
 .react-calendar__month-view__days__day--neighboringMonth > abbr {
-  color: #86868b;
+  color: #86868b !important;
 }
 
 /* Todo count badge */
@@ -642,8 +643,8 @@
 }
 
 .todo-count {
-  background: #007aff;
-  color: white;
+  background: #007aff !important;
+  color: white !important;
   border-radius: 12px;
   min-width: 20px;
   height: 20px;
@@ -726,7 +727,7 @@
 
 .selected-date-todos h3 {
   margin: 0 0 1rem 0;
-  color: #1d1d1f;
+  color: #000000 !important;
   font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: -0.022em;
