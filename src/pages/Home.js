@@ -219,7 +219,7 @@ INVEST NOW!`;
 
   // Add modal close handler
   const handleCloseModal = (e) => {
-    if (e.target.classList.contains('modal-overlay')) {
+    if (e.target.classList.contains('home-modal-overlay')) {
       setShowModal(false);
     }
   };
@@ -286,15 +286,15 @@ INVEST NOW!`;
       <div className="todos-section">
         <div className="todos-header">
           <h2 className="todos-title">What Juhee Hur Do Everyday</h2>
-          <div className="todos-view-buttons">
+          <div className="home-view-buttons">
             <button 
-              className={`view-button ${!showCalendar ? 'active' : ''}`}
+              className={`home-view-button ${!showCalendar ? 'active' : ''}`}
               onClick={() => setShowCalendar(false)}
             >
               Today
             </button>
             <button 
-              className={`view-button ${showCalendar ? 'active' : ''}`}
+              className={`home-view-button ${showCalendar ? 'active' : ''}`}
               onClick={() => setShowCalendar(true)}
             >
               Calendar
@@ -303,7 +303,7 @@ INVEST NOW!`;
         </div>
         
         {showCalendar ? (
-          <div className="calendar-container">
+          <div className="calendar-container home-calendar">
             <Calendar
               onChange={handleDateClick}
               value={selectedDate}
@@ -320,22 +320,22 @@ INVEST NOW!`;
             />
           </div>
         ) : (
-          <div className="todos-grid">
+          <div className="home-todos-grid">
             {todayTodos.map((todo) => (
-              <div key={`${todo.date}-${todo.id}`} className="todo-card">
-                <h3 className="todo-task">{todo.task}</h3>
-                <div className="todo-info">
+              <div key={`${todo.date}-${todo.id}`} className="home-todo-card">
+                <h3 className="home-todo-task">{todo.task}</h3>
+                <div className="home-todo-info">
                   {todo.startTime && (
-                    <span className="todo-time">
+                    <span className="home-todo-time">
                       {todo.startTime}{todo.endTime ? ` - ${todo.endTime}` : ''}
                     </span>
                   )}
-                  {todo.location && <span className="todo-location">{todo.location}</span>}
+                  {todo.location && <span className="home-todo-location">{todo.location}</span>}
                 </div>
               </div>
             ))}
             {todayTodos.length === 0 && (
-              <div className="no-todos">
+              <div className="home-no-todos">
                 <p>오늘은 할 일이 없습니다</p>
               </div>
             )}
@@ -344,40 +344,27 @@ INVEST NOW!`;
 
         {/* Todo Modal */}
         {showModal && selectedDateTodos && (
-          <div className="modal-overlay" onClick={handleCloseModal}>
-            <div className="modal-content">
-              <div className="modal-header">
+          <div className="home-modal-overlay" onClick={handleCloseModal}>
+            <div className="home-modal-content">
+              <div className="home-modal-header">
                 <h3>{moment(selectedDateTodos.date).format('YYYY년 MM월 DD일 ddd')}</h3>
-                <button className="modal-close" onClick={() => setShowModal(false)}>
+                <button className="home-modal-close" onClick={() => setShowModal(false)}>
                   <span>×</span>
                 </button>
               </div>
-              <div className="modal-body">
+              <div className="home-modal-body">
                 {selectedDateTodos.todos.map((todo) => (
-                  <div key={`${todo.date}-${todo.id}`} className="modal-todo-item">
-                    <div className="todo-time-column">
-                      {todo.startTime && (
-                        <span className="todo-time">
-                          {todo.startTime}
-                          {todo.endTime && (
-                            <>
-                              <br />
-                              <span className="todo-end-time">{todo.endTime}</span>
-                            </>
-                          )}
-                        </span>
-                      )}
-                    </div>
-                    <div className="todo-content-column">
-                      <h4 className="todo-task">{todo.task}</h4>
+                  <div key={`${todo.date}-${todo.id}`} className="home-modal-todo-item">
+                    <div className="home-todo-content-column">
+                      <h4 className="home-todo-task">{todo.task}</h4>
                       {todo.location && (
-                        <p className="todo-location">@ {todo.location}</p>
+                        <p className="home-todo-location">@ {todo.location}</p>
                       )}
                     </div>
                   </div>
                 ))}
                 {selectedDateTodos.todos.length === 0 && (
-                  <div className="no-todos">
+                  <div className="home-modal-no-todos">
                     <p>No todos for this day</p>
                   </div>
                 )}

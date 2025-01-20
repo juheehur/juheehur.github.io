@@ -503,8 +503,7 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* Override react-calendar default styles */
-.react-calendar {
+.home-calendar .react-calendar {
   width: 100%;
   background: transparent !important;
   border: none !important;
@@ -514,13 +513,13 @@
   padding: 0.5rem;
 }
 
-.react-calendar__navigation {
+.home-calendar .react-calendar__navigation {
   display: flex;
   margin-bottom: 1rem;
   padding: 0 0.5rem;
 }
 
-.react-calendar__navigation button {
+.home-calendar .react-calendar__navigation button {
   color: white !important;
   min-width: 44px;
   background: none;
@@ -531,7 +530,7 @@
   transition: all 0.2s ease;
 }
 
-.react-calendar__month-view__weekdays {
+.home-calendar .react-calendar__month-view__weekdays {
   text-align: center;
   text-transform: uppercase;
   font-weight: 600;
@@ -539,17 +538,25 @@
   margin-bottom: 0.5rem;
 }
 
-.react-calendar__month-view__weekdays__weekday {
+.home-calendar .react-calendar__month-view__weekdays__weekday {
   padding: 0.5rem;
   color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.react-calendar__month-view__weekdays__weekday abbr {
+.home-calendar .react-calendar__month-view__weekdays__weekday abbr {
   text-decoration: none;
   color: rgba(255, 255, 255, 0.8);
 }
 
-.react-calendar__tile {
+.home-calendar .react-calendar__month-view__days__day {
+  color: white !important;
+}
+
+.home-calendar .react-calendar__month-view__days__day--neighboringMonth {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.home-calendar .react-calendar__tile {
   position: relative;
   height: 70px !important;
   display: flex;
@@ -565,40 +572,30 @@
   color: white !important;
 }
 
-.react-calendar__month-view__days__day {
+.home-calendar .react-calendar__tile > abbr {
   color: white !important;
 }
 
-.react-calendar__month-view__days__day--neighboringMonth {
-  color: rgba(255, 255, 255, 0.3) !important;
-}
-
-.react-calendar__tile:enabled:hover,
-.react-calendar__tile:enabled:focus {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.react-calendar__tile--now {
+.home-calendar .react-calendar__tile--now {
   background: rgba(26, 109, 255, 0.2) !important;
   border-color: rgba(26, 109, 255, 0.4) !important;
 }
 
-.react-calendar__tile--active {
+.home-calendar .react-calendar__tile--active {
   background: #1a6dff !important;
   border-color: #1a6dff !important;
 }
 
-.calendar-todos {
+.home-calendar .calendar-todos {
   position: absolute;
   top: 32px;
   left: 50%;
   transform: translateX(-50%);
 }
 
-.todo-count {
+.home-calendar .todo-count {
   background: #1a6dff;
-  color: white;
+  color: white !important;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -607,6 +604,118 @@
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+/* Todo Styles */
+.home-todos .todo-item {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.home-todos .todo-task {
+  color: white !important;
+}
+
+.home-todos .todo-details {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.home-todos .todo-time {
+  color: #1a6dff !important;
+}
+
+.home-todos .todo-location {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .home-calendar .react-calendar__tile {
+    height: 60px !important;
+  }
+
+  .home-calendar .calendar-todos {
+    top: 28px;
+  }
+
+  .home-calendar .todo-count {
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+  }
+
+  .todos-section {
+    padding: 1rem;
+  }
+
+  .todos-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0;
+  }
+
+  .todo-card {
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    margin: 0;
+  }
+
+  .todo-task {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .todo-info {
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .todo-time {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(26, 109, 255, 0.1);
+    border-radius: 6px;
+    color: #1a6dff !important;
+  }
+
+  .todo-time::before {
+    display: none;
+  }
+
+  .todo-location {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .todo-location::before {
+    display: none;
+  }
+
+  .no-todos {
+    padding: 2rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    margin: 0;
+  }
+
+  .todos-title {
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .todos-view-buttons {
+    margin-bottom: 1rem;
+  }
+
+  .view-button {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
 }
 
 /* Modal Styles */
@@ -736,94 +845,374 @@
   margin: 0;
 }
 
-/* Mobile Styles */
+/* Home Todo Styles - Independent from addTodo.css */
+.home-view-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.home-view-button {
+  padding: 0.7rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.home-view-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.home-view-button.active {
+  background: #1a6dff;
+  color: white;
+  border-color: #1a6dff;
+}
+
+.home-todos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.home-todo-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.home-todo-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.home-todo-card h3,
+.home-todo-card p {
+  color: white !important;
+  margin: 0;
+}
+
+.home-todo-task {
+  font-size: 1.1rem;
+  color: white !important;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.home-todo-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.home-todo-location {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.home-todo-location::before {
+  content: "📍";
+  font-size: 0.9rem;
+}
+
+.home-todo-time {
+  color: white !important;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.home-todo-time::before {
+  content: "🕒";
+  font-size: 0.9rem;
+}
+
+.home-no-todos {
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 2.5rem;
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.95rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Mobile Styles for Home Todos */
 @media (max-width: 768px) {
-  .react-calendar__tile {
-    height: 60px !important;
-    font-size: 0.9rem;
-  }
-
-  .calendar-todos {
-    top: 28px;
-  }
-
-  .todo-count {
-    width: 18px;
-    height: 18px;
-    font-size: 0.7rem;
-  }
-
-  .todos-section {
-    padding: 1rem;
-  }
-
-  .todos-grid {
+  .home-todos-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;
     padding: 0;
   }
 
-  .todo-card {
+  .home-todo-card {
     padding: 1rem;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.04);
     margin: 0;
   }
 
-  .todo-task {
+  .home-todo-task {
     font-size: 1rem;
     margin-bottom: 0.25rem;
   }
 
-  .todo-info {
+  .home-todo-info {
     gap: 0.5rem;
     margin-top: 0.5rem;
   }
 
-  .todo-time {
+  .home-todo-time {
     font-size: 0.85rem;
     padding: 0.25rem 0.5rem;
-    background: rgba(26, 109, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 6px;
-    color: #1a6dff !important;
+    color: white !important;
   }
 
-  .todo-time::before {
+  .home-todo-time::before {
     display: none;
   }
 
-  .todo-location {
+  .home-todo-location {
     font-size: 0.85rem;
     padding: 0.25rem 0.5rem;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 6px;
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
   }
 
-  .todo-location::before {
+  .home-todo-location::before {
     display: none;
   }
 
-  .no-todos {
+  .home-no-todos {
     padding: 2rem 1rem;
     font-size: 0.9rem;
     border-radius: 12px;
     margin: 0;
   }
+}
 
-  .todos-title {
-    font-size: 1.8rem;
-    margin-bottom: 0.75rem;
+/* Home Modal Styles - New Design */
+.home-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.home-modal-content {
+  background: rgba(18, 18, 18, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: modalSlideUp 0.3s ease-out;
+}
+
+.home-modal-header {
+  padding: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.home-modal-header h3 {
+  color: white !important;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.home-modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.home-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.home-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: calc(85vh - 81px);
+}
+
+.home-modal-todo-item {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.home-modal-todo-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.home-todo-time-column {
+  min-width: 90px;
+  text-align: right;
+  padding-right: 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.home-todo-time {
+  color: #1a6dff !important;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: block;
+}
+
+.home-todo-end-time {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.home-todo-content-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-todo-content-column h4 {
+  color: white !important;
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.home-todo-content-column .home-todo-location {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 0.9rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.home-todo-content-column .home-todo-location::before {
+  content: "📍";
+  font-size: 1rem;
+}
+
+.home-modal-no-todos {
+  text-align: center;
+  padding: 40px 24px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  margin: 12px 0;
+}
+
+@media (max-width: 768px) {
+  .home-modal-content {
+    margin: 0;
+    max-height: 90vh;
+    border-radius: 16px;
   }
 
-  .todos-view-buttons {
-    margin-bottom: 1rem;
+  .home-modal-header {
+    padding: 20px;
   }
 
-  .view-button {
-    padding: 0.6rem 1.25rem;
-    font-size: 0.9rem;
-    border-radius: 10px;
+  .home-modal-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .home-modal-body {
+    padding: 16px;
+  }
+
+  .home-modal-todo-item {
+    padding: 14px;
+    margin-bottom: 10px;
+    gap: 16px;
+  }
+
+  .home-todo-time-column {
+    min-width: 80px;
+    padding-right: 14px;
+  }
+
+  .home-todo-content-column h4 {
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+
+  .home-todo-content-column .home-todo-location {
+    font-size: 0.85rem;
+  }
+
+  .home-modal-no-todos {
+    padding: 32px 20px;
+    font-size: 0.95rem;
   }
 }
 
