@@ -237,7 +237,19 @@ const AddTodo = () => {
           date = today.add(7, 'days').format('YYYY-MM-DD');
           break;
         default:
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+          // Check if input is in MMDD format (e.g., 0130)
+          if (/^\d{4}$/.test(dateStr)) {
+            const month = dateStr.substring(0, 2);
+            const day = dateStr.substring(2, 4);
+            const year = today.format('YYYY');
+            const inputDate = moment.tz(`${year}-${month}-${day}`, 'YYYY-MM-DD', 'Asia/Hong_Kong');
+            
+            if (inputDate.isValid()) {
+              date = inputDate.format('YYYY-MM-DD');
+            } else {
+              date = today.format('YYYY-MM-DD');
+            }
+          } else if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
             date = today.format('YYYY-MM-DD');
           }
       }
@@ -435,7 +447,7 @@ const AddTodo = () => {
             Examples {isExampleVisible ? '▼' : '▶'}
           </p>
           <div className={`examples-content ${isExampleVisible ? 'visible' : ''}`}>
-            <p>/d td (today), tmr (tomorrow), nw (next week)</p>
+            <p>/d td (today), tmr (tomorrow), nw (next week), 0130 (1월 30일)</p>
             <p>/t 9-10:30 (time range)</p>
             <p>/l location</p>
             <p>/a 20 (알림: 20분 전)</p>

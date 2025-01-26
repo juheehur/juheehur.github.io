@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase/config';
-import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/todoManagement.css';
 
@@ -97,7 +97,7 @@ const TodoManagement = () => {
           completed: editingTodo.completed || false
         };
 
-        await updateDoc(newTodoRef, updatedTodo);
+        await setDoc(newTodoRef, updatedTodo);
         
         setTodos(prev => prev.filter(todo => !(todo.id === editingTodo.id && todo.date === editingTodo.originalDate))
           .concat({...updatedTodo, id: newTodoRef.id, date: editingTodo.date}));
@@ -110,14 +110,15 @@ const TodoManagement = () => {
           endTime: editingTodo.endTime || '',
           location: editingTodo.location || '',
           notification: editingTodo.notification || false,
-          notificationTime: editingTodo.notificationTime || ''
+          notificationTime: editingTodo.notificationTime || '',
+          completed: editingTodo.completed || false
         };
 
         await updateDoc(todoRef, updatedTodo);
 
         setTodos(prev => prev.map(todo => 
           todo.id === editingTodo.id && todo.date === editingTodo.date
-            ? { ...todo, ...updatedTodo }
+            ? { ...todo, ...updatedTodo, date: editingTodo.date }
             : todo
         ));
       }
