@@ -312,6 +312,32 @@ function AddBlog() {
     setCodeContent('');
   };
 
+  const handlePaste = async (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        try {
+          if (validateImage(file)) {
+            setCoverImage(file);
+            // Create a preview URL
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const previewContainer = document.getElementById('cover-image-preview');
+              if (previewContainer) {
+                previewContainer.style.backgroundImage = `url(${reader.result})`;
+                previewContainer.style.display = 'block';
+              }
+            };
+            reader.readAsDataURL(file);
+          }
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+    }
+  };
+
   return (
     <div className="add-blog">
       <h2>Add New Blog Post</h2>
@@ -449,11 +475,19 @@ function AddBlog() {
 
         <div className="form-group">
           <label>Cover Image:</label>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/gif"
-            onChange={handleImageChange}
-          />
+          <div 
+            className="cover-image-input"
+            onPaste={handlePaste}
+            tabIndex="0"
+          >
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif"
+              onChange={handleImageChange}
+            />
+            <div id="cover-image-preview" className="cover-image-preview"></div>
+            <p className="help-text">You can also paste (Ctrl+V) an image here</p>
+          </div>
         </div>
 
         <div className="form-group">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { collection, addDoc, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useNavigate } from 'react-router-dom';
@@ -139,6 +139,7 @@ function AddProject() {
   const [liveUrl, setLiveUrl] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [document, setDocument] = useState('');
@@ -148,6 +149,7 @@ function AddProject() {
   const [translationProgress, setTranslationProgress] = useState(0);
   const [translationStatus, setTranslationStatus] = useState('');
   const navigate = useNavigate();
+  const uploadContainerRef = useRef(null);
 
   useEffect(() => {
     const fetchExistingData = async () => {
@@ -399,6 +401,44 @@ function AddProject() {
     }
   };
 
+  const handleImagePaste = (e) => {
+    const items = e.clipboardData.items;
+    
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        setImage(file);
+        
+        // Create preview URL
+        const reader = new FileReader();
+        reader.onload = (e) => setImagePreview(e.target.result);
+        reader.readAsDataURL(file);
+        
+        break;
+      }
+    }
+  };
+
+  useEffect(() => {
+    const element = uploadContainerRef.current;
+    if (element) {
+      element.addEventListener('paste', handleImagePaste);
+      return () => element.removeEventListener('paste', handleImagePaste);
+    }
+  }, []);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="add-project">
       <h2>Add New Project</h2>
@@ -524,11 +564,29 @@ function AddProject() {
 
         <div className="form-group">
           <label>Project Image:</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
-          />
+          <div className="image-upload-container" ref={uploadContainerRef} tabIndex="0">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+            <p className="paste-instruction">또는 이미지를 여기에 붙여넣기(Ctrl+V)하세요</p>
+            {imagePreview && (
+              <div className="image-preview">
+                <img src={imagePreview} alt="Preview" />
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setImage(null);
+                    setImagePreview(null);
+                  }}
+                  className="remove-image"
+                >
+                  이미지 제거
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="form-group">

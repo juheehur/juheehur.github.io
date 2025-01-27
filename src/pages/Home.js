@@ -257,17 +257,19 @@ INVEST NOW!`;
           <div className="content-section">
             <div className="language-toggle">
             </div>
-            <pre 
-              className="title" 
-              onClick={() => {
-                if (window.innerWidth <= 768) {
-                  setIsAutoRotating(false);
-                  handleRoleClick();
-                }
-              }}
-            >
-              {getHeadline(selectedRole)}
-            </pre>
+            <div className="title-container">
+              <pre 
+                className="title" 
+                onClick={() => {
+                  if (window.innerWidth <= 768) {
+                    setIsAutoRotating(false);
+                    handleRoleClick();
+                  }
+                }}
+              >
+                {getHeadline(selectedRole)}
+              </pre>
+            </div>
             <p className="subtitle">
               A hackathon nerd who learns new tech on the fly to bring bold, spur-of-the-moment ideas to life.
             </p>
