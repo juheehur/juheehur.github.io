@@ -84,7 +84,7 @@ const CommentSection = styled.div`
   padding: 16px;
   background: #FAFAFA;
   border-radius: 0 0 14px 14px;
-  font-size：16px;
+  text-size: 17px;
 `;
 
 const CommentForm = styled.form`
@@ -105,6 +105,7 @@ const CommentForm = styled.form`
     padding: 12px;
     gap: 8px;
     border-radius: 16px;
+    text-size: 17px;
   }
 `;
 
@@ -139,6 +140,7 @@ const NameInput = styled(CommentInput)`
     padding-right: 0;
     padding-bottom: 8px;
     margin-bottom: 8px;
+    text-size: 17px;
   }
 `;
 
