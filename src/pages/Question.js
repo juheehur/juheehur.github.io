@@ -84,6 +84,7 @@ const CommentSection = styled.div`
   padding: 16px;
   background: #FAFAFA;
   border-radius: 0 0 14px 14px;
+  font-size：16px;
 `;
 
 const CommentForm = styled.form`
