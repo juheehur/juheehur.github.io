@@ -1,59 +1,129 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { db } from '../../firebase/config';
-import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy, setDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy, setDoc, limit, startAfter } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/todoManagement.css';
+import moment from 'moment-timezone';
 
 const TodoManagement = () => {
   const [todos, setTodos] = useState([]);
   const [editingTodo, setEditingTodo] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastDate, setLastDate] = useState(null);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const observer = useRef();
   const navigate = useNavigate();
 
+  const TODOS_PER_PAGE = 10; // 한 번에 로드할 할일 개수
+
+  // 무한 스크롤을 위한 마지막 요소 참조
+  const lastTodoElementRef = useCallback(node => {
+    if (isLoading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        fetchMoreTodos();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoading, hasMore]);
+
   useEffect(() => {
-    fetchTodos();
+    fetchInitialTodos();
   }, []);
 
-  const fetchTodos = async () => {
+  const fetchInitialTodos = async () => {
+    setIsLoading(true);
     try {
-      // Get all date collections
-      const dateCollectionsSnapshot = await getDocs(collection(db, 'todos'));
-      const allTodos = [];
-
-      // For each date, get its todos
-      for (const dateDoc of dateCollectionsSnapshot.docs) {
-        const todosQuery = query(
-          collection(db, `todos/${dateDoc.id}/todos`),
-          orderBy('createdAt', 'desc')
-        );
-        const todosSnapshot = await getDocs(todosQuery);
-        const dateTodos = todosSnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            date: dateDoc.id,
-            ...data,
-            createdAt: data.createdAt?.toDate?.() || new Date()
-          };
-        });
-        allTodos.push(...dateTodos);
-      }
-
-      // Sort by date and time
-      allTodos.sort((a, b) => {
-        if (a.date !== b.date) {
-          return b.date.localeCompare(a.date);
-        }
-        if (a.startTime && b.startTime) {
-          return a.startTime.localeCompare(b.startTime);
-        }
-        return b.createdAt - a.createdAt;
-      });
-
-      console.log('Fetched todos:', allTodos); // 디버깅용
+      const todosCollectionRef = collection(db, 'todos');
+      const snapshot = await getDocs(todosCollectionRef);
+      
+      // Get all dates and sort them
+      const dates = snapshot.docs.map(doc => doc.id).sort().reverse();
+      
+      // Take only first TODOS_PER_PAGE dates
+      const initialDates = dates.slice(0, TODOS_PER_PAGE);
+      const remainingDates = dates.slice(TODOS_PER_PAGE);
+      
+      const allTodos = await fetchTodosForDates(initialDates);
+      
       setTodos(allTodos);
+      setHasMore(remainingDates.length > 0);
+      if (remainingDates.length > 0) {
+        setLastDate(initialDates[initialDates.length - 1]);
+      }
+      setInitialLoad(false);
     } catch (error) {
-      console.error('Error fetching todos:', error);
+      console.error('Error fetching initial todos:', error);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const fetchMoreTodos = async () => {
+    if (isLoading || !hasMore || !lastDate) return;
+    
+    setIsLoading(true);
+    try {
+      const todosCollectionRef = collection(db, 'todos');
+      const snapshot = await getDocs(todosCollectionRef);
+      
+      // Get all dates and sort them
+      const allDates = snapshot.docs.map(doc => doc.id).sort().reverse();
+      
+      // Find the index of the last loaded date
+      const lastIndex = allDates.indexOf(lastDate);
+      if (lastIndex === -1) return;
+      
+      // Get next batch of dates
+      const nextDates = allDates.slice(lastIndex + 1, lastIndex + 1 + TODOS_PER_PAGE);
+      const remainingDates = allDates.slice(lastIndex + 1 + TODOS_PER_PAGE);
+      
+      const newTodos = await fetchTodosForDates(nextDates);
+      
+      setTodos(prev => [...prev, ...newTodos]);
+      setHasMore(remainingDates.length > 0);
+      if (nextDates.length > 0) {
+        setLastDate(nextDates[nextDates.length - 1]);
+      }
+    } catch (error) {
+      console.error('Error fetching more todos:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchTodosForDates = async (dateDocs) => {
+    const allTodos = [];
+    
+    for (const dateDoc of dateDocs) {
+      const todosQuery = query(
+        collection(db, `todos/${dateDoc}/todos`),
+        orderBy('createdAt', 'desc')
+      );
+      const todosSnapshot = await getDocs(todosQuery);
+      const dateTodos = todosSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          date: dateDoc,
+          ...data,
+          createdAt: data.createdAt?.toDate?.() || new Date()
+        };
+      });
+      allTodos.push(...dateTodos);
+    }
+
+    return allTodos.sort((a, b) => {
+      if (a.date !== b.date) {
+        return b.date.localeCompare(a.date);
+      }
+      if (a.startTime && b.startTime) {
+        return a.startTime.localeCompare(b.startTime);
+      }
+      return b.createdAt - a.createdAt;
+    });
   };
 
   const handleDelete = async (todo) => {
@@ -183,10 +253,12 @@ const TodoManagement = () => {
       </div>
       
       <div className="todos-list">
-        {sortedDates.length === 0 ? (
+        {initialLoad ? (
+          <div className="loading">로딩 중...</div>
+        ) : sortedDates.length === 0 ? (
           <div className="no-todos">할 일이 없습니다.</div>
         ) : (
-          sortedDates.map(date => {
+          sortedDates.map((date, dateIndex) => {
             const dateTodos = todosByDate[date].sort((a, b) => {
               if (a.startTime && b.startTime) {
                 return a.startTime.localeCompare(b.startTime);
@@ -195,7 +267,11 @@ const TodoManagement = () => {
             });
 
             return (
-              <div key={date} className="date-group">
+              <div 
+                key={date} 
+                className="date-group"
+                ref={dateIndex === sortedDates.length - 1 ? lastTodoElementRef : null}
+              >
                 <h2 className="date-header">{formatDate(date)}</h2>
                 {dateTodos.map(todo => (
                   <div key={`${todo.date}-${todo.id}`} className="todo-item">
@@ -296,6 +372,9 @@ const TodoManagement = () => {
               </div>
             );
           })
+        )}
+        {isLoading && !initialLoad && (
+          <div className="loading-more">더 많은 할일 불러오는 중...</div>
         )}
       </div>
     </div>

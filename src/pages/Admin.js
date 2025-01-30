@@ -1,235 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import styled from 'styled-components';
-
-const AdminDashboard = styled.div`
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
-const AdminHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-`;
-
-const AdminActions = styled.div`
-  display: flex;
-  gap: 1rem;
-`;
-
-const AdminButton = styled(Link)`
-  background: #4A90E2;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: #357ABD;
-  }
-`;
-
-const ProjectList = styled.div`
-  display: grid;
-  gap: 2rem;
-`;
-
-const ProjectItem = styled.div`
-  border: 1px solid #eee;
-  border-radius: 8px;
-  overflow: hidden;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-`;
-
-const ProjectInfo = styled.div`
-  display: flex;
-  gap: 2rem;
-  padding: 1.5rem;
-`;
-
-const ProjectThumbnail = styled.img`
-  width: 200px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 4px;
-`;
-
-const ProjectDetails = styled.div`
-  flex: 1;
-`;
-
-const TagsContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
-`;
-
-const Tag = styled.span`
-  background: #f0f0f0;
-  color: #333;
-  padding: 0.25rem 0.5rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-`;
-
-const ProjectActions = styled.div`
-  display: flex;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
-  background: #f8f9fa;
-  border-top: 1px solid #eee;
-`;
-
-const ActionButton = styled.button`
-  background: ${props => props.isDelete ? '#dc3545' : '#4A90E2'};
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
-const EditButton = styled(Link)`
-  background: #4A90E2;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
-const BlogList = styled.div`
-  margin-top: 3rem;
-  display: grid;
-  gap: 2rem;
-`;
-
-const BlogItem = styled.div`
-  border: 1px solid #eee;
-  border-radius: 8px;
-  overflow: hidden;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-`;
-
-const BlogInfo = styled.div`
-  display: flex;
-  gap: 2rem;
-  padding: 1.5rem;
-`;
-
-const BlogThumbnail = styled.img`
-  width: 200px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 4px;
-`;
-
-const BlogDetails = styled.div`
-  flex: 1;
-  
-  h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.2rem;
-    white-space: pre-line;
-    line-height: 1.4;
-  }
-
-  .metadata {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-  }
-`;
-
-const TabContainer = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const TabList = styled.div`
-  display: flex;
-  gap: 1rem;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 2rem;
-`;
-
-const Tab = styled.button`
-  padding: 0.8rem 1.5rem;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 1rem;
-  color: ${props => props.active ? '#4A90E2' : '#666'};
-  border-bottom: 2px solid ${props => props.active ? '#4A90E2' : 'transparent'};
-  transition: all 0.2s ease;
-
-  &:hover {
-    color: #4A90E2;
-  }
-`;
-
-const SearchContainer = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-
-  &:focus {
-    outline: none;
-    border-color: #4A90E2;
-  }
-`;
-
-const StatsContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-`;
-
-const StatCard = styled.div`
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-  h3 {
-    margin: 0;
-    color: #666;
-    font-size: 0.9rem;
-  }
-
-  p {
-    margin: 0.5rem 0 0 0;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #4A90E2;
-  }
-`;
+import '../styles/admin.css';
 
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
@@ -322,6 +96,27 @@ function Admin() {
     }
   };
 
+  const handlePriorityChange = async (projectId, newPriority) => {
+    try {
+      const projectRef = doc(db, 'projects', projectId);
+      const projectRefEn = doc(db, 'projects-en', projectId);
+      
+      await Promise.all([
+        updateDoc(projectRef, { priority: Number(newPriority) }),
+        updateDoc(projectRefEn, { priority: Number(newPriority) })
+      ]);
+
+      setProjects(projects.map(project => 
+        project.id === projectId 
+          ? { ...project, priority: Number(newPriority) }
+          : project
+      ));
+    } catch (error) {
+      console.error('Error updating priority:', error);
+      alert('Failed to update priority');
+    }
+  };
+
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString('ko-KR', {
@@ -348,106 +143,21 @@ function Admin() {
   );
 
   const renderStats = () => (
-    <StatsContainer>
-      <StatCard>
+    <div className="stats-container">
+      <div className="stat-card">
         <h3>Total Projects</h3>
         <p>{projects.length}</p>
-      </StatCard>
-      <StatCard>
+      </div>
+      <div className="stat-card">
         <h3>Total Blog Posts</h3>
         <p>{blogPosts.length}</p>
-      </StatCard>
-      <StatCard>
+      </div>
+      <div className="stat-card">
         <h3>Total Questions</h3>
         <p>{questions.length}</p>
-      </StatCard>
-    </StatsContainer>
+      </div>
+    </div>
   );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'projects':
-        return (
-          <ProjectList>
-            {filteredProjects.map(project => (
-              <ProjectItem key={project.id}>
-                <ProjectInfo>
-                  {project.imageUrl && (
-                    <ProjectThumbnail src={project.imageUrl} alt={project.title} />
-                  )}
-                  <ProjectDetails>
-                    <h3>{project.title}</h3>
-                    <p>{project.description}</p>
-                    <TagsContainer>
-                      {project.skillTags?.map((skill, index) => (
-                        <Tag key={index}>{skill}</Tag>
-                      ))}
-                      {project.roleTags?.map((role, index) => (
-                        <Tag key={`role-${index}`}>{role}</Tag>
-                      ))}
-                    </TagsContainer>
-                  </ProjectDetails>
-                </ProjectInfo>
-                <ProjectActions>
-                  <EditButton to={`/admin/edit-project/${project.id}`}>Edit</EditButton>
-                  <ActionButton isDelete onClick={() => handleDelete(project.id)}>Delete</ActionButton>
-                </ProjectActions>
-              </ProjectItem>
-            ))}
-          </ProjectList>
-        );
-      case 'blog':
-        return (
-          <BlogList>
-            {filteredBlogPosts.map(post => (
-              <BlogItem key={post.id}>
-                <BlogInfo>
-                  {post.coverImageUrl && (
-                    <BlogThumbnail src={post.coverImageUrl} alt={post.title} />
-                  )}
-                  <BlogDetails>
-                    <h3>{post.title}</h3>
-                    <div className="metadata">
-                      <div>{formatDateTime(post.date)}</div>
-                      <div>{post.readTime} min read</div>
-                    </div>
-                  </BlogDetails>
-                </BlogInfo>
-                <ProjectActions>
-                  <EditButton to={`/admin/edit-blog/${post.id}`}>Edit</EditButton>
-                  <ActionButton isDelete onClick={() => handleDeleteBlog(post.id)}>Delete</ActionButton>
-                </ProjectActions>
-              </BlogItem>
-            ))}
-          </BlogList>
-        );
-      case 'questions':
-        return (
-          <BlogList>
-            {filteredQuestions.map(question => (
-              <BlogItem key={question.id}>
-                <BlogInfo>
-                  <BlogDetails>
-                    <h3>{question.title}</h3>
-                    <div className="metadata">
-                      <div>{formatDateTime(question.createdAt)}</div>
-                      <div>{question.comments?.length || 0} answers</div>
-                    </div>
-                    <p>{question.description}</p>
-                  </BlogDetails>
-                </BlogInfo>
-                <ProjectActions>
-                  <EditButton to={`/question/${question.id}`}>View Answers</EditButton>
-                  <ActionButton isDelete onClick={() => handleDeleteQuestion(question.id)}>Delete</ActionButton>
-                </ProjectActions>
-              </BlogItem>
-            ))}
-          </BlogList>
-        );
-      default:
-        return null;
-    }
-  };
 
   if (loading || dataLoading) {
     return <div className="loading">Loading...</div>;
@@ -458,45 +168,156 @@ function Admin() {
   }
 
   return (
-    <AdminDashboard>
-      <AdminHeader>
+    <div className="admin-dashboard">
+      <div className="admin-header">
         <h1>Admin Dashboard</h1>
-        <AdminActions>
-          <AdminButton to="/admin/add-project">Add New Project</AdminButton>
-          <AdminButton to="/admin/add-blog">Add New Blog Post</AdminButton>
-          <AdminButton to="/admin/add-question">Add New Question</AdminButton>
-          <AdminButton to="/admin/portfolio-summary">Portfolio Summary</AdminButton>
-          <AdminButton to="/admin/todos">Todo List</AdminButton>
-        </AdminActions>
-      </AdminHeader>
+        <div className="admin-actions">
+          <Link to="/admin/add-project" className="admin-button">Add New Project</Link>
+          <Link to="/admin/add-blog" className="admin-button">Add New Blog Post</Link>
+          <Link to="/admin/add-question" className="admin-button">Add New Question</Link>
+          <Link to="/admin/portfolio-summary" className="admin-button">Portfolio Summary</Link>
+          <Link to="/admin/todos" className="admin-button">Todo List</Link>
+        </div>
+      </div>
 
       {renderStats()}
 
-      <TabContainer>
-        <TabList>
-          <Tab active={activeTab === 'projects'} onClick={() => setActiveTab('projects')}>
+      <div className="tab-container">
+        <div className="tab-list">
+          <button 
+            className={`tab ${activeTab === 'projects' ? 'active' : ''}`}
+            onClick={() => setActiveTab('projects')}
+          >
             Projects
-          </Tab>
-          <Tab active={activeTab === 'blog'} onClick={() => setActiveTab('blog')}>
+          </button>
+          <button 
+            className={`tab ${activeTab === 'blog' ? 'active' : ''}`}
+            onClick={() => setActiveTab('blog')}
+          >
             Blog Posts
-          </Tab>
-          <Tab active={activeTab === 'questions'} onClick={() => setActiveTab('questions')}>
+          </button>
+          <button 
+            className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+            onClick={() => setActiveTab('questions')}
+          >
             Questions
-          </Tab>
-        </TabList>
+          </button>
+        </div>
 
-        <SearchContainer>
-          <SearchInput
+        <div className="search-container">
+          <input
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
           />
-        </SearchContainer>
+        </div>
 
-        {renderContent()}
-      </TabContainer>
-    </AdminDashboard>
+        {activeTab === 'projects' && (
+          <div className="project-list">
+            {filteredProjects.map(project => (
+              <div key={project.id} className="project-item">
+                <div className="project-info">
+                  {project.imageUrl && (
+                    <img src={project.imageUrl} alt={project.title} className="project-thumbnail" />
+                  )}
+                  <div className="project-details">
+                    <h3>{project.title}</h3>
+                    <p>{project.description}</p>
+                    <div className="tags-container">
+                      {project.skillTags?.map((skill, index) => (
+                        <span key={index} className="tag">{skill}</span>
+                      ))}
+                      {project.roleTags?.map((role, index) => (
+                        <span key={`role-${index}`} className="tag">{role}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="project-actions">
+                  <div className="priority-controls">
+                    <span>Priority:</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={project.priority || 0}
+                      onChange={(e) => handlePriorityChange(project.id, e.target.value)}
+                      className="priority-input"
+                    />
+                  </div>
+                  <Link to={`/admin/edit-project/${project.id}`} className="edit-button">Edit</Link>
+                  <button 
+                    className="action-button delete"
+                    onClick={() => handleDelete(project.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'blog' && (
+          <div className="blog-list">
+            {filteredBlogPosts.map(post => (
+              <div key={post.id} className="blog-item">
+                <div className="blog-info">
+                  {post.coverImageUrl && (
+                    <img src={post.coverImageUrl} alt={post.title} className="blog-thumbnail" />
+                  )}
+                  <div className="blog-details">
+                    <h3>{post.title}</h3>
+                    <div className="metadata">
+                      <div>{formatDateTime(post.date)}</div>
+                      <div>{post.readTime} min read</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="blog-actions">
+                  <Link to={`/admin/edit-blog/${post.id}`} className="edit-button">Edit</Link>
+                  <button 
+                    className="action-button delete"
+                    onClick={() => handleDeleteBlog(post.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'questions' && (
+          <div className="questions-list">
+            {filteredQuestions.map(question => (
+              <div key={question.id} className="question-item">
+                <div className="question-info">
+                  <div className="question-details">
+                    <h3>{question.title}</h3>
+                    <div className="metadata">
+                      <div>{formatDateTime(question.createdAt)}</div>
+                      <div>{question.comments?.length || 0} answers</div>
+                    </div>
+                    <p>{question.description}</p>
+                  </div>
+                </div>
+                <div className="question-actions">
+                  <Link to={`/question/${question.id}`} className="edit-button">View Answers</Link>
+                  <button 
+                    className="action-button delete"
+                    onClick={() => handleDeleteQuestion(question.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

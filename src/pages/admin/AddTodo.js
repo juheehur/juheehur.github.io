@@ -6,6 +6,8 @@ import '../../styles/addTodo.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import moment from 'moment-timezone';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddTodo = () => {
   const navigate = useNavigate();
@@ -22,50 +24,103 @@ const AddTodo = () => {
   });
   const [notificationPermission, setNotificationPermission] = useState('default');
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [goals, setGoals] = useState([]);
+  const [categoryColors, setCategoryColors] = useState({});
+  const [selectedMonth, setSelectedMonth] = useState(moment().tz('Asia/Hong_Kong'));
+  const [monthTodos, setMonthTodos] = useState({});
+  const [loadedMonths, setLoadedMonths] = useState(new Set());
+  const [isLoadingMonth, setIsLoadingMonth] = useState(false);
 
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
-    fetchTodos();
+    fetchTodayTodos();
     checkNotificationPermission();
+    fetchGoals();
+    fetchCategoryColors();
   }, []);
 
-  const fetchTodos = async () => {
+  const fetchTodayTodos = async () => {
     try {
+      const today = moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD');
+      const todosQuery = query(
+        collection(db, `todos/${today}/todos`),
+        orderBy('createdAt', 'desc')
+      );
+      const todosSnapshot = await getDocs(todosQuery);
+      const todayTodos = todosSnapshot.docs.map(doc => ({
+        id: doc.id,
+        date: today,
+        ...doc.data()
+      }));
+
+      setAddedTodos(todayTodos);
+      
+      const currentMonth = moment().tz('Asia/Hong_Kong').format('YYYY-MM');
+      fetchMonthTodos(currentMonth);
+    } catch (error) {
+      console.error('Error fetching today todos:', error);
+    }
+  };
+
+  const fetchMonthTodos = async (monthStr) => {
+    if (loadedMonths.has(monthStr) || isLoadingMonth) return;
+    
+    setIsLoadingMonth(true);
+    try {
+      const startDate = moment(monthStr).startOf('month');
+      const endDate = moment(monthStr).endOf('month');
       const dateCollectionsSnapshot = await getDocs(collection(db, 'todos'));
-      const allTodos = [];
+      const monthTodosList = [];
 
       for (const dateDoc of dateCollectionsSnapshot.docs) {
-        const todosQuery = query(
-          collection(db, `todos/${dateDoc.id}/todos`),
-          orderBy('createdAt', 'desc')
-        );
-        const todosSnapshot = await getDocs(todosQuery);
-        const dateTodos = todosSnapshot.docs.map(doc => ({
-          id: doc.id,
-          date: dateDoc.id,
-          ...doc.data()
-        }));
-        allTodos.push(...dateTodos);
+        const date = moment(dateDoc.id);
+        if (date.isBetween(startDate, endDate, 'day', '[]')) {
+          const todosQuery = query(
+            collection(db, `todos/${dateDoc.id}/todos`),
+            orderBy('createdAt', 'desc')
+          );
+          const todosSnapshot = await getDocs(todosQuery);
+          const dateTodos = todosSnapshot.docs.map(doc => ({
+            id: doc.id,
+            date: dateDoc.id,
+            ...doc.data()
+          }));
+          monthTodosList.push(...dateTodos);
+        }
       }
 
-      // Sort todos by date in Hong Kong timezone
-      allTodos.sort((a, b) => {
-        const dateA = moment.tz(a.date, 'Asia/Hong_Kong');
-        const dateB = moment.tz(b.date, 'Asia/Hong_Kong');
-        if (dateA.isSame(dateB, 'day')) {
-          return a.startTime && b.startTime ? 
-            a.startTime.localeCompare(b.startTime) : 
-            b.createdAt - a.createdAt;
-        }
-        return dateA.isBefore(dateB) ? -1 : 1;
-      });
-
-      setAddedTodos(allTodos);
+      setMonthTodos(prev => ({
+        ...prev,
+        [monthStr]: monthTodosList
+      }));
+      setLoadedMonths(prev => new Set([...prev, monthStr]));
     } catch (error) {
-      console.error('Error fetching todos:', error);
+      console.error('Error fetching month todos:', error);
+    } finally {
+      setIsLoadingMonth(false);
     }
+  };
+
+  const handleMonthChange = ({ activeStartDate }) => {
+    const monthStr = moment(activeStartDate).format('YYYY-MM');
+    fetchMonthTodos(monthStr);
+  };
+
+  const getTodoCount = (date) => {
+    const dateStr = moment(date).format('YYYY-MM-DD');
+    const monthStr = moment(date).format('YYYY-MM');
+    
+    if (moment(dateStr).isSame(moment(), 'day')) {
+      return addedTodos.length;
+    }
+    
+    if (!loadedMonths.has(monthStr)) {
+      return null;
+    }
+    
+    return monthTodos[monthStr]?.filter(todo => todo.date === dateStr).length || 0;
   };
 
   const checkNotificationPermission = async () => {
@@ -101,7 +156,6 @@ const AddTodo = () => {
     const now = new Date();
     if (notificationTime > now) {
       try {
-        // Update todo in Firestore with new path
         const todoRef = doc(db, `todos/${todo.date}/todos/${todo.id}`);
         await updateDoc(todoRef, {
           notificationScheduled: true,
@@ -109,7 +163,6 @@ const AddTodo = () => {
           notificationTime: notificationTime.getTime()
         });
 
-        // Update local state
         setAddedTodos(prev => prev.map(t => 
           t.id === todo.id && t.date === todo.date ? {
             ...t, 
@@ -118,7 +171,6 @@ const AddTodo = () => {
           } : t
         ));
 
-        // Service Worker에 알림 스케줄링 요청
         if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
           const notification = {
             id: `${todo.date}-${todo.id}`,
@@ -212,6 +264,30 @@ const AddTodo = () => {
     }
   };
 
+  const getNextWeekday = (weekday) => {
+    const weekdays = {
+      'sun': 0, 'sunday': 0,
+      'mon': 1, 'monday': 1,
+      'tue': 2, 'tuesday': 2,
+      'wed': 3, 'wednesday': 3,
+      'thu': 4, 'thursday': 4,
+      'fri': 5, 'friday': 5,
+      'sat': 6, 'saturday': 6
+    };
+
+    const today = moment().tz('Asia/Hong_Kong');
+    const targetDay = weekdays[weekday.toLowerCase()];
+    
+    if (targetDay === undefined) return null;
+
+    let nextDate = moment(today);
+    while (nextDate.day() !== targetDay || nextDate.isBefore(today, 'day')) {
+      nextDate = nextDate.add(1, 'days');
+    }
+
+    return nextDate.format('YYYY-MM-DD');
+  };
+
   const parseCommand = (text) => {
     const dateMatch = text.match(/\/d\s+(\S+)/);
     const timeMatch = text.match(/\/t\s+(\S+)/);
@@ -226,32 +302,36 @@ const AddTodo = () => {
       let date = dateStr;
       const today = moment().tz('Asia/Hong_Kong');
       
-      switch(dateStr) {
-        case 'td':
-          date = today.format('YYYY-MM-DD');
-          break;
-        case 'tmr':
-          date = today.add(1, 'days').format('YYYY-MM-DD');
-          break;
-        case 'nw':
-          date = today.add(7, 'days').format('YYYY-MM-DD');
-          break;
-        default:
-          // Check if input is in MMDD format (e.g., 0130)
-          if (/^\d{4}$/.test(dateStr)) {
-            const month = dateStr.substring(0, 2);
-            const day = dateStr.substring(2, 4);
-            const year = today.format('YYYY');
-            const inputDate = moment.tz(`${year}-${month}-${day}`, 'YYYY-MM-DD', 'Asia/Hong_Kong');
-            
-            if (inputDate.isValid()) {
-              date = inputDate.format('YYYY-MM-DD');
-            } else {
+      const nextWeekday = getNextWeekday(dateStr);
+      if (nextWeekday) {
+        date = nextWeekday;
+      } else {
+        switch(dateStr) {
+          case 'td':
+            date = today.format('YYYY-MM-DD');
+            break;
+          case 'tmr':
+            date = today.add(1, 'days').format('YYYY-MM-DD');
+            break;
+          case 'nw':
+            date = today.add(7, 'days').format('YYYY-MM-DD');
+            break;
+          default:
+            if (/^\d{4}$/.test(dateStr)) {
+              const month = dateStr.substring(0, 2);
+              const day = dateStr.substring(2, 4);
+              const year = today.format('YYYY');
+              const inputDate = moment.tz(`${year}-${month}-${day}`, 'YYYY-MM-DD', 'Asia/Hong_Kong');
+              
+              if (inputDate.isValid()) {
+                date = inputDate.format('YYYY-MM-DD');
+              } else {
+                date = today.format('YYYY-MM-DD');
+              }
+            } else if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
               date = today.format('YYYY-MM-DD');
             }
-          } else if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-            date = today.format('YYYY-MM-DD');
-          }
+        }
       }
       
       updatedTodo.date = date;
@@ -303,15 +383,12 @@ const AddTodo = () => {
       try {
         const todayDate = todo.date || moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD');
         
-        // Get reference to the date collection and its todos subcollection
         const dateCollectionRef = doc(db, 'todos', todayDate);
         const todosCollectionRef = collection(dateCollectionRef, 'todos');
         
-        // Get current todos for the date to determine next number
         const todosQuery = query(todosCollectionRef, orderBy('createdAt', 'desc'));
         const todosSnapshot = await getDocs(todosQuery);
         
-        // Calculate next number
         let nextNumber = 1;
         if (!todosSnapshot.empty) {
           const numbers = todosSnapshot.docs
@@ -326,10 +403,8 @@ const AddTodo = () => {
           }
         }
 
-        // Create document ID
         const docId = `todo-${String(nextNumber).padStart(3, '0')}`;
 
-        // 알림 설정이 있는 경우 초기 상태에 포함
         const initialNotificationState = todo.notifyMinutesBefore ? {
           notificationScheduled: true,
           notifyMinutesBefore: todo.notifyMinutesBefore
@@ -337,10 +412,8 @@ const AddTodo = () => {
           notificationScheduled: false
         };
 
-        // Ensure date collection exists
         await setDoc(dateCollectionRef, { createdAt: serverTimestamp() }, { merge: true });
 
-        // Add todo document to the subcollection
         await setDoc(doc(todosCollectionRef, docId), {
           ...todo,
           task: taskText || lastLine,
@@ -349,7 +422,6 @@ const AddTodo = () => {
           ...initialNotificationState
         });
 
-        // Add the new todo to the list
         const newTodo = {
           id: docId,
           date: todayDate,
@@ -359,14 +431,22 @@ const AddTodo = () => {
           ...initialNotificationState
         };
 
-        // If /a command was used, schedule notification immediately
+        toast.success(`✅ Added: ${taskText || lastLine}`, {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          style: { maxWidth: '400px', whiteSpace: 'pre-line' }
+        });
+
         if (todo.notifyMinutesBefore) {
           await scheduleNotification(newTodo, todo.notifyMinutesBefore);
         }
 
         setAddedTodos(prev => [newTodo, ...prev]);
 
-        // Clear only the last line
         const newNotes = lines.slice(0, -1).join('\n') + '\n';
         setNotes(newNotes);
         setCurrentTodo({
@@ -378,6 +458,14 @@ const AddTodo = () => {
         });
       } catch (error) {
         console.error('Error adding todo:', error);
+        toast.error('❌ Failed to add todo', {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     }
   };
@@ -387,32 +475,27 @@ const AddTodo = () => {
     const textBeforeCursor = notes.substring(0, cursorPosition);
     const textAfterCursor = notes.substring(cursorPosition);
     
-    // Add a space before the command if there isn't one
     const space = textBeforeCursor.length > 0 && !textBeforeCursor.endsWith(' ') ? ' ' : '';
     const newText = textBeforeCursor + space + command + ' ' + textAfterCursor;
     
     setNotes(newText);
     textareaRef.current.focus();
     
-    // Set cursor position after the command
     const newPosition = cursorPosition + space.length + command.length + 1;
     setTimeout(() => {
       textareaRef.current.setSelectionRange(newPosition, newPosition);
     }, 0);
   };
 
-  // Helper function to check if a date is today in Hong Kong timezone
   const isToday = (dateStr) => {
     const today = moment().tz('Asia/Hong_Kong').startOf('day');
     const date = moment.tz(dateStr, 'Asia/Hong_Kong').startOf('day');
     return date.isSame(today);
   };
 
-  // Filter todos for today and other days
   const todayTodos = addedTodos.filter(todo => isToday(todo.date));
   const otherTodos = addedTodos.filter(todo => !isToday(todo.date));
 
-  // Group todos by date for calendar view
   const todosByDate = otherTodos.reduce((acc, todo) => {
     const date = todo.date;
     if (!acc[date]) {
@@ -422,18 +505,64 @@ const AddTodo = () => {
     return acc;
   }, {});
 
+  const fetchGoals = async () => {
+    try {
+      const goalsSnapshot = await getDocs(collection(db, 'goals'));
+      const goalsData = goalsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setGoals(goalsData);
+    } catch (error) {
+      console.error('Error fetching goals:', error);
+    }
+  };
+
+  const fetchCategoryColors = async () => {
+    try {
+      const categoryColorsSnapshot = await getDocs(collection(db, 'categoryColors'));
+      const colorsData = categoryColorsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setCategoryColors(colorsData.reduce((acc, color) => ({
+        ...acc,
+        [color.category]: color.color
+      }), {}));
+    } catch (error) {
+      console.error('Error fetching category colors:', error);
+    }
+  };
+
+  const filterGoalsByMonth = (goals, month) => {
+    return goals.filter(goal => {
+      if (!goal.targetDate) return false;
+      const goalDate = moment(goal.targetDate);
+      return goalDate.month() === month.month() && goalDate.year() === month.year();
+    });
+  };
+
   return (
     <div className="memo-container">
       <div className="memo-header">
         <div className="memo-header-top">
           <h1>Quick Todo</h1>
-          <button 
-            onClick={() => navigate('/admin/todo-management')} 
-            className="manage-todos-btn"
-            title="Todo 관리"
-          >
-            ⚙️
-          </button>
+          <div className="header-buttons">
+            <button 
+              onClick={() => navigate('/admin/add-goal')} 
+              className="add-goal-small-btn"
+              title="Add Goal"
+            >
+              🎯
+            </button>
+            <button 
+              onClick={() => navigate('/admin/todo-management')} 
+              className="manage-todos-btn"
+              title="Todo 관리"
+            >
+              ⚙️
+            </button>
+          </div>
         </div>
         <div className="memo-commands">
           <p>Commands:</p>
@@ -448,6 +577,7 @@ const AddTodo = () => {
           </p>
           <div className={`examples-content ${isExampleVisible ? 'visible' : ''}`}>
             <p>/d td (today), tmr (tomorrow), nw (next week), 0130 (1월 30일)</p>
+            <p>/d mon, tue, wed... (다가오는 가장 가까운 요일)</p>
             <p>/t 9-10:30 (time range)</p>
             <p>/l location</p>
             <p>/a 20 (알림: 20분 전)</p>
@@ -507,35 +637,37 @@ const AddTodo = () => {
                 <div className="selected-date-todos">
                   <h3>{moment(selectedDate).tz('Asia/Hong_Kong').format('YYYY-MM-DD ddd')}</h3>
                   <div className="added-todos">
-                    {todosByDate[moment(selectedDate).format('YYYY-MM-DD')]?.map(todo => (
-                      <div 
-                        key={todo.id} 
-                        className={`todo-item ${todo.completed ? 'completed' : ''}`}
-                        onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={todo.completed}
-                          className="todo-checkbox"
-                          readOnly
-                        />
-                        {formatTodoDisplay(todo)}
-                        {todo.startTime && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              scheduleNotification(todo);
-                            }}
-                            className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
-                            disabled={todo.notificationScheduled}
-                          >
-                            {todo.notificationScheduled 
-                              ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
-                              : '30분 전 알림'}
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                    {monthTodos[moment(selectedDate).format('YYYY-MM')]
+                      ?.filter(todo => todo.date === moment(selectedDate).format('YYYY-MM-DD'))
+                      .map(todo => (
+                        <div 
+                          key={todo.id} 
+                          className={`todo-item ${todo.completed ? 'completed' : ''}`}
+                          onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={todo.completed}
+                            className="todo-checkbox"
+                            readOnly
+                          />
+                          {formatTodoDisplay(todo)}
+                          {todo.startTime && (
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                scheduleNotification(todo);
+                              }}
+                              className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
+                              disabled={todo.notificationScheduled}
+                            >
+                              {todo.notificationScheduled 
+                                ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
+                                : '30분 전 알림'}
+                            </button>
+                          )}
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}
@@ -543,24 +675,81 @@ const AddTodo = () => {
           </div>
           
           <div className="calendar-section">
+            <div className="monthly-achievements">
+              <div className="monthly-achievements-header">
+                <h2>
+                  <button 
+                    onClick={() => handleMonthChange({ activeStartDate: moment(selectedMonth).subtract(1, 'month') })}
+                    className="month-nav-btn"
+                  >
+                    ◀
+                  </button>
+                  {selectedMonth.format('MMMM YYYY')} Achievements
+                  <button 
+                    onClick={() => handleMonthChange({ activeStartDate: moment(selectedMonth).add(1, 'month') })}
+                    className="month-nav-btn"
+                  >
+                    ▶
+                  </button>
+                </h2>
+              </div>
+              <div className="achievements-grid">
+                {filterGoalsByMonth(goals, selectedMonth).length > 0 ? (
+                  filterGoalsByMonth(goals, selectedMonth).map((goal) => (
+                    <div 
+                      key={goal.id} 
+                      className="achievement-card"
+                      style={{ borderLeft: `4px solid ${categoryColors[goal.category]}` }}
+                    >
+                      <div className="achievement-content">
+                        <h4>{goal.title}</h4>
+                        {goal.description && (
+                          <p className="achievement-description">{goal.description}</p>
+                        )}
+                        <div className="achievement-footer">
+                          <span className="achievement-category" style={{ backgroundColor: categoryColors[goal.category] }}>
+                            {goal.category}
+                          </span>
+                          {goal.targetDate && (
+                            <span className="achievement-date">
+                              {moment(goal.targetDate).format('MMM DD')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-goals-message">
+                    No goals set for {selectedMonth.format('MMMM YYYY')}
+                  </div>
+                )}
+              </div>
+            </div>
             <h2>Calendar</h2>
             <Calendar
               onChange={setSelectedDate}
               value={selectedDate}
               locale="ko-KR"
+              onActiveStartDateChange={handleMonthChange}
               tileContent={({ date }) => {
-                const dateStr = moment(date).format('YYYY-MM-DD');
-                const todosForDate = todosByDate[dateStr];
-                return todosForDate ? (
+                const count = getTodoCount(date);
+                return count !== null ? (
                   <div className="calendar-todos">
-                    <div className="todo-count">{todosForDate.length}</div>
+                    {count > 0 && <div className="todo-count">{count}</div>}
                   </div>
-                ) : null;
+                ) : (
+                  <div className="calendar-todos loading">...</div>
+                );
               }}
             />
+            {isLoadingMonth && (
+              <div className="calendar-loading">달력 데이터 로딩 중...</div>
+            )}
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

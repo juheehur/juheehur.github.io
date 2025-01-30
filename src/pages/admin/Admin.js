@@ -34,18 +34,21 @@ const DeleteButton = styled.button`
   }
 `;
 
-// 버튼 사용 부분 수정
-<StyledButton
-  $isActive={activeTab === 'projects'}
-  onClick={() => setActiveTab('projects')}
->
-  Projects
-</StyledButton>
+// 버튼 사용 예시
+const ButtonExample = () => (
+  <>
+    <StyledButton
+      $isActive={activeTab === 'projects'}
+      onClick={() => setActiveTab('projects')}
+    >
+      Projects
+    </StyledButton>
 
-// 삭제 버튼 사용 부분
-<DeleteButton
-  onClick={handleDelete}
-  aria-label="Delete item"
->
-  Delete
-</DeleteButton> 
+    <DeleteButton
+      onClick={handleDelete}
+      aria-label="Delete item"
+    >
+      Delete
+    </DeleteButton>
+  </>
+); 
