@@ -25,6 +25,7 @@ import EditBlog from './pages/admin/EditBlog';
 import PortfolioSummary from './pages/admin/PortfolioSummary';
 import AddTodo from './pages/admin/AddTodo';
 import TodoManagement from './pages/admin/TodoManagement';
+import AddGoal from './pages/admin/AddGoal';
 import { useAuth, AuthProvider } from './contexts/AuthContext';
 
 // Check if we're in the GitHub Pages environment
@@ -54,6 +55,7 @@ function App() {
                 <Route path="/admin/add-project" element={<ProtectedRoute adminOnly><AddProject /></ProtectedRoute>} />
                 <Route path="/admin/add-blog" element={<ProtectedRoute adminOnly><AddBlog /></ProtectedRoute>} />
                 <Route path="/admin/add-question" element={<ProtectedRoute adminOnly><AddQuestion /></ProtectedRoute>} />
+                <Route path="/admin/add-goal" element={<ProtectedRoute adminOnly><AddGoal /></ProtectedRoute>} />
                 <Route path="/admin/portfolio-summary" element={<ProtectedRoute adminOnly><PortfolioSummary /></ProtectedRoute>} />
                 <Route path="/admin/edit-project/:projectId" element={<ProtectedRoute adminOnly><EditProject /></ProtectedRoute>} />
                 <Route path="/admin/edit-blog/:postId" element={<ProtectedRoute adminOnly><EditBlog /></ProtectedRoute>} />

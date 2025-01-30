@@ -1,0 +1,150 @@
+.goals-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.goals-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.goals-header h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.back-btn {
+  padding: 0.5rem 1rem;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.goal-form {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.goal-input,
+.goal-description,
+.goal-category,
+.goal-date {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.goal-description {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.add-goal-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-goal-btn:hover {
+  background-color: #45a049;
+}
+
+.goals-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.goal-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.goal-card:hover {
+  transform: translateY(-2px);
+}
+
+.goal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.goal-card-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.delete-goal-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.delete-goal-btn:hover {
+  color: #ff4444;
+}
+
+.goal-description-text {
+  color: #666;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.goal-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.goal-category-tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+.goal-date-tag {
+  color: #666;
+  font-size: 0.8rem;
+} 

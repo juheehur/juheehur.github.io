@@ -33,8 +33,16 @@ function Portfolio() {
           id: doc.id,
           ...doc.data()
         }));
-        setAllProjects(projectList);
-        setProjects(projectList);
+        
+        // Sort projects by priority (higher priority first)
+        const sortedProjects = projectList.sort((a, b) => {
+          const priorityA = a.priority || 0;
+          const priorityB = b.priority || 0;
+          return priorityB - priorityA;
+        });
+        
+        setAllProjects(sortedProjects);
+        setProjects(sortedProjects);
 
         const uniqueRoles = new Set();
         const uniqueSkills = new Set();
