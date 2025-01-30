@@ -112,14 +112,15 @@
   font-family: 'Courier New', monospace;
   color: #ffff;
   white-space: pre-wrap;
-  min-height: 150px;
+  min-height: 200px;
   display: flex;
   align-items: flex-start;
+  overflow: visible;
 }
 
 .title-container {
-  height: 150px;
-  overflow: hidden;
+  height: 200px;
+  overflow: visible;
   margin-bottom: 1.5rem;
   margin-top: -20px;
 }
@@ -196,15 +197,17 @@
   }
 
   .title-container {
-    height: 120px;
+    height: auto;
+    min-height: 120px;
     margin: 0 0 40px 0;
+    overflow: visible;
   }
 
   .title {
     font-size: 1.1rem;
     margin: 0;
     min-height: unset;
-    height: 100%;
+    height: auto;
   }
 
   .subtitle {
