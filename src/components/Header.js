@@ -177,19 +177,24 @@ function Header() {
           <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>Home</Link>
           <Link to="/portfolio" className="nav-link" onClick={() => setIsMenuOpen(false)}>Portfolio</Link>
           <Link to="/blog" className="nav-link" onClick={() => setIsMenuOpen(false)}>Blog</Link>
-          <Link to="/profile" className="nav-link" onClick={() => setIsMenuOpen(false)}>Profile</Link>
-          {role === 'admin' && (
+          {user && (
             <>
-              <Link to="/admin" className="nav-link" onClick={() => setIsMenuOpen(false)}>Admin</Link>
-              <Link to="/admin/add-blog" className="nav-link quick-add" onClick={() => setIsMenuOpen(false)}>
-                <span className="plus-icon">+</span> Blog
-              </Link>
-              <Link to="/admin/add-todo" className="nav-link quick-add" onClick={() => setIsMenuOpen(false)}>
-                <span className="plus-icon">+</span> Todo
-              </Link>
+              {role === 'admin' ? (
+                <>
+                  <Link to="/admin" className="nav-link" onClick={() => setIsMenuOpen(false)}>Admin</Link>
+                  <Link to="/admin/add-blog" className="nav-link quick-add" onClick={() => setIsMenuOpen(false)}>
+                    <span className="plus-icon">+</span> Blog
+                  </Link>
+                  <Link to="/admin/add-todo" className="nav-link quick-add" onClick={() => setIsMenuOpen(false)}>
+                    <span className="plus-icon">+</span> Todo
+                  </Link>
+                </>
+              ) : (
+                <Link to="/profile" className="nav-link" onClick={() => setIsMenuOpen(false)}>Profile</Link>
+              )}
+              <button className="logout-button" onClick={handleLogout}>Logout</button>
             </>
           )}
-          {user && <button className="logout-button" onClick={handleLogout}>Logout</button>}
           
           <div className="social-icons">
             <a href="https://www.instagram.com/diatomic_carbon" target="_blank" rel="noopener noreferrer" className="social-link">
