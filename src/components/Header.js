@@ -177,7 +177,7 @@ function Header() {
           <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>Home</Link>
           <Link to="/portfolio" className="nav-link" onClick={() => setIsMenuOpen(false)}>Portfolio</Link>
           <Link to="/blog" className="nav-link" onClick={() => setIsMenuOpen(false)}>Blog</Link>
-          {user && (
+          {user ? (
             <>
               {role === 'admin' ? (
                 <>
@@ -194,6 +194,8 @@ function Header() {
               )}
               <button className="logout-button" onClick={handleLogout}>Logout</button>
             </>
+          ) : (
+            <Link to="/login" className="nav-link login-button" onClick={() => setIsMenuOpen(false)}>Login</Link>
           )}
           
           <div className="social-icons">
