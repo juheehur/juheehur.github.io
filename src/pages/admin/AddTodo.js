@@ -556,6 +556,20 @@ const AddTodo = () => {
               🎯
             </button>
             <button 
+              onClick={() => navigate('/admin/tech-interview')} 
+              className="tech-interview-btn"
+              title="Tech Interview"
+            >
+              💻
+            </button>
+            <button 
+              onClick={() => navigate('/admin/interview-practice')} 
+              className="interview-practice-btn"
+              title="Interview Practice"
+            >
+              📝
+            </button>
+            <button 
               onClick={() => navigate('/admin/todo-management')} 
               className="manage-todos-btn"
               title="Todo 관리"

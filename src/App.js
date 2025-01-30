@@ -27,6 +27,8 @@ import AddTodo from './pages/admin/AddTodo';
 import TodoManagement from './pages/admin/TodoManagement';
 import AddGoal from './pages/admin/AddGoal';
 import { useAuth, AuthProvider } from './contexts/AuthContext';
+import TechInterview from './pages/admin/TechInterview';
+import InterviewPractice from './pages/admin/InterviewPractice';
 
 // Check if we're in the GitHub Pages environment
 const isGithubPages = process.env.REACT_APP_DEPLOY_TARGET === 'github';
@@ -64,6 +66,16 @@ function App() {
                 <Route path="/admin/todos" element={<Navigate to="/admin/add-todo" replace />} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/duplicate" element={<Duplicate />} />
+                <Route path="/admin/tech-interview" element={
+                  <ProtectedRoute>
+                    <TechInterview />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/interview-practice" element={
+                  <ProtectedRoute>
+                    <InterviewPractice />
+                  </ProtectedRoute>
+                } />
               </>
             )}
             
