@@ -1,0 +1,535 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+
+.student-progress {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: linear-gradient(to right, rgba(10, 132, 255, 0.15), rgba(10, 132, 255, 0.05));
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.1), transparent 70%);
+  pointer-events: none;
+}
+
+.progress-header-content {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.progress-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--apple-text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+  font-feature-settings: "ss07" on;
+}
+
+.subjects-tag {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--apple-text-primary);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  letter-spacing: -0.2px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: none;
+  padding: 16px 12px;
+  text-align: center;
+  position: relative;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 70%;
+  border-radius: 2px;
+}
+
+.total-hours::after { background: #30D158; }
+.total-sessions::after { background: #0A84FF; }
+.avg-length::after { background: #FFD60A; }
+.last-month::after { background: #FF453A; }
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--apple-text-primary);
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--apple-text-secondary);
+  letter-spacing: -0.2px;
+  font-weight: 400;
+}
+
+.stat-sublabel {
+  font-size: 11px;
+  color: var(--apple-text-secondary);
+  margin-top: 2px;
+}
+
+.progress-timeline {
+  margin-top: 32px;
+  border-top: 1px solid var(--apple-border);
+  padding-top: 24px;
+}
+
+.month-section {
+  margin-bottom: 32px;
+}
+
+.month-section:last-child {
+  margin-bottom: 0;
+}
+
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  font-size: 18px;
+}
+
+.month-stats {
+  font-size: 14px;
+  color: var(--apple-text-secondary);
+  font-weight: normal;
+}
+
+.month-logs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.progress-log-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.log-date-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.log-date {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--apple-text-primary);
+}
+
+.log-time {
+  color: var(--apple-text-secondary);
+  font-size: 14px;
+}
+
+.log-duration {
+  margin-left: 8px;
+  color: var(--apple-accent);
+}
+
+.log-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.log-topics,
+.log-homework {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--apple-text-secondary);
+}
+
+.log-topics strong,
+.log-homework strong {
+  color: var(--apple-text-primary);
+  margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+  .student-progress {
+    padding: 16px;
+  }
+
+  .progress-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, rgba(10, 132, 255, 0.15), rgba(10, 132, 255, 0.05));
+  }
+
+  .progress-header::before {
+    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 60%);
+  }
+
+  .progress-header-content {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .progress-header h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .subjects-tag {
+    padding: 6px 14px;
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .class-info {
+    width: 100%;
+  }
+
+  .zoom-link {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .zoom-link:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .zoom-icon {
+    font-size: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 12px 8px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .progress-timeline {
+    padding: 16px;
+  }
+
+  .log-date-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+.student-progress-page {
+  min-height: 100vh;
+  background: var(--apple-dark-bg);
+  padding: 20px;
+}
+
+.progress-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.upcoming-sessions {
+  margin-top: 32px;
+}
+
+.upcoming-sessions h3 {
+  font-size: 18px;
+  color: var(--apple-text-primary);
+  margin-bottom: 24px;
+}
+
+.sessions-timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.session-card {
+  position: relative;
+  padding: 16px 0;
+  margin-bottom: 16px;
+}
+
+.session-card:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-connector {
+  position: absolute;
+  left: -24px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timeline-connector .dot {
+  width: 12px;
+  height: 12px;
+  background: var(--apple-accent);
+  border-radius: 50%;
+  margin-top: 24px;
+  z-index: 1;
+}
+
+.timeline-connector .line {
+  position: absolute;
+  top: 30px;
+  bottom: -16px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.session-date {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.date-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--apple-text-primary);
+}
+
+.date-full {
+  font-size: 14px;
+  color: var(--apple-text-secondary);
+}
+
+.session-time {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.time-range {
+  font-size: 15px;
+  color: var(--apple-accent);
+  background: rgba(10, 132, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.duration {
+  font-size: 14px;
+  color: var(--apple-text-secondary);
+}
+
+.session-note {
+  font-size: 14px;
+  color: var(--apple-text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .upcoming-sessions {
+    padding: 16px;
+  }
+
+  .sessions-timeline {
+    padding-left: 20px;
+  }
+
+  .timeline-connector {
+    left: -20px;
+  }
+
+  .session-date {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .session-time {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+.class-info {
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.zoom-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--apple-text-primary);
+  padding: 12px 24px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  letter-spacing: -0.2px;
+}
+
+.zoom-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.zoom-icon {
+  font-size: 18px;
+}
+
+.latest-homework {
+  margin: 32px 0;
+  background: linear-gradient(to right, rgba(10, 132, 255, 0.1), rgba(10, 132, 255, 0.05));
+  padding: 32px;
+  position: relative;
+  border-radius: 16px;
+}
+
+.latest-homework::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--apple-accent);
+  border-radius: 4px 0 0 4px;
+}
+
+.latest-homework h3 {
+  font-size: 20px;
+  color: var(--apple-text-primary);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.latest-homework h3::before {
+  content: '📝';
+  font-size: 24px;
+}
+
+.homework-card {
+  padding: 0;
+}
+
+.homework-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.homework-date {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--apple-text-primary);
+}
+
+.next-class {
+  font-size: 14px;
+  color: var(--apple-text-secondary);
+}
+
+.homework-content {
+  color: var(--apple-text-primary);
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.no-homework {
+  color: var(--apple-text-secondary);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .class-info {
+    margin: 16px 0;
+  }
+
+  .latest-homework {
+    padding: 24px;
+    margin: 24px 0;
+  }
+
+  .homework-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+} 

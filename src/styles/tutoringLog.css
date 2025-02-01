@@ -1,0 +1,378 @@
+.tutoring-log {
+  background: var(--apple-dark-surface);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.tutoring-form {
+  margin-bottom: 24px;
+}
+
+.student-section {
+  margin-bottom: 20px;
+}
+
+.add-student {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.student-inputs {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+}
+
+.student-input {
+  flex: 1;
+  background: var(--apple-dark-elevated);
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.add-student-btn {
+  background: var(--apple-accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.student-select {
+  width: 100%;
+  background: var(--apple-dark-elevated);
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-inputs .duration {
+  color: var(--apple-text-secondary);
+  font-size: 14px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+.date-input,
+.time-input,
+.subject-input {
+  background: var(--apple-dark-elevated);
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.topics-input,
+.homework-input {
+  width: 100%;
+  min-height: 80px;
+  background: var(--apple-dark-elevated);
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.submit-btn {
+  background: var(--apple-success);
+  color: black;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.recent-logs {
+  margin-top: 30px;
+}
+
+.recent-logs h3 {
+  color: var(--apple-text-primary);
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.log-item {
+  background: var(--apple-dark-elevated);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.log-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-name {
+  font-weight: 600;
+  color: var(--apple-text-primary);
+}
+
+.student-subjects {
+  color: var(--apple-text-secondary);
+  font-size: 13px;
+}
+
+.log-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.log-duration {
+  color: var(--apple-accent);
+  font-size: 13px;
+  padding: 2px 6px;
+  background: rgba(10, 132, 255, 0.1);
+  border-radius: 4px;
+}
+
+.log-date {
+  color: var(--apple-text-secondary);
+  font-size: 14px;
+}
+
+.log-subject {
+  color: var(--apple-accent);
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.log-topics,
+.log-homework {
+  color: var(--apple-text-secondary);
+  font-size: 14px;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.log-topics strong,
+.log-homework strong {
+  color: var(--apple-text-primary);
+}
+
+@media (max-width: 768px) {
+  .tutoring-log {
+    padding: 16px;
+    margin: 16px 0;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .student-inputs {
+    flex-direction: column;
+  }
+
+  .log-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .log-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.student-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.student-header h3 {
+  margin: 0;
+  color: var(--apple-text-primary);
+  font-size: 18px;
+}
+
+.view-progress-btn {
+  background: var(--apple-accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.view-progress-btn:hover {
+  background: rgba(10, 132, 255, 0.8);
+}
+
+.student-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.share-btn {
+  background: var(--apple-dark-elevated);
+  color: var(--apple-text-primary);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.share-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.share-btn-small {
+  background: none;
+  border: none;
+  color: var(--apple-text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.share-btn-small:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--apple-text-primary);
+}
+
+.share-progress-btn {
+  background: var(--apple-dark-elevated);
+  color: var(--apple-accent);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.share-progress-btn:hover {
+  background: rgba(10, 132, 255, 0.1);
+}
+
+.progress-nav {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.back-to-log-btn {
+  background: var(--apple-dark-elevated);
+  color: var(--apple-accent);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.back-to-log-btn:hover {
+  background: rgba(10, 132, 255, 0.1);
+}
+
+.form-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--apple-border);
+  padding-bottom: 12px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--apple-text-secondary);
+  padding: 8px 16px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-size: 14px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  color: var(--apple-accent);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--apple-accent);
+  border-radius: 2px;
+}
+
+.schedule-btn {
+  background: var(--apple-accent);
+  color: white;
+} 
