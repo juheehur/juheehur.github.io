@@ -27,8 +27,14 @@ const AddTodo = () => {
   const [goals, setGoals] = useState([]);
   const [categoryColors, setCategoryColors] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(moment().tz('Asia/Hong_Kong'));
-  const [monthTodos, setMonthTodos] = useState({});
-  const [loadedMonths, setLoadedMonths] = useState(new Set());
+  const [monthTodos, setMonthTodos] = useState(() => {
+    const cached = localStorage.getItem('monthTodos');
+    return cached ? JSON.parse(cached) : {};
+  });
+  const [loadedMonths, setLoadedMonths] = useState(() => {
+    const cached = localStorage.getItem('loadedMonths');
+    return new Set(cached ? JSON.parse(cached) : []);
+  });
   const [isLoadingMonth, setIsLoadingMonth] = useState(false);
 
   useEffect(() => {
@@ -40,6 +46,14 @@ const AddTodo = () => {
     fetchGoals();
     fetchCategoryColors();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('monthTodos', JSON.stringify(monthTodos));
+  }, [monthTodos]);
+
+  useEffect(() => {
+    localStorage.setItem('loadedMonths', JSON.stringify([...loadedMonths]));
+  }, [loadedMonths]);
 
   const fetchTodayTodos = async () => {
     try {
@@ -58,7 +72,9 @@ const AddTodo = () => {
       setAddedTodos(todayTodos);
       
       const currentMonth = moment().tz('Asia/Hong_Kong').format('YYYY-MM');
-      fetchMonthTodos(currentMonth);
+      if (!loadedMonths.has(currentMonth)) {
+        fetchMonthTodos(currentMonth);
+      }
     } catch (error) {
       console.error('Error fetching today todos:', error);
     }
@@ -91,10 +107,13 @@ const AddTodo = () => {
         }
       }
 
-      setMonthTodos(prev => ({
-        ...prev,
-        [monthStr]: monthTodosList
-      }));
+      setMonthTodos(prev => {
+        const updated = {
+          ...prev,
+          [monthStr]: monthTodosList
+        };
+        return updated;
+      });
       setLoadedMonths(prev => new Set([...prev, monthStr]));
     } catch (error) {
       console.error('Error fetching month todos:', error);
@@ -256,9 +275,21 @@ const AddTodo = () => {
       await updateDoc(todoRef, {
         completed: !completed
       });
+      
       setAddedTodos(prev => prev.map(todo => 
         todo.id === todoId && todo.date === date ? {...todo, completed: !completed} : todo
       ));
+
+      const monthStr = moment(date).format('YYYY-MM');
+      setMonthTodos(prev => {
+        const monthTodosList = prev[monthStr] || [];
+        return {
+          ...prev,
+          [monthStr]: monthTodosList.map(todo =>
+            todo.id === todoId && todo.date === date ? {...todo, completed: !completed} : todo
+          )
+        };
+      });
     } catch (error) {
       console.error('Error updating todo:', error);
     }
@@ -382,6 +413,7 @@ const AddTodo = () => {
       
       try {
         const todayDate = todo.date || moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD');
+        const monthStr = moment(todayDate).format('YYYY-MM');
         
         const dateCollectionRef = doc(db, 'todos', todayDate);
         const todosCollectionRef = collection(dateCollectionRef, 'todos');
@@ -431,6 +463,15 @@ const AddTodo = () => {
           ...initialNotificationState
         };
 
+        setAddedTodos(prev => [newTodo, ...prev]);
+        setMonthTodos(prev => {
+          const monthTodosList = prev[monthStr] || [];
+          return {
+            ...prev,
+            [monthStr]: [newTodo, ...monthTodosList]
+          };
+        });
+
         toast.success(`✅ Added: ${taskText || lastLine}`, {
           position: "bottom-right",
           autoClose: 2000,
@@ -444,8 +485,6 @@ const AddTodo = () => {
         if (todo.notifyMinutesBefore) {
           await scheduleNotification(newTodo, todo.notifyMinutesBefore);
         }
-
-        setAddedTodos(prev => [newTodo, ...prev]);
 
         const newNotes = lines.slice(0, -1).join('\n') + '\n';
         setNotes(newNotes);
