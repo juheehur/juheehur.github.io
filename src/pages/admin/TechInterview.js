@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { techQuestionsDb, COLLECTIONS, PREDEFINED_CATEGORIES, DIFFICULTY_LEVELS, QUESTION_TYPES } from '../../firebase/config';
 import { collection, addDoc } from 'firebase/firestore';
-import './TechInterview.css';
+import '../../styles/techInterview.css';
 
 const TechInterview = () => {
   const navigate = useNavigate();

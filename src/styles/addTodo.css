@@ -433,6 +433,21 @@
   }
 }
 
+
+.tech-interview-btn,
+.interview-practice-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tech-interview-btn:hover,
+.interview-practice-btn:hover {
+  background-color: #f0f0f0;
+} 
+
 .todos-section {
   display: flex;
   flex-direction: column;

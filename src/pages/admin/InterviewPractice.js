@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { techQuestionsDb, COLLECTIONS, PREDEFINED_CATEGORIES, DIFFICULTY_LEVELS, QUESTION_TYPES } from '../../firebase/config';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
-import './InterviewPractice.css';
+import '../../styles/interviewPractice.css';
+
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000; // 1시간 (밀리초)
+const CACHE_KEY = 'interviewQuestions';
+const LAST_UPDATE_KEY = 'lastQuestionUpdate';
 
 const InterviewPractice = () => {
   const navigate = useNavigate();
@@ -25,6 +29,9 @@ const InterviewPractice = () => {
   const [randomCategory, setRandomCategory] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showModalAnswer, setShowModalAnswer] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [showOnlyUnlearned, setShowOnlyUnlearned] = useState(false);
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
 
   useEffect(() => {
     fetchQuestions();
@@ -47,35 +54,53 @@ const InterviewPractice = () => {
     }
   }, [questions, randomCategory]);
 
-  const fetchQuestions = async () => {
+  // 캐시된 데이터 체크 함수
+  const checkCachedData = () => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      const lastUpdateTime = localStorage.getItem(LAST_UPDATE_KEY);
+      
+      if (!cached) return null;
+
+      const parsedData = JSON.parse(cached);
+      
+      // 데이터가 배열인지 확인
+      if (!Array.isArray(parsedData)) {
+        console.error('Cached data is not an array, clearing cache');
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+
+      setLastUpdate(lastUpdateTime ? new Date(parseInt(lastUpdateTime)) : null);
+      return parsedData;
+    } catch (error) {
+      console.error('Error parsing cached data:', error);
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+  };
+
+  // 데이터를 캐시에 저장하는 함수
+  const cacheData = (data) => {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    const now = new Date().getTime();
+    localStorage.setItem(LAST_UPDATE_KEY, now.toString());
+    setLastUpdate(new Date(now));
+  };
+
+  // 수동으로 데이터를 새로고침하는 함수
+  const refreshData = async () => {
     setIsLoading(true);
     try {
       let q = collection(techQuestionsDb, COLLECTIONS.QUESTIONS);
-      const queryConstraints = [];
+      q = query(q, orderBy('createdAt', 'desc'));
 
-      if (filters.category !== 'all') {
-        queryConstraints.push(where('category_id', '==', filters.category));
-      }
-      if (filters.difficulty !== 'all') {
-        queryConstraints.push(where('difficulty', '==', filters.difficulty));
-      }
-      if (filters.type !== 'all') {
-        queryConstraints.push(where('type', '==', filters.type));
-      }
-      if (filters.language !== 'all') {
-        queryConstraints.push(where('language', '==', filters.language));
-      }
-
-      queryConstraints.push(orderBy('createdAt', 'desc'));
-      
-      q = query(q, ...queryConstraints);
       const questionsSnapshot = await getDocs(q);
-      
       const questionsData = [];
+
       for (const doc of questionsSnapshot.docs) {
         const questionData = { id: doc.id, ...doc.data() };
         
-        // Fetch answer for this question
         const answerQuery = query(
           collection(techQuestionsDb, COLLECTIONS.ANSWERS),
           where('question_id', '==', doc.id)
@@ -88,6 +113,7 @@ const InterviewPractice = () => {
         questionsData.push(questionData);
       }
       
+      cacheData(questionsData);
       setQuestions(questionsData);
     } catch (error) {
       console.error('Error fetching questions:', error);
@@ -96,13 +122,40 @@ const InterviewPractice = () => {
     }
   };
 
+  const fetchQuestions = async () => {
+    setIsLoading(true);
+    try {
+      // 먼저 캐시된 데이터 확인
+      const cachedQuestions = checkCachedData();
+      if (cachedQuestions) {
+        console.log('Using cached data');
+        setQuestions(cachedQuestions);
+        setIsLoading(false);
+        return;
+      }
+
+      await refreshData();
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+      setQuestions([]); // 에러 발생 시 빈 배열로 설정
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleFilterChange = (name, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    console.log(`Changing ${name} filter to:`, value);
+    setFilters(prev => {
+      const newFilters = {
+        ...prev,
+        [name]: value
+      };
+      console.log('New filters state:', newFilters);
+      return newFilters;
+    });
     setSelectedQuestion(null);
     setShowAnswer(false);
+    setShowModalAnswer(false);
   };
 
   const handleQuestionClick = (question) => {
@@ -124,7 +177,6 @@ const InterviewPractice = () => {
 
   const handleCategoryChange = (e) => {
     setRandomCategory(e.target.value);
-    // 카테고리 변경 시 자동으로 랜덤 질문 생성
     const newCategory = e.target.value;
     const filteredQuestions = questions.filter(q => 
       newCategory === 'all' || q.category_id === newCategory
@@ -141,6 +193,51 @@ const InterviewPractice = () => {
     setShowModalAnswer(false);
   };
 
+  const handleCardFlip = () => {
+    setIsCardFlipped(!isCardFlipped);
+  };
+
+  const getNewRandomQuestion = () => {
+    setIsCardFlipped(false); // Reset flip state
+    const filteredQuestions = questions.filter(q => 
+      randomCategory === 'all' || q.category_id === randomCategory
+    );
+    if (filteredQuestions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * filteredQuestions.length);
+      setRandomQuestion(filteredQuestions[randomIndex]);
+    }
+  };
+
+  // 필터링된 질문 목록을 계산하는 함수
+  const getFilteredQuestions = () => {
+    if (!Array.isArray(questions)) {
+      console.error('Questions is not an array:', questions);
+      return [];
+    }
+
+    return questions.filter(question => {
+      // 기본 필터 조건
+      if (filters.difficulty !== 'all' && question.difficulty !== filters.difficulty) return false;
+      if (filters.category !== 'all' && question.category_id !== filters.category) return false;
+      if (filters.type !== 'all' && question.type !== filters.type) return false;
+      if (filters.language !== 'all' && question.language !== filters.language) return false;
+      
+      // 학습되지 않은 문제만 보기 필터
+      if (showOnlyUnlearned && comfortableQuestions.includes(question.id)) return false;
+      
+      return true;
+    });
+  };
+
+  // 질문 아이템 클릭 핸들러 수정
+  const handleQuestionItemClick = (e, question) => {
+    // 체크박스나 그 부모 요소를 클릭한 경우 모달을 열지 않음
+    if (e.target.closest('.comfort-checkbox-wrapper')) {
+      return;
+    }
+    handleQuestionClick(question);
+  };
+
   return (
     <div className="interview-practice">
       <div className="container">
@@ -150,6 +247,11 @@ const InterviewPractice = () => {
             <div>
               <h1>Interview Practice</h1>
               <p>기술 면접 질문을 연습하고 학습하세요</p>
+              {lastUpdate && (
+                <p className="last-update">
+                  마지막 업데이트: {lastUpdate.toLocaleString()}
+                </p>
+              )}
             </div>
             <button 
               onClick={() => navigate('/admin/tech-interview')} 
@@ -179,13 +281,16 @@ const InterviewPractice = () => {
           </div>
 
           {randomQuestion && (
-            <div className="random-card">
-              <div className="random-card-inner">
+            <div className={`random-card ${isCardFlipped ? 'flipped' : ''}`}>
+              <div className="random-card-inner" onClick={handleCardFlip}>
                 <div className="random-question">
                   <h3>
                     Random Question
                     <button 
-                      onClick={() => setShowRandomAnswer(!showRandomAnswer)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        getNewRandomQuestion();
+                      }}
                       className="refresh-button"
                       aria-label="Get new random question"
                     >
@@ -203,19 +308,16 @@ const InterviewPractice = () => {
                       {PREDEFINED_CATEGORIES.find(c => c.id === randomQuestion.category_id)?.name}
                     </span>
                   </div>
+                  <div className="flip-hint">클릭하여 답변 보기</div>
                 </div>
                 <div className="random-answer-section">
-                  <button
-                    className="toggle-random-answer"
-                    onClick={() => setShowRandomAnswer(!showRandomAnswer)}
-                  >
-                    {showRandomAnswer ? '답변 숨기기' : '답변 보기'}
-                  </button>
-                  {showRandomAnswer && randomQuestion.answer && (
+                  {randomQuestion.answer && (
                     <div className="random-answer">
+                      <h3>Answer</h3>
                       <p>{randomQuestion.answer.answer}</p>
                     </div>
                   )}
+                  <div className="flip-hint">클릭하여 질문 보기</div>
                 </div>
               </div>
             </div>
@@ -241,7 +343,10 @@ const InterviewPractice = () => {
             <label>난이도</label>
             <select
               value={filters.difficulty}
-              onChange={(e) => handleFilterChange('difficulty', e.target.value)}
+              onChange={(e) => {
+                console.log('Selected difficulty:', e.target.value);
+                handleFilterChange('difficulty', e.target.value);
+              }}
             >
               <option value="all">전체</option>
               {DIFFICULTY_LEVELS.map(level => (
@@ -278,35 +383,51 @@ const InterviewPractice = () => {
 
         {/* Main Content */}
         <div className="practice-content">
-          {/* Questions List */}
+          {/* Questions List with Toggle Button */}
           <div className="questions-panel">
-            <h2>질문 목록</h2>
+            <div className="questions-header">
+              <h2>질문 목록</h2>
+              <button
+                className={`unlearned-toggle ${showOnlyUnlearned ? 'active' : ''}`}
+                onClick={() => setShowOnlyUnlearned(!showOnlyUnlearned)}
+                title={showOnlyUnlearned ? "모든 문제 보기" : "학습되지 않은 문제만 보기"}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+                  <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                </svg>
+                {showOnlyUnlearned ? "학습되지 않은 문제" : "전체 문제"}
+              </button>
+            </div>
             {isLoading ? (
               <div className="loading">Loading...</div>
             ) : (
               <div className="questions-list">
-                {questions.map((question) => (
+                {getFilteredQuestions().map((question) => (
                   <div
                     key={question.id}
-                    className={`question-item ${selectedQuestion?.id === question.id ? 'selected' : ''}`}
-                    onClick={() => handleQuestionClick(question)}
+                    className="question-item"
+                    onClick={(e) => handleQuestionItemClick(e, question)}
                   >
                     <div className="question-header">
-                      <span className={`question-difficulty ${question.difficulty.toLowerCase()}`}>
-                        {question.difficulty}
-                      </span>
-                      <span className="question-category">
-                        {PREDEFINED_CATEGORIES.find(c => c.id === question.category_id)?.name}
-                      </span>
+                      <div className="question-header-left">
+                        <span className={`question-difficulty ${question.difficulty.toLowerCase()}`}>
+                          {question.difficulty}
+                        </span>
+                        <span className="question-category">
+                          {PREDEFINED_CATEGORIES.find(c => c.id === question.category_id)?.name}
+                        </span>
+                      </div>
+                      <div className="comfort-checkbox-wrapper" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="comfort-checkbox"
+                          checked={comfortableQuestions.includes(question.id)}
+                          onChange={(e) => handleComfortableToggle(question.id, e)}
+                          aria-label="학습 완료 표시"
+                        />
+                      </div>
                     </div>
                     <div className="question-text">{question.question}</div>
-                    <input
-                      type="checkbox"
-                      className="comfort-checkbox"
-                      checked={comfortableQuestions.includes(question.id)}
-                      onChange={(e) => handleComfortableToggle(question.id, e)}
-                      aria-label="Mark as comfortable"
-                    />
                   </div>
                 ))}
               </div>
@@ -352,9 +473,6 @@ const InterviewPractice = () => {
                       onClick={() => setShowModalAnswer(!showModalAnswer)}
                     >
                       {showModalAnswer ? '답변 숨기기' : '답변 보기'}
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
                     </button>
                     {showModalAnswer && selectedQuestion.answer && (
                       <div className="modal-answer">
