@@ -8,6 +8,7 @@ import 'react-calendar/dist/Calendar.css';
 import moment from 'moment-timezone';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import TutoringLog from '../../components/TutoringLog';
 
 const AddTodo = () => {
   const navigate = useNavigate();
@@ -615,6 +616,13 @@ const AddTodo = () => {
             >
               ⚙️
             </button>
+            <button 
+              onClick={() => navigate('/admin/tutoring')} 
+              className="tutoring-btn"
+              title="과외 관리"
+            >
+              📚
+            </button>
           </div>
         </div>
         <div className="memo-commands">
@@ -801,6 +809,7 @@ const AddTodo = () => {
             )}
           </div>
         </div>
+        <TutoringLog />
       </div>
       <ToastContainer />
     </div>

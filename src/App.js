@@ -29,6 +29,7 @@ import AddGoal from './pages/admin/AddGoal';
 import { useAuth, AuthProvider } from './contexts/AuthContext';
 import TechInterview from './pages/admin/TechInterview';
 import InterviewPractice from './pages/admin/InterviewPractice';
+import StudentProgressPage from './pages/StudentProgressPage';
 
 // Check if we're in the GitHub Pages environment
 const isGithubPages = process.env.REACT_APP_DEPLOY_TARGET === 'github';
@@ -80,6 +81,7 @@ function App() {
             )}
             
             <Route path="/question/:id" element={<Question />} />
+            <Route path="/student-progress/:studentId" element={<StudentProgressPage />} />
           </Routes>
         </div>
       </Router>
