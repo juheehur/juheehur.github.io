@@ -37,6 +37,8 @@ const AddTodo = () => {
     return new Set(cached ? JSON.parse(cached) : []);
   });
   const [isLoadingMonth, setIsLoadingMonth] = useState(false);
+  const [habits, setHabits] = useState([]);
+  const [todayHabits, setTodayHabits] = useState([]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -46,6 +48,7 @@ const AddTodo = () => {
     checkNotificationPermission();
     fetchGoals();
     fetchCategoryColors();
+    fetchTodayHabits();
   }, []);
 
   useEffect(() => {
@@ -582,6 +585,91 @@ const AddTodo = () => {
     });
   };
 
+  const fetchTodayHabits = async () => {
+    try {
+      const habitsQuery = query(collection(db, 'habits'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(habitsQuery);
+      const habitsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Filter habits that are still active
+      const today = moment().format('YYYY-MM-DD');
+      const activeHabits = habitsData.filter(habit => 
+        moment(today).isBetween(habit.startDate, habit.endDate, 'day', '[]')
+      );
+      
+      setHabits(activeHabits);
+      setTodayHabits(activeHabits);
+    } catch (error) {
+      console.error('Error fetching habits:', error);
+    }
+  };
+
+  const handleHabitCheck = async (habit) => {
+    const today = moment().format('YYYY-MM-DD');
+    const newProgress = { ...habit.progress };
+    newProgress[today] = !newProgress[today];
+
+    try {
+      const habitRef = doc(db, 'habits', habit.id);
+      const updatedStreak = calculateStreak(newProgress);
+      
+      await updateDoc(habitRef, {
+        progress: newProgress,
+        currentStreak: updatedStreak.currentStreak,
+        longestStreak: Math.max(updatedStreak.currentStreak, habit.longestStreak || 0)
+      });
+
+      // Update local state
+      setTodayHabits(prev => prev.map(h => 
+        h.id === habit.id 
+          ? { ...h, progress: newProgress, currentStreak: updatedStreak.currentStreak }
+          : h
+      ));
+
+      // Show toast notification
+      const message = newProgress[today] 
+        ? `✅ Completed: ${habit.title}`
+        : `↩️ Unmarked: ${habit.title}`;
+      
+      toast(message, {
+        position: "bottom-right",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } catch (error) {
+      console.error('Error updating habit:', error);
+    }
+  };
+
+  const calculateStreak = (progress) => {
+    let currentStreak = 0;
+    const today = moment().format('YYYY-MM-DD');
+    let date = moment(today);
+
+    while (progress[date.format('YYYY-MM-DD')]) {
+      currentStreak++;
+      date = date.subtract(1, 'days');
+    }
+
+    return { currentStreak };
+  };
+
+  const getHabitCompletion = (habit) => {
+    const completedDays = Object.values(habit.progress || {}).filter(Boolean).length;
+    const monthlyTarget = habit.monthlyTarget || 30;
+    return {
+      percentage: Math.round((completedDays / monthlyTarget) * 100),
+      completedDays,
+      monthlyTarget
+    };
+  };
+
   return (
     <div className="memo-container">
       <div className="memo-header">
@@ -616,13 +704,6 @@ const AddTodo = () => {
             >
               ⚙️
             </button>
-            <button 
-              onClick={() => navigate('/admin/tutoring')} 
-              className="tutoring-btn"
-              title="과외 관리"
-            >
-              📚
-            </button>
           </div>
         </div>
         <div className="memo-commands">
@@ -645,168 +726,160 @@ const AddTodo = () => {
           </div>
         </div>
       </div>
+
       <div className="memo-content">
-        <textarea
-          ref={textareaRef}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="memo-textarea"
-          placeholder="Type your todos here..."
-        />
-        <div className="todos-calendar-layout">
-          <div className="todos-list-section">
-            <div className="todos-list-content">
-              {todayTodos.length > 0 && (
-                <div className="today-todos">
-                  <h2>Today's Todos ({moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD ddd')})</h2>
-                  <div className="added-todos">
-                    {todayTodos.map(todo => (
+        <div className="content-layout">
+          <div className="main-section">
+            <textarea
+              ref={textareaRef}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="memo-textarea"
+              placeholder="Type your todos here..."
+            />
+            
+            {/* Today's Habits Section */}
+            {todayHabits.length > 0 && (
+              <div className="today-habits-section">
+                <h2>Today's Habits</h2>
+                <div className="habits-grid">
+                  {todayHabits.map(habit => {
+                    const completion = getHabitCompletion(habit);
+                    const today = moment().format('YYYY-MM-DD');
+                    const isCompleted = habit.progress[today];
+                    
+                    return (
                       <div 
-                        key={todo.id} 
-                        className={`todo-item ${todo.completed ? 'completed' : ''}`}
-                        onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
+                        key={habit.id}
+                        className={`habit-check-card ${isCompleted ? 'completed' : ''}`}
+                        onClick={() => handleHabitCheck(habit)}
                       >
-                        <input
-                          type="checkbox"
-                          checked={todo.completed}
-                          className="todo-checkbox"
-                          readOnly
-                        />
-                        {formatTodoDisplay(todo)}
-                        {todo.startTime && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              scheduleNotification(todo);
-                            }}
-                            className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
-                            disabled={todo.notificationScheduled}
-                          >
-                            {todo.notificationScheduled 
-                              ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
-                              : '30분 전 알림'}
-                          </button>
-                        )}
+                        <div className="habit-check-content">
+                          <div className="habit-check-header">
+                            <h3>{habit.title}</h3>
+                            <div className="habit-check-box">
+                              {isCompleted ? '✓' : ''}
+                            </div>
+                          </div>
+                          <p className="habit-goal-title">Goal: {habit.goalTitle}</p>
+                          <div className="habit-mini-stats">
+                            <span>{completion.completedDays}/{completion.monthlyTarget} times</span>
+                            <span>Streak: {habit.currentStreak} days</span>
+                          </div>
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
-              )}
-              
-              {selectedDate && !isToday(moment(selectedDate).format('YYYY-MM-DD')) && (
-                <div className="selected-date-todos">
-                  <h3>{moment(selectedDate).tz('Asia/Hong_Kong').format('YYYY-MM-DD ddd')}</h3>
-                  <div className="added-todos">
-                    {monthTodos[moment(selectedDate).format('YYYY-MM')]
-                      ?.filter(todo => todo.date === moment(selectedDate).format('YYYY-MM-DD'))
-                      .map(todo => (
-                        <div 
-                          key={todo.id} 
-                          className={`todo-item ${todo.completed ? 'completed' : ''}`}
-                          onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={todo.completed}
-                            className="todo-checkbox"
-                            readOnly
-                          />
-                          {formatTodoDisplay(todo)}
-                          {todo.startTime && (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                scheduleNotification(todo);
-                              }}
-                              className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
-                              disabled={todo.notificationScheduled}
-                            >
-                              {todo.notificationScheduled 
-                                ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
-                                : '30분 전 알림'}
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <div className="calendar-section">
-            <div className="monthly-achievements">
-              <div className="monthly-achievements-header">
-                <h2>
-                  <button 
-                    onClick={() => handleMonthChange({ activeStartDate: moment(selectedMonth).subtract(1, 'month') })}
-                    className="month-nav-btn"
-                  >
-                    ◀
-                  </button>
-                  {selectedMonth.format('MMMM YYYY')} Achievements
-                  <button 
-                    onClick={() => handleMonthChange({ activeStartDate: moment(selectedMonth).add(1, 'month') })}
-                    className="month-nav-btn"
-                  >
-                    ▶
-                  </button>
-                </h2>
               </div>
-              <div className="achievements-grid">
-                {filterGoalsByMonth(goals, selectedMonth).length > 0 ? (
-                  filterGoalsByMonth(goals, selectedMonth).map((goal) => (
-                    <div 
-                      key={goal.id} 
-                      className="achievement-card"
-                      style={{ borderLeft: `4px solid ${categoryColors[goal.category]}` }}
-                    >
-                      <div className="achievement-content">
-                        <h4>{goal.title}</h4>
-                        {goal.description && (
-                          <p className="achievement-description">{goal.description}</p>
-                        )}
-                        <div className="achievement-footer">
-                          <span className="achievement-category" style={{ backgroundColor: categoryColors[goal.category] }}>
-                            {goal.category}
-                          </span>
-                          {goal.targetDate && (
-                            <span className="achievement-date">
-                              {moment(goal.targetDate).format('MMM DD')}
-                            </span>
-                          )}
-                        </div>
+            )}
+
+            <div className="todos-calendar-layout">
+              <div className="todos-list-section">
+                <div className="todos-list-content">
+                  {/* Today's Todos */}
+                  {todayTodos.length > 0 && (
+                    <div className="today-todos">
+                      <h2>Today's Todos ({moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD ddd')})</h2>
+                      <div className="added-todos">
+                        {todayTodos.map(todo => (
+                          <div 
+                            key={todo.id} 
+                            className={`todo-item ${todo.completed ? 'completed' : ''}`}
+                            onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={todo.completed}
+                              className="todo-checkbox"
+                              readOnly
+                            />
+                            {formatTodoDisplay(todo)}
+                            {todo.startTime && (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  scheduleNotification(todo);
+                                }}
+                                className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
+                                disabled={todo.notificationScheduled}
+                              >
+                                {todo.notificationScheduled 
+                                  ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
+                                  : '30분 전 알림'}
+                              </button>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="no-goals-message">
-                    No goals set for {selectedMonth.format('MMMM YYYY')}
-                  </div>
+                  )}
+
+                  {/* Selected Date Todos */}
+                  {selectedDate && !isToday(moment(selectedDate).format('YYYY-MM-DD')) && (
+                    <div className="selected-date-todos">
+                      <h3>{moment(selectedDate).tz('Asia/Hong_Kong').format('YYYY-MM-DD ddd')}</h3>
+                      <div className="added-todos">
+                        {monthTodos[moment(selectedDate).format('YYYY-MM')]
+                          ?.filter(todo => todo.date === moment(selectedDate).format('YYYY-MM-DD'))
+                          .map(todo => (
+                            <div 
+                              key={todo.id} 
+                              className={`todo-item ${todo.completed ? 'completed' : ''}`}
+                              onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={todo.completed}
+                                className="todo-checkbox"
+                                readOnly
+                              />
+                              {formatTodoDisplay(todo)}
+                              {todo.startTime && (
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    scheduleNotification(todo);
+                                  }}
+                                  className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
+                                  disabled={todo.notificationScheduled}
+                                >
+                                  {todo.notificationScheduled 
+                                    ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
+                                    : '30분 전 알림'}
+                              </button>
+                            )}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Calendar Section */}
+              <div className="calendar-section">
+                <Calendar
+                  onChange={setSelectedDate}
+                  value={selectedDate}
+                  tileContent={({ date }) => {
+                    const dateStr = moment(date).format('YYYY-MM-DD');
+                    const count = getTodoCount(date);
+                    return count !== null ? (
+                      <div className="calendar-todos">
+                        {count > 0 && <div className="todo-count">{count}</div>}
+                      </div>
+                    ) : (
+                      <div className="calendar-todos loading">...</div>
+                    );
+                  }}
+                />
+                {isLoadingMonth && (
+                  <div className="calendar-loading">달력 데이터 로딩 중...</div>
                 )}
               </div>
             </div>
-            <h2>Calendar</h2>
-            <Calendar
-              onChange={setSelectedDate}
-              value={selectedDate}
-              locale="ko-KR"
-              onActiveStartDateChange={handleMonthChange}
-              tileContent={({ date }) => {
-                const count = getTodoCount(date);
-                return count !== null ? (
-                  <div className="calendar-todos">
-                    {count > 0 && <div className="todo-count">{count}</div>}
-                  </div>
-                ) : (
-                  <div className="calendar-todos loading">...</div>
-                );
-              }}
-            />
-            {isLoadingMonth && (
-              <div className="calendar-loading">달력 데이터 로딩 중...</div>
-            )}
           </div>
         </div>
         <TutoringLog />
