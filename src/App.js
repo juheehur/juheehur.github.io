@@ -30,62 +30,65 @@ import { useAuth, AuthProvider } from './contexts/AuthContext';
 import TechInterview from './pages/admin/TechInterview';
 import InterviewPractice from './pages/admin/InterviewPractice';
 import StudentProgressPage from './pages/StudentProgressPage';
+import { HelmetProvider } from 'react-helmet-async';
 
 // Check if we're in the GitHub Pages environment
 const isGithubPages = process.env.REACT_APP_DEPLOY_TARGET === 'github';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router basename="/">
-        <div className="App">
-          <Header />
-          <Routes>
-            <Route path="/" element={
-              <ConditionalHomeRoute />
-            } />
-            <Route path="/portfolio" element={<Portfolio />} />
-            <Route path="/project/:id" element={<ProjectDetails />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<BlogDetails />} />
-            
-            {/* Only show these routes in non-GitHub Pages environment */}
-            {!isGithubPages && (
-              <>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<SignUp />} />
-                <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
-                <Route path="/admin/add-project" element={<ProtectedRoute adminOnly><AddProject /></ProtectedRoute>} />
-                <Route path="/admin/add-blog" element={<ProtectedRoute adminOnly><AddBlog /></ProtectedRoute>} />
-                <Route path="/admin/add-question" element={<ProtectedRoute adminOnly><AddQuestion /></ProtectedRoute>} />
-                <Route path="/admin/add-goal" element={<ProtectedRoute adminOnly><AddGoal /></ProtectedRoute>} />
-                <Route path="/admin/portfolio-summary" element={<ProtectedRoute adminOnly><PortfolioSummary /></ProtectedRoute>} />
-                <Route path="/admin/edit-project/:projectId" element={<ProtectedRoute adminOnly><EditProject /></ProtectedRoute>} />
-                <Route path="/admin/edit-blog/:postId" element={<ProtectedRoute adminOnly><EditBlog /></ProtectedRoute>} />
-                <Route path="/admin/add-todo" element={<ProtectedRoute adminOnly><AddTodo /></ProtectedRoute>} />
-                <Route path="/admin/todo-management" element={<ProtectedRoute adminOnly><TodoManagement /></ProtectedRoute>} />
-                <Route path="/admin/todos" element={<Navigate to="/admin/add-todo" replace />} />
-                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/duplicate" element={<Duplicate />} />
-                <Route path="/admin/tech-interview" element={
-                  <ProtectedRoute>
-                    <TechInterview />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/interview-practice" element={
-                  <ProtectedRoute>
-                    <InterviewPractice />
-                  </ProtectedRoute>
-                } />
-              </>
-            )}
-            
-            <Route path="/question/:id" element={<Question />} />
-            <Route path="/student-progress/:studentId" element={<StudentProgressPage />} />
-          </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <Router basename="/">
+          <div className="App">
+            <Header />
+            <Routes>
+              <Route path="/" element={
+                <ConditionalHomeRoute />
+              } />
+              <Route path="/portfolio" element={<Portfolio />} />
+              <Route path="/project/:id" element={<ProjectDetails />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogDetails />} />
+              
+              {/* Only show these routes in non-GitHub Pages environment */}
+              {!isGithubPages && (
+                <>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+                  <Route path="/admin/add-project" element={<ProtectedRoute adminOnly><AddProject /></ProtectedRoute>} />
+                  <Route path="/admin/add-blog" element={<ProtectedRoute adminOnly><AddBlog /></ProtectedRoute>} />
+                  <Route path="/admin/add-question" element={<ProtectedRoute adminOnly><AddQuestion /></ProtectedRoute>} />
+                  <Route path="/admin/add-goal" element={<ProtectedRoute adminOnly><AddGoal /></ProtectedRoute>} />
+                  <Route path="/admin/portfolio-summary" element={<ProtectedRoute adminOnly><PortfolioSummary /></ProtectedRoute>} />
+                  <Route path="/admin/edit-project/:projectId" element={<ProtectedRoute adminOnly><EditProject /></ProtectedRoute>} />
+                  <Route path="/admin/edit-blog/:postId" element={<ProtectedRoute adminOnly><EditBlog /></ProtectedRoute>} />
+                  <Route path="/admin/add-todo" element={<ProtectedRoute adminOnly><AddTodo /></ProtectedRoute>} />
+                  <Route path="/admin/todo-management" element={<ProtectedRoute adminOnly><TodoManagement /></ProtectedRoute>} />
+                  <Route path="/admin/todos" element={<Navigate to="/admin/add-todo" replace />} />
+                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                  <Route path="/duplicate" element={<Duplicate />} />
+                  <Route path="/admin/tech-interview" element={
+                    <ProtectedRoute>
+                      <TechInterview />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/interview-practice" element={
+                    <ProtectedRoute>
+                      <InterviewPractice />
+                    </ProtectedRoute>
+                  } />
+                </>
+              )}
+              
+              <Route path="/question/:id" element={<Question />} />
+              <Route path="/student-progress/:studentId" element={<StudentProgressPage />} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 
