@@ -197,17 +197,22 @@
   }
 
   .title-container {
-    height: auto;
-    min-height: 120px;
+    height: 150px;
+    min-height: 150px;
+    max-height: 150px;
     margin: 0 0 40px 0;
-    overflow: visible;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
   }
 
   .title {
     font-size: 1.1rem;
     margin: 0;
-    min-height: unset;
     height: auto;
+    min-height: unset;
+    overflow: visible;
+    width: 100%;
   }
 
   .subtitle {
@@ -620,6 +625,7 @@
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 600;
+  margin-top: 10px;
 }
 
 /* Todo Styles */
@@ -658,6 +664,7 @@
     width: 18px;
     height: 18px;
     font-size: 0.7rem;
+    margin-top: 10px;
   }
 
   .todos-section {
