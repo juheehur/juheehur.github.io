@@ -244,6 +244,8 @@
 .testimonials-section {
   padding: 100px 0;
   background: linear-gradient(180deg, #000000 0%, #0A0A0A 100%);
+  position: relative;
+  overflow: hidden;
 }
 
 .testimonials-header {
@@ -277,67 +279,133 @@
   transform: translateY(-2px);
 }
 
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 40px;
-  padding: 0 5%;
+.testimonials-carousel {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  overflow: hidden;
+  padding: 0 20px;
 }
 
-.testimonial-card {
+.testimonials-slider {
+  display: flex;
+  transition: none;
+}
+
+.testimonials-slider.transitioning {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.testimonial-slide {
+  min-width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  opacity: 0.3;
+  transform: scale(0.9);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.testimonial-slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.testimonial-quote {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 40px;
+  position: relative;
   transition: all 0.3s ease;
+  transform: perspective(1000px) rotateY(5deg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.testimonial-card:hover {
-  transform: translateY(-5px);
+.testimonial-quote:hover {
+  transform: perspective(1000px) rotateY(0deg) translateY(-5px);
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.testimonial-title {
-  font-size: 1.5rem;
-  color: #ffffff;
-  margin: 0 0 20px 0;
+.quote-icon {
+  color: rgba(26, 109, 255, 0.3);
+  margin-bottom: 20px;
+  transform: rotate(-10deg);
+  display: inline-block;
 }
 
-.testimonial-description {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 30px 0;
+.quote-content {
+  font-size: 1.25rem;
   line-height: 1.6;
-}
-
-.testimonial-comments {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.testimonial-comment {
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px;
-}
-
-.comment-content {
-  font-size: 1rem;
   color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 10px 0;
-  line-height: 1.5;
+  margin: 0 0 20px 0;
+  font-style: italic;
 }
 
-.comment-author {
-  font-size: 0.9rem;
+.quote-author {
+  font-size: 1rem;
   color: #1a6dff;
   margin: 0;
   font-weight: 500;
+  text-align: right;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.5s forwards;
+  animation-delay: 0.3s;
 }
 
-/* Mobile Styles */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slider-controls {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px;
+  pointer-events: none;
+}
+
+.slider-arrow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+}
+
+.slider-arrow:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.slider-arrow.prev {
+  margin-right: auto;
+}
+
+.slider-arrow.next {
+  margin-left: auto;
+}
+
 @media screen and (max-width: 768px) {
   .testimonials-section {
     padding: 60px 0;
@@ -355,19 +423,21 @@
     font-size: 1.8rem;
   }
 
-  .testimonials-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
+  .testimonial-quote {
+    padding: 30px;
+  }
+
+  .quote-content {
+    font-size: 1.1rem;
+  }
+
+  .slider-controls {
     padding: 0 20px;
   }
 
-  .testimonial-card {
-    padding: 24px;
-  }
-
-  .testimonial-title {
-    font-size: 1.3rem;
-    margin-bottom: 16px;
+  .slider-arrow {
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -380,15 +450,63 @@
 
 .todos-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .todos-title {
-  font-size: 2.2rem;
+  font-size: 3.5rem;
   color: white;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   font-weight: 600;
   letter-spacing: -0.02em;
+}
+
+.schedule-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 0 auto;
+  position: relative;
+  max-width: 300px;
+}
+
+.schedule-tab {
+  position: relative;
+  padding: 0.5rem 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.schedule-tab.active {
+  color: white;
+}
+
+.tab-text {
+  position: relative;
+  z-index: 1;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #1a6dff;
+  transform-origin: left;
+  animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .todos-view-buttons {
@@ -726,8 +844,8 @@
   }
 
   .todos-title {
-    font-size: 1.8rem;
-    margin-bottom: 0.75rem;
+    font-size: 2.5rem;
+    margin-bottom: 1.2rem;
   }
 
   .todos-view-buttons {
@@ -738,6 +856,15 @@
     padding: 0.6rem 1.25rem;
     font-size: 0.9rem;
     border-radius: 10px;
+  }
+
+  .schedule-tabs {
+    gap: 1.5rem;
+  }
+
+  .schedule-tab {
+    font-size: 1rem;
+    padding: 0.4rem 0.8rem;
   }
 }
 

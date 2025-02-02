@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { collection, getDocs, doc, getDoc, query, orderBy, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +26,10 @@ const Home = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedDateTodos, setSelectedDateTodos] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [totalSlides, setTotalSlides] = useState(0);
+  const sliderRef = useRef(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Add todo fetching logic
   useEffect(() => {
@@ -123,7 +127,13 @@ const Home = () => {
             return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
           })
         );
-        setTestimonials(testimonialData.filter(Boolean));
+        const filteredTestimonials = testimonialData.filter(Boolean);
+        setTestimonials(filteredTestimonials);
+        
+        // Calculate total number of slides
+        const total = filteredTestimonials.reduce((acc, testimonial) => 
+          acc + (testimonial.comments ? testimonial.comments.length : 0), 0);
+        setTotalSlides(total);
       } catch (error) {
         console.error('Error fetching testimonials:', error);
       }
@@ -237,6 +247,35 @@ INVEST NOW!`;
     }
   };
 
+  // Add auto-rotation effect
+  useEffect(() => {
+    if (!totalSlides) return;
+
+    const rotationInterval = setInterval(() => {
+      setIsTransitioning(true);
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, 2000); // Change slide every 2 seconds
+
+    return () => clearInterval(rotationInterval);
+  }, [totalSlides]);
+
+  // Update slide position when currentSlide changes
+  useEffect(() => {
+    if (!sliderRef.current) return;
+    
+    const slideWidth = sliderRef.current.offsetWidth;
+    sliderRef.current.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
+    
+    const transitionEndHandler = () => setIsTransitioning(false);
+    sliderRef.current.addEventListener('transitionend', transitionEndHandler);
+    
+    return () => {
+      if (sliderRef.current) {
+        sliderRef.current.removeEventListener('transitionend', transitionEndHandler);
+      }
+    };
+  }, [currentSlide]);
+
   return (
     <div className="home-container">
       <div className="main-content">
@@ -287,20 +326,22 @@ INVEST NOW!`;
       {/* Todo Section */}
       <div className="todos-section">
         <div className="todos-header">
-          <h2 className="todos-title">What Juhee Hur Do Everyday</h2>
-          <div className="home-view-buttons">
-            <button 
-              className={`home-view-button ${!showCalendar ? 'active' : ''}`}
+          <h2 className="todos-title">Today's Schedule</h2>
+          <div className="schedule-tabs">
+            <div 
+              className={`schedule-tab ${!showCalendar ? 'active' : ''}`}
               onClick={() => setShowCalendar(false)}
             >
-              Today
-            </button>
-            <button 
-              className={`home-view-button ${showCalendar ? 'active' : ''}`}
+              <span className="tab-text">Today</span>
+              {!showCalendar && <div className="tab-indicator" />}
+            </div>
+            <div 
+              className={`schedule-tab ${showCalendar ? 'active' : ''}`}
               onClick={() => setShowCalendar(true)}
             >
-              Calendar
-            </button>
+              <span className="tab-text">Calendar</span>
+              {showCalendar && <div className="tab-indicator" />}
+            </div>
           </div>
         </div>
         
@@ -387,21 +428,34 @@ INVEST NOW!`;
             Click to Answer
           </button>
         </div>
-        <div className="testimonials-grid">
-          {testimonials.map((testimonial) => (
-            <div key={testimonial.id} className="testimonial-card">
-              <h3 className="testimonial-title">{testimonial.title}</h3>
-              <p className="testimonial-description">{testimonial.description}</p>
-              <div className="testimonial-comments">
-                {testimonial.comments && testimonial.comments.map((comment, index) => (
-                  <div key={index} className="testimonial-comment">
-                    <p className="comment-content">{comment.content}</p>
-                    <p className="comment-author">- {comment.author}</p>
+        <div className="testimonials-carousel">
+          <div 
+            className={`testimonials-slider ${isTransitioning ? 'transitioning' : ''}`} 
+            ref={sliderRef}
+          >
+            {testimonials.map((testimonial, tIndex) => (
+              testimonial.comments && testimonial.comments.map((comment, cIndex) => {
+                const slideIndex = testimonials.slice(0, tIndex).reduce((acc, t) => 
+                  acc + (t.comments ? t.comments.length : 0), 0) + cIndex;
+                return (
+                  <div 
+                    key={`${testimonial.id}-${cIndex}`} 
+                    className={`testimonial-slide ${slideIndex === currentSlide ? 'active' : ''}`}
+                  >
+                    <div className="testimonial-quote">
+                      <div className="quote-icon">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                          <path d="M9.33333 21.3333C11.1743 21.3333 12.6667 19.841 12.6667 18C12.6667 16.159 11.1743 14.6667 9.33333 14.6667V10.6667C13.3834 10.6667 16.6667 13.95 16.6667 18C16.6667 22.05 13.3834 25.3333 9.33333 25.3333V21.3333ZM22.6667 21.3333C24.5077 21.3333 26 19.841 26 18C26 16.159 24.5077 14.6667 22.6667 14.6667V10.6667C26.7167 10.6667 30 13.95 30 18C30 22.05 26.7167 25.3333 22.6667 25.3333V21.3333Z" fill="currentColor"/>
+                        </svg>
+                      </div>
+                      <p className="quote-content">{comment.content}</p>
+                      <p className="quote-author">- {comment.author}</p>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+                );
+              })
+            ))}
+          </div>
         </div>
       </div>
     </div>

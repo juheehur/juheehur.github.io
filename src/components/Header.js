@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { auth, db } from '../firebase/config';
 import { signOut } from 'firebase/auth';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { FaGithub, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { FaGithub, FaInstagram, FaLinkedin, FaHome, FaBriefcase, FaBlog, FaUser, FaCog, FaSignOutAlt, FaPlus } from 'react-icons/fa';
 import '../styles/Header.css';
 
 const SearchIcon = () => (
@@ -174,28 +174,42 @@ function Header() {
         </button>
 
         <nav className={`nav ${isMenuOpen ? 'active' : ''}`}>
-          <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>Home</Link>
-          <Link to="/portfolio" className="nav-link" onClick={() => setIsMenuOpen(false)}>Portfolio</Link>
-          <Link to="/blog" className="nav-link" onClick={() => setIsMenuOpen(false)}>Blog</Link>
+          <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+            <FaHome className="nav-icon" /> Home
+          </Link>
+          <Link to="/portfolio" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+            <FaBriefcase className="nav-icon" /> Portfolio
+          </Link>
+          <Link to="/blog" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+            <FaBlog className="nav-icon" /> Blog
+          </Link>
           {user ? (
             <>
               {role === 'admin' ? (
                 <>
-                  <Link to="/admin" className="nav-link" onClick={() => setIsMenuOpen(false)}>Admin</Link>
+                  <Link to="/admin" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+                    <FaCog className="nav-icon" /> Admin
+                  </Link>
                   <Link to="/admin/add-blog" className="nav-link quick-add" onClick={() => setIsMenuOpen(false)}>
-                    <span className="plus-icon">+</span> Blog
+                    <FaPlus className="nav-icon" /> Blog
                   </Link>
                   <Link to="/admin/add-todo" className="nav-link quick-add" onClick={() => setIsMenuOpen(false)}>
-                    <span className="plus-icon">+</span> Todo
+                    <FaPlus className="nav-icon" /> Todo
                   </Link>
                 </>
               ) : (
-                <Link to="/profile" className="nav-link" onClick={() => setIsMenuOpen(false)}>Profile</Link>
+                <Link to="/profile" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+                  <FaUser className="nav-icon" /> Profile
+                </Link>
               )}
-              <button className="logout-button" onClick={handleLogout}>Logout</button>
+              <button className="logout-button" onClick={handleLogout}>
+                <FaSignOutAlt className="nav-icon" /> Logout
+              </button>
             </>
           ) : (
-            <Link to="/login" className="nav-link login-button" onClick={() => setIsMenuOpen(false)}>Login</Link>
+            <Link to="/login" className="nav-link login-button" onClick={() => setIsMenuOpen(false)}>
+              <FaUser className="nav-icon" /> Login
+            </Link>
           )}
           
           <div className="social-icons">
