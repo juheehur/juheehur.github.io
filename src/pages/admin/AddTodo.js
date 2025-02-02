@@ -704,12 +704,51 @@ const AddTodo = () => {
     };
   };
 
+  const refreshTodos = async () => {
+    try {
+      toast.info('🔄 Refreshing todos...', {
+        position: "bottom-right",
+        autoClose: 1000,
+      });
+      
+      // Re-fetch today's todos
+      const unsubscribe = setupTodayTodosListener();
+      
+      // Re-fetch current month's todos
+      const currentMonth = moment().format('YYYY-MM');
+      setLoadedMonths(new Set());
+      await fetchMonthTodos(currentMonth);
+      
+      toast.success('✨ Todos refreshed!', {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+      
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    } catch (error) {
+      console.error('Error refreshing todos:', error);
+      toast.error('❌ Failed to refresh todos', {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
+  };
+
   return (
     <div className="memo-container">
       <div className="memo-header">
         <div className="memo-header-top">
           <h1>Quick Todo</h1>
           <div className="header-buttons">
+            <button 
+              onClick={refreshTodos} 
+              className="refresh-btn"
+              title="Refresh Todos"
+            >
+              🔄
+            </button>
             <button 
               onClick={() => navigate('/admin/add-goal')} 
               className="add-goal-small-btn"
