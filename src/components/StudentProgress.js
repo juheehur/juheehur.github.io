@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { db } from '../firebase/config';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import moment from 'moment-timezone';
@@ -33,10 +34,12 @@ const StudentProgress = ({ studentId }) => {
       const studentData = studentDoc.docs
         .find(doc => doc.id === studentId);
       if (studentData) {
-        setStudent({
+        const studentInfo = {
           id: studentData.id,
           ...studentData.data()
-        });
+        };
+        setStudent(studentInfo);
+        document.title = `${studentInfo.name}님의 학습 현황`;
       }
     } catch (error) {
       console.error('Error fetching student data:', error);
@@ -167,6 +170,13 @@ const StudentProgress = ({ studentId }) => {
 
   return (
     <div className="student-progress">
+      {student && (
+        <Helmet>
+          <title>{student.name}님의 학습 현황</title>
+          <meta property="og:title" content={`${student.name}님의 학습 현황`} />
+          <meta property="og:description" content={`${student.name} 학생의 과외 학습 현황과 숙제를 확인하세요.`} />
+        </Helmet>
+      )}
       <div className="progress-header">
         <div className="progress-header-content">
           <h2>{student.name}님의 학습 현황</h2>
