@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { db } from '../../firebase/config';
-import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy, setDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy, setDoc, onSnapshot } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/addTodo.css';
 import Calendar from 'react-calendar';
@@ -39,16 +39,25 @@ const AddTodo = () => {
   const [isLoadingMonth, setIsLoadingMonth] = useState(false);
   const [habits, setHabits] = useState([]);
   const [todayHabits, setTodayHabits] = useState([]);
+  const [monthListeners, setMonthListeners] = useState({});
 
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
-    fetchTodayTodos();
+    const unsubscribeTodayTodos = setupTodayTodosListener();
     checkNotificationPermission();
     fetchGoals();
     fetchCategoryColors();
     fetchTodayHabits();
+
+    return () => {
+      if (unsubscribeTodayTodos) unsubscribeTodayTodos();
+      // Cleanup all month listeners
+      Object.values(monthListeners).forEach(unsubscribe => {
+        if (unsubscribe) unsubscribe();
+      });
+    };
   }, []);
 
   useEffect(() => {
@@ -59,65 +68,90 @@ const AddTodo = () => {
     localStorage.setItem('loadedMonths', JSON.stringify([...loadedMonths]));
   }, [loadedMonths]);
 
-  const fetchTodayTodos = async () => {
+  const setupTodayTodosListener = () => {
     try {
       const today = moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD');
       const todosQuery = query(
         collection(db, `todos/${today}/todos`),
         orderBy('createdAt', 'desc')
       );
-      const todosSnapshot = await getDocs(todosQuery);
-      const todayTodos = todosSnapshot.docs.map(doc => ({
-        id: doc.id,
-        date: today,
-        ...doc.data()
-      }));
 
-      setAddedTodos(todayTodos);
-      
-      const currentMonth = moment().tz('Asia/Hong_Kong').format('YYYY-MM');
-      if (!loadedMonths.has(currentMonth)) {
-        fetchMonthTodos(currentMonth);
-      }
+      const unsubscribe = onSnapshot(todosQuery, (snapshot) => {
+        const todayTodos = snapshot.docs.map(doc => ({
+          id: doc.id,
+          date: today,
+          ...doc.data()
+        }));
+
+        setAddedTodos(todayTodos);
+        
+        const currentMonth = moment().tz('Asia/Hong_Kong').format('YYYY-MM');
+        if (!loadedMonths.has(currentMonth)) {
+          fetchMonthTodos(currentMonth);
+        }
+      }, (error) => {
+        console.error('Error in todos listener:', error);
+      });
+
+      return unsubscribe;
     } catch (error) {
-      console.error('Error fetching today todos:', error);
+      console.error('Error setting up todos listener:', error);
+      return null;
     }
   };
 
   const fetchMonthTodos = async (monthStr) => {
-    if (loadedMonths.has(monthStr) || isLoadingMonth) return;
+    if (loadedMonths.has(monthStr) || isLoadingMonth || monthListeners[monthStr]) return;
     
     setIsLoadingMonth(true);
     try {
       const startDate = moment(monthStr).startOf('month');
       const endDate = moment(monthStr).endOf('month');
-      const dateCollectionsSnapshot = await getDocs(collection(db, 'todos'));
-      const monthTodosList = [];
-
-      for (const dateDoc of dateCollectionsSnapshot.docs) {
-        const date = moment(dateDoc.id);
-        if (date.isBetween(startDate, endDate, 'day', '[]')) {
-          const todosQuery = query(
-            collection(db, `todos/${dateDoc.id}/todos`),
-            orderBy('createdAt', 'desc')
-          );
-          const todosSnapshot = await getDocs(todosQuery);
-          const dateTodos = todosSnapshot.docs.map(doc => ({
-            id: doc.id,
-            date: dateDoc.id,
-            ...doc.data()
-          }));
-          monthTodosList.push(...dateTodos);
-        }
+      
+      // Create listeners for each day in the month
+      const monthDays = [];
+      let currentDate = startDate.clone();
+      while (currentDate.isSameOrBefore(endDate)) {
+        monthDays.push(currentDate.format('YYYY-MM-DD'));
+        currentDate.add(1, 'day');
       }
 
-      setMonthTodos(prev => {
-        const updated = {
-          ...prev,
-          [monthStr]: monthTodosList
-        };
-        return updated;
+      const listeners = {};
+      monthDays.forEach(date => {
+        const todosQuery = query(
+          collection(db, `todos/${date}/todos`),
+          orderBy('createdAt', 'desc')
+        );
+
+        const unsubscribe = onSnapshot(todosQuery, (snapshot) => {
+          const dateTodos = snapshot.docs.map(doc => ({
+            id: doc.id,
+            date,
+            ...doc.data()
+          }));
+
+          setMonthTodos(prev => {
+            const existingMonthTodos = prev[monthStr] || [];
+            const filteredTodos = existingMonthTodos.filter(todo => todo.date !== date);
+            return {
+              ...prev,
+              [monthStr]: [...filteredTodos, ...dateTodos]
+            };
+          });
+        }, (error) => {
+          console.error(`Error in month todos listener for ${date}:`, error);
+        });
+
+        listeners[date] = unsubscribe;
       });
+
+      setMonthListeners(prev => ({
+        ...prev,
+        [monthStr]: () => {
+          Object.values(listeners).forEach(unsubscribe => unsubscribe());
+        }
+      }));
+
       setLoadedMonths(prev => new Set([...prev, monthStr]));
     } catch (error) {
       console.error('Error fetching month todos:', error);
