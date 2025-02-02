@@ -254,11 +254,11 @@ const InterviewPractice = () => {
               )}
             </div>
             <button 
-              onClick={() => navigate('/admin/tech-interview')} 
+              onClick={() => window.location.href = 'http://localhost:3002/#/'} 
               className="back-button"
             >
               <span>←</span>
-              <span>Tech Interview</span>
+              <span>Home</span>
             </button>
           </div>
         </div>
@@ -267,16 +267,30 @@ const InterviewPractice = () => {
         <div className="random-question-section">
           <div className="random-controls">
             <div className="random-category-select">
-              <select
-                value={randomCategory}
-                onChange={handleCategoryChange}
-                className="random-category-dropdown"
+              <div className="dropdown-wrapper">
+                <select
+                  value={randomCategory}
+                  onChange={handleCategoryChange}
+                  className="random-category-dropdown"
+                >
+                  <option value="all">모든 카테고리</option>
+                  {PREDEFINED_CATEGORIES.map(category => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                </select>
+                <svg className="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <button 
+                onClick={refreshData}
+                className="refresh-button"
+                title="데이터 새로고침"
               >
-                <option value="all">모든 카테고리</option>
-                {PREDEFINED_CATEGORIES.map(category => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
-                ))}
-              </select>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+                </svg>
+              </button>
             </div>
           </div>
 

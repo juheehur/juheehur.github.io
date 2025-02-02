@@ -3,7 +3,7 @@
 .memo-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -11,12 +11,12 @@
 }
 
 .memo-header {
-  margin-bottom: 2rem;
+  margin-bottom: 10px;
   padding: 1.75rem;
-  background: #f5f5f7;
+  background: #ffffff;
   border-radius: 16px;
   border: none;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: none;
 }
 
 .memo-header h1 {
@@ -55,7 +55,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: none;
   font-weight: 500;
 }
 
@@ -72,8 +72,9 @@
 .memo-command-examples {
   padding: 1.25rem;
   margin-top: 1rem;
-  background: rgba(0, 0, 0, 0.03);
+  background: #ffffff;
   border-radius: 12px;
+  border: none;
 }
 
 .examples-toggle {
@@ -134,7 +135,7 @@
   outline: none;
   font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   transition: border-color 0.2s ease;
-  margin-bottom: 2rem;
+  margin-bottom: 10px;
 }
 
 .memo-textarea:focus {
@@ -296,7 +297,6 @@
 
   .memo-header {
     padding: 1.25rem;
-    margin-bottom: 1.5rem;
     border-radius: 12px;
   }
 
@@ -459,9 +459,9 @@
 .todos-calendar-layout {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
   flex: 1;
   min-height: 0;
+  margin-top:20px;
 }
 
 @media (min-width: 1024px) {
@@ -538,7 +538,6 @@
 
 .calendar-section {
   background: #ffffff;
-  padding: 1.5rem;
   border-radius: 16px;
 }
 
@@ -1027,19 +1026,19 @@
 .habit-check-box {
   width: 24px;
   height: 24px;
-  border: 2px solid #4ECDC4;
+  border: 2px solid var(--apple-accent);
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4ECDC4;
+  color: var(--apple-accent);
   font-size: 16px;
   font-weight: bold;
   transition: all 0.2s ease;
 }
 
 .completed .habit-check-box {
-  background-color: #4ECDC4;
+  background-color: var(--apple-accent);
   color: white;
 }
 
@@ -1117,7 +1116,7 @@
   }
 
   .habit-check-card.completed {
-    background: #4ECDC4;
+    background: var(--apple-accent);
   }
 
   .habit-check-card.completed .habit-check-header h3 {
