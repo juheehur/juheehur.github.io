@@ -217,8 +217,8 @@ const AddGoal = () => {
             Habits
           </button>
         </div>
-        <button onClick={() => navigate('/admin')} className="back-btn">
-          Back to Admin
+        <button onClick={() => window.location.href = 'http://localhost:3002/#/'} className="back-btn">
+          Back to Home
         </button>
       </div>
 

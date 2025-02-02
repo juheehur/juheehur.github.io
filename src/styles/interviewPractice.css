@@ -74,19 +74,18 @@
 }
 
 .back-button {
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
   border: none;
   color: var(--apple-accent);
   padding: 8px 14px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
+  font-family: var(--font-primary);
   display: flex;
   align-items: center;
   gap: 6px;
   transition: all 0.2s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .back-button span:first-child {
@@ -95,12 +94,12 @@
 }
 
 .back-button:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(10, 132, 255, 0.1);
 }
 
 .back-button:active {
   transform: scale(0.96);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(10, 132, 255, 0.15);
 }
 
 @media (max-width: 768px) {
@@ -138,26 +137,111 @@
 .random-category-select {
   width: 100%;
   max-width: 300px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-wrapper {
+  position: relative;
+  flex: 1;
 }
 
 .random-category-dropdown {
-  background: var(--apple-dark-elevated);
-  border: none;
-  color: var(--apple-text-primary);
-  padding: 14px 18px;
-  border-radius: 12px;
-  font-size: 16px;
   width: 100%;
+  background: var(--apple-dark-elevated);
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  padding: 10px 14px;
+  padding-right: 36px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-primary);
+  letter-spacing: -0.2px;
   appearance: none;
-  position: relative;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.random-category-dropdown option {
+  background: var(--apple-dark-surface);
+  color: var(--apple-text-primary);
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-primary);
+}
+
+.random-category-dropdown:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .random-category-dropdown:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3);
+  border-color: var(--apple-accent);
+  background: rgba(10, 132, 255, 0.1);
+  box-shadow: 0 0 0 1px var(--apple-accent);
+}
+
+.dropdown-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--apple-text-secondary);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  width: 16px;
+  height: 16px;
+  padding: 3px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.random-category-dropdown:hover + .dropdown-arrow {
+  color: var(--apple-text-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.random-category-dropdown:focus + .dropdown-arrow {
+  color: var(--apple-accent);
+  transform: translateY(-50%) rotate(180deg);
+  background: rgba(10, 132, 255, 0.1);
+}
+
+.refresh-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: var(--apple-dark-elevated);
+  color: var(--apple-text-secondary);
+  border: 1px solid var(--apple-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.refresh-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--apple-text-primary);
+  transform: rotate(30deg);
+}
+
+.refresh-button:active {
+  transform: rotate(180deg);
+}
+
+.last-update {
+  color: var(--apple-text-secondary);
+  font-size: 0.9rem;
+  font-family: var(--font-primary);
+  margin: 0;
 }
 
 /* Random Question Flip Card */
@@ -690,6 +774,7 @@
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 13px;
+  font-family: var(--font-primary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -768,5 +853,43 @@
     opacity: 0.3;
     bottom: 4px;
   }
+}
+
+.update-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.update-section .refresh-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: var(--apple-dark-elevated);
+  color: var(--apple-text-secondary);
+  border: 1px solid var(--apple-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.update-section .refresh-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--apple-text-primary);
+  transform: rotate(30deg);
+}
+
+.update-section .refresh-button:active {
+  transform: rotate(180deg);
+}
+
+.update-section .last-update {
+  color: var(--apple-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
 }
 
