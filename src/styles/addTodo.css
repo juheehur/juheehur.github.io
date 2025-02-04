@@ -158,6 +158,7 @@
 .todo-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   padding: 1rem;
   color: #000000 !important;
@@ -168,6 +169,53 @@
   background: #ffffff;
   cursor: pointer;
   position: relative;
+}
+
+.todo-main-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.notification-btn {
+  display: none;
+}
+
+.postpone-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1em;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.postpone-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+  opacity: 1;
+}
+
+.postpone-btn:active {
+  transform: scale(0.95);
 }
 
 .todo-item:hover {
@@ -228,46 +276,9 @@
   letter-spacing: -0.006em;
 }
 
-.notification-btn {
-  background: transparent;
-  color: #0066cc;
-  border: 1px solid #0066cc;
-  padding: 0.375rem 0.875rem;
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-weight: 500;
-  margin-left: auto;
-  flex-shrink: 0;
-  z-index: 1;
-}
-
 .notification-btn::before {
   content: '🔔';
   font-size: 0.875rem;
-}
-
-.notification-btn:hover {
-  background: rgba(0, 102, 204, 0.1);
-}
-
-.notification-btn:active {
-  transform: scale(0.98);
-}
-
-.notification-btn.scheduled {
-  background: #f5f5f7;
-  border-color: #86868b;
-  color: #86868b;
-}
-
-.notification-btn.scheduled::before {
-  content: '✓';
 }
 
 .notification-btn:disabled {
@@ -329,39 +340,53 @@
   }
 
   .todo-item {
-    padding: 0.875rem;
-    margin-bottom: 0.375rem;
-    border-radius: 10px;
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .todo-main-content {
     gap: 0.75rem;
   }
 
-  .todo-checkbox {
-    width: 20px;
-    height: 20px;
-  }
-
   .todo-content {
-    padding-right: 0.75rem;
+    min-width: 0;
   }
 
   .todo-task {
     font-size: 0.9375rem;
-    margin-bottom: 0.25rem;
-    line-height: 1.4;
   }
 
   .todo-details {
     font-size: 0.8125rem;
   }
 
-  .notification-btn {
-    padding: 0.25rem 0.625rem;
-    font-size: 0.75rem;
-    border-radius: 6px;
+  .todo-actions {
+    gap: 4px;
   }
 
-  .notification-btn::before {
-    font-size: 0.8125rem;
+  .postpone-form {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 1rem;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .postpone-reason-input {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .postpone-form button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
   }
 
   /* Improve touch targets */
@@ -370,7 +395,7 @@
     min-width: 20px;
   }
 
-  .notification-btn {
+  .postpone-btn {
     min-height: 28px;
     min-width: 28px;
   }
@@ -433,7 +458,6 @@
     font-size: 1rem;
   }
 }
-
 
 .tech-interview-btn,
 .interview-practice-btn {
@@ -1146,4 +1170,85 @@
     flex-direction: column;
     gap: 0;
   }
+}
+
+.postpone-form {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.postpone-reason-input {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9em;
+  width: 200px;
+}
+
+.postpone-submit-btn,
+.postpone-cancel-btn {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.postpone-submit-btn {
+  background-color: #4CAF50;
+  color: white;
+  border-color: #45a049;
+}
+
+.postpone-cancel-btn {
+  background-color: #f44336;
+  color: white;
+  border-color: #da190b;
+}
+
+.postpone-submit-btn:hover {
+  background-color: #45a049;
+}
+
+.postpone-cancel-btn:hover {
+  background-color: #da190b;
+}
+
+.postponed-indicator {
+  color: #ff6b6b;
+  margin-right: 8px;
+  font-size: 1.2em;
+  letter-spacing: -2px;
+  white-space: nowrap;
+}
+
+.todo-item.postponed {
+  border-left: 3px solid #ff6b6b;
+}
+
+.todo-item.notification-scheduled {
+  border-left: 3px solid #FFD700;
+}
+
+.todo-item.postponed.notification-scheduled {
+  border-left: 6px solid;
+  border-image: linear-gradient(to bottom, #ff6b6b 50%, #FFD700 50%) 1;
+}
+
+.todo-item.can-schedule {
+  border-left: 3px solid #FFD700;
+}
+
+.todo-item.can-schedule:hover {
+  border-left-color: #666;
+}
+.todo-item.postponed:hover {
+  border-left-color: #666;
+}
+.postpone-reason {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 4px;
+  font-style: italic;
 } 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { db } from '../../firebase/config';
-import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy, setDoc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp, query, orderBy, setDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/addTodo.css';
 import Calendar from 'react-calendar';
@@ -21,7 +21,9 @@ const AddTodo = () => {
     date: moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD'),
     startTime: '',
     endTime: '',
-    location: ''
+    location: '',
+    postponed: false,
+    postponeReason: ''
   });
   const [notificationPermission, setNotificationPermission] = useState('default');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -258,25 +260,74 @@ const AddTodo = () => {
     }
   };
 
+  const handlePostpone = async (todo, reason = '') => {
+    try {
+      const currentDate = moment(todo.date);
+      const nextDate = currentDate.add(1, 'days').format('YYYY-MM-DD');
+      
+      // Delete from current date collection
+      const oldTodoRef = doc(db, `todos/${todo.date}/todos/${todo.id}`);
+      await deleteDoc(oldTodoRef);
+      
+      // Add to next date collection with postpone info
+      const dateCollectionRef = doc(db, 'todos', nextDate);
+      const todosCollectionRef = collection(dateCollectionRef, 'todos');
+      
+      await setDoc(dateCollectionRef, { createdAt: serverTimestamp() }, { merge: true });
+      
+      const newTodoData = {
+        ...todo,
+        date: nextDate,
+        postponed: true,
+        postponeReason: reason,
+        postponeCount: (todo.postponeCount || 0) + 1,
+        createdAt: serverTimestamp()
+      };
+      
+      await setDoc(doc(todosCollectionRef, todo.id), newTodoData);
+
+      // Update local state
+      setAddedTodos(prev => prev.filter(t => !(t.id === todo.id && t.date === todo.date)));
+      
+      const monthStr = moment(nextDate).format('YYYY-MM');
+      setMonthTodos(prev => {
+        const monthTodosList = prev[monthStr] || [];
+        return {
+          ...prev,
+          [monthStr]: [newTodoData, ...monthTodosList.filter(t => !(t.id === todo.id && t.date === todo.date))]
+        };
+      });
+
+      toast.info('📅 Todo postponed to tomorrow', {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    } catch (error) {
+      console.error('Error postponing todo:', error);
+      toast.error('❌ Failed to postpone todo', {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
+  };
+
   const formatTodoDisplay = (todo) => {
     const parts = [];
 
     if (todo.date) {
-      const date = new Date(todo.date);
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const nextWeek = new Date(today);
-      nextWeek.setDate(nextWeek.getDate() + 7);
+      const date = moment(todo.date).tz('Asia/Hong_Kong');
+      const today = moment().tz('Asia/Hong_Kong');
+      const tomorrow = moment().tz('Asia/Hong_Kong').add(1, 'days');
+      const nextWeek = moment().tz('Asia/Hong_Kong').add(7, 'days');
 
-      if (todo.date === today.toISOString().split('T')[0]) {
+      if (date.isSame(today, 'day')) {
         parts.push('오늘');
-      } else if (todo.date === tomorrow.toISOString().split('T')[0]) {
+      } else if (date.isSame(tomorrow, 'day')) {
         parts.push('내일');
-      } else if (todo.date === nextWeek.toISOString().split('T')[0]) {
+      } else if (date.isSame(nextWeek, 'day')) {
         parts.push('다음 주');
       } else {
-        parts.push(date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' }));
+        parts.push(date.format('M월 D일'));
       }
     }
 
@@ -295,9 +346,20 @@ const AddTodo = () => {
       parts.push(`🔔 ${todo.notifyMinutesBefore || 30}분 전 알림`);
     }
 
+    if (todo.postponed) {
+      parts.push(`미뤄짐${todo.postponeReason ? ': ' + todo.postponeReason : ''}`);
+    }
+
     return (
       <div className="todo-content">
-        <div className="todo-task">{todo.task}</div>
+        <div className="todo-task">
+          {todo.postponed && (
+            <span className="postponed-indicator">
+              {'•'.repeat(todo.postponeCount || 1)}
+            </span>
+          )}
+          {todo.task}
+        </div>
         {parts.length > 0 && (
           <div className="todo-details">
             {parts.join(' · ')}
@@ -531,7 +593,9 @@ const AddTodo = () => {
           date: moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD'),
           startTime: '',
           endTime: '',
-          location: ''
+          location: '',
+          postponed: false,
+          postponeReason: ''
         });
       } catch (error) {
         console.error('Error adding todo:', error);
@@ -566,7 +630,7 @@ const AddTodo = () => {
 
   const isToday = (dateStr) => {
     const today = moment().tz('Asia/Hong_Kong').startOf('day');
-    const date = moment.tz(dateStr, 'Asia/Hong_Kong').startOf('day');
+    const date = moment(dateStr).tz('Asia/Hong_Kong').startOf('day');
     return date.isSame(today);
   };
 
@@ -736,6 +800,88 @@ const AddTodo = () => {
     }
   };
 
+  const TodoItem = ({ todo, onToggleComplete }) => {
+    const [isPostponing, setIsPostponing] = useState(false);
+    const [postponeReason, setPostponeReason] = useState('');
+
+    const handlePostponeClick = (e) => {
+      e.stopPropagation();
+      setIsPostponing(true);
+    };
+
+    const handlePostponeSubmit = (e) => {
+      e.stopPropagation();
+      handlePostpone(todo, postponeReason);
+      setIsPostponing(false);
+      setPostponeReason('');
+    };
+
+    const handlePostponeCancel = (e) => {
+      e.stopPropagation();
+      setIsPostponing(false);
+      setPostponeReason('');
+    };
+
+    const handleNotificationClick = (e) => {
+      e.stopPropagation();
+      if (!todo.notificationScheduled && todo.startTime) {
+        scheduleNotification(todo);
+      }
+    };
+
+    const todoClasses = [
+      'todo-item',
+      todo.completed ? 'completed' : '',
+      todo.postponed ? 'postponed' : '',
+      todo.notificationScheduled ? 'notification-scheduled' : '',
+      todo.startTime && !todo.notificationScheduled ? 'can-schedule' : ''
+    ].filter(Boolean).join(' ');
+
+    return (
+      <div 
+        className={todoClasses}
+        onClick={() => onToggleComplete(todo.id, todo.completed, todo.date)}
+      >
+        <div className="todo-main-content">
+          <input
+            type="checkbox"
+            checked={todo.completed}
+            className="todo-checkbox"
+            readOnly
+          />
+          {formatTodoDisplay(todo)}
+        </div>
+        <div className="todo-actions">
+          {!isPostponing ? (
+            <button 
+              onClick={handlePostponeClick}
+              className="postpone-btn"
+              title="미루기"
+            >
+              ⏳
+            </button>
+          ) : (
+            <div className="postpone-form" onClick={e => e.stopPropagation()}>
+              <input
+                type="text"
+                placeholder="미룬 이유 (선택사항)"
+                value={postponeReason}
+                onChange={e => setPostponeReason(e.target.value)}
+                className="postpone-reason-input"
+              />
+              <button onClick={handlePostponeSubmit} className="postpone-submit-btn">
+                확인
+              </button>
+              <button onClick={handlePostponeCancel} className="postpone-cancel-btn">
+                취소
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="memo-container">
       <div className="memo-header">
@@ -857,33 +1003,11 @@ const AddTodo = () => {
                       <h2>Today's Todos ({moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD ddd')})</h2>
                       <div className="added-todos">
                         {todayTodos.map(todo => (
-                          <div 
-                            key={todo.id} 
-                            className={`todo-item ${todo.completed ? 'completed' : ''}`}
-                            onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={todo.completed}
-                              className="todo-checkbox"
-                              readOnly
-                            />
-                            {formatTodoDisplay(todo)}
-                            {todo.startTime && (
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  scheduleNotification(todo);
-                                }}
-                                className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
-                                disabled={todo.notificationScheduled}
-                              >
-                                {todo.notificationScheduled 
-                                  ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
-                                  : '30분 전 알림'}
-                              </button>
-                            )}
-                          </div>
+                          <TodoItem
+                            key={todo.id}
+                            todo={todo}
+                            onToggleComplete={handleToggleComplete}
+                          />
                         ))}
                       </div>
                     </div>
@@ -897,33 +1021,11 @@ const AddTodo = () => {
                         {monthTodos[moment(selectedDate).format('YYYY-MM')]
                           ?.filter(todo => todo.date === moment(selectedDate).format('YYYY-MM-DD'))
                           .map(todo => (
-                            <div 
-                              key={todo.id} 
-                              className={`todo-item ${todo.completed ? 'completed' : ''}`}
-                              onClick={() => handleToggleComplete(todo.id, todo.completed, todo.date)}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={todo.completed}
-                                className="todo-checkbox"
-                                readOnly
-                              />
-                              {formatTodoDisplay(todo)}
-                              {todo.startTime && (
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    scheduleNotification(todo);
-                                  }}
-                                  className={`notification-btn ${todo.notificationScheduled ? 'scheduled' : ''}`}
-                                  disabled={todo.notificationScheduled}
-                                >
-                                  {todo.notificationScheduled 
-                                    ? `${todo.notifyMinutesBefore || 30}분 전 알림` 
-                                    : '30분 전 알림'}
-                              </button>
-                            )}
-                            </div>
+                            <TodoItem
+                              key={todo.id}
+                              todo={todo}
+                              onToggleComplete={handleToggleComplete}
+                            />
                           ))}
                       </div>
                     </div>
