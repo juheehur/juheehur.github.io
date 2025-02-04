@@ -14,6 +14,7 @@ const StudentProgressPage = () => {
   const { studentId } = useParams();
   const [student, setStudent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -55,7 +56,7 @@ const StudentProgressPage = () => {
         
         {/* Open Graph / Facebook / KakaoTalk */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={window.location.href} />
+        <meta property="og:url" content={currentUrl} />
         <meta property="og:site_name" content={title} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
@@ -63,7 +64,7 @@ const StudentProgressPage = () => {
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:url" content={window.location.href} />
+        <meta name="twitter:url" content={currentUrl} />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={null} />
