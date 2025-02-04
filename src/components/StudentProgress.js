@@ -169,18 +169,6 @@ const StudentProgress = ({ studentId }) => {
 
   return (
     <div className="student-progress">
-      <Helmet prioritizeSeoTags={true}>
-        <title>{student?.name ? `${student.name}님의 학습 현황` : '학습 현황'}</title>
-        <meta property="og:title" content={student?.name ? `${student.name}님의 학습 현황` : '학습 현황'} />
-        <meta name="description" content={student?.name && student?.subjects ? 
-          `${student.name}님의 ${student.subjects} 수업 진도와 숙제를 확인하실 수 있습니다.` : 
-          '학생의 수업 진도와 숙제를 확인하실 수 있습니다.'} />
-        <meta property="og:description" content={student?.name && student?.subjects ? 
-          `${student.name}님의 ${student.subjects} 수업 진도와 숙제를 확인하실 수 있습니다.` : 
-          '학생의 수업 진도와 숙제를 확인하실 수 있습니다.'} />
-        <meta property="og:type" content="website" />
-        <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
       <div className="progress-header">
         <div className="progress-header-content">
           <h2>{student.name}님의 학습 현황</h2>
