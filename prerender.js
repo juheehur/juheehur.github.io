@@ -3,17 +3,33 @@ const path = require('path');
 const fs = require('fs');
 const admin = require('firebase-admin');
 
+// Firebase 초기화 - 환경 변수 확인
+let firebaseConfig;
+
+if (process.env.FIREBASE_PRIVATE_KEY) {
+  // Vercel 환경 - 환경 변수 사용
+  firebaseConfig = {
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    }),
+  };
+} else {
+  // 로컬 환경 - 서비스 계정 파일 사용
+  try {
+    const serviceAccount = require('./firebase-service-account.json');
+    firebaseConfig = {
+      credential: admin.credential.cert(serviceAccount)
+    };
+  } catch (error) {
+    console.error('Firebase credentials not found. Please set up environment variables or provide service account file.');
+    process.exit(1);
+  }
+}
+
 // Firebase 초기화
-const firebaseConfig = {
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  }),
-};
-
 admin.initializeApp(firebaseConfig);
-
 const db = admin.firestore();
 
 async function getStudentIds() {
