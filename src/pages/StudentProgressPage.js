@@ -37,27 +37,38 @@ const StudentProgressPage = () => {
 
   return (
     <>
-      <Helmet prioritizeSeoTags={true}>
-        {/* 기본 메타데이터 */}
+      <Helmet>
+        {/* Force override metadata */}
         <title>{title}</title>
         <meta name="title" content={title} />
         <meta name="description" content={description} />
         
-        {/* Open Graph / Facebook */}
+        {/* Open Graph / Facebook / KakaoTalk */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={window.location.href} />
+        <meta property="og:site_name" content={title} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
+        <meta property="og:image" content={null} />
         
         {/* Twitter */}
-        <meta property="twitter:card" content="summary" />
-        <meta property="twitter:url" content={window.location.href} />
-        <meta property="twitter:title" content={title} />
-        <meta property="twitter:description" content={description} />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:url" content={window.location.href} />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={null} />
 
-        {/* 기타 메타데이터 */}
-        <meta name="robots" content="noindex,nofollow" />
-        <link rel="canonical" href={window.location.href} />
+        {/* WeChat */}
+        <meta property="wechat:title" content={title} />
+        <meta property="wechat:description" content={description} />
+        <meta property="wechat:image" content={null} />
+        <meta property="wechat:timeline_title" content={title} />
+        
+        {/* Naver / KakaoTalk */}
+        <meta name="naver-site-verification" content={title} />
+        <meta property="kakao:title" content={title} />
+        <meta property="kakao:description" content={description} />
+        <meta property="kakao:image" content={null} />
       </Helmet>
       <div className="student-progress-page">
         <div className="progress-container">
