@@ -42,11 +42,12 @@
   "scripts": {
     "dev": "react-scripts start",
     "start": "react-scripts start",
-    "build": "set \"CI=false\" && react-scripts build",
+    "build": "react-scripts build && node prerender.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "prerender": "node prerender.js"
   },
   "repository": {
     "type": "git",
@@ -73,6 +74,8 @@
   "devDependencies": {
     "autoprefixer": "^9.8.8",
     "cross-env": "^7.0.3",
-    "postcss": "^7.0.39"
+    "firebase-admin": "^13.0.2",
+    "postcss": "^7.0.39",
+    "puppeteer": "^24.1.1"
   }
 }

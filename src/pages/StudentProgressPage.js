@@ -5,13 +5,20 @@ import { db } from '../firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
 import StudentProgress from '../components/StudentProgress';
 
+// 정적 HTML 생성을 위한 라우트 정보
+if (typeof window !== 'undefined' && window.__PRERENDER_INJECTED) {
+  window.__PRERENDER_INJECTED.routes = ['/student-progress/:studentId'];
+}
+
 const StudentProgressPage = () => {
   const { studentId } = useParams();
   const [student, setStudent] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
+        setIsLoading(true);
         const studentDoc = await getDocs(collection(db, 'tutoringStudents'));
         const studentData = studentDoc.docs.find(doc => doc.id === studentId);
         if (studentData) {
@@ -22,6 +29,8 @@ const StudentProgressPage = () => {
         }
       } catch (error) {
         console.error('Error fetching student data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -35,6 +44,7 @@ const StudentProgressPage = () => {
     `${student.name}님의 ${student.subjects} 수업 진도와 숙제를 확인하실 수 있습니다.` : 
     '학생의 수업 진도와 숙제를 확인하실 수 있습니다.';
 
+  // 로딩 중에도 메타데이터가 있는 HTML을 반환
   return (
     <>
       <Helmet>
@@ -72,7 +82,14 @@ const StudentProgressPage = () => {
       </Helmet>
       <div className="student-progress-page">
         <div className="progress-container">
-          <StudentProgress studentId={studentId} />
+          {isLoading ? (
+            <div className="loading-state">
+              <h1>{title}</h1>
+              <p>{description}</p>
+            </div>
+          ) : (
+            <StudentProgress studentId={studentId} />
+          )}
         </div>
       </div>
     </>
