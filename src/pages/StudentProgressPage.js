@@ -12,9 +12,14 @@ if (typeof window !== 'undefined' && window.__PRERENDER_INJECTED) {
 
 const StudentProgressPage = () => {
   const { studentId } = useParams();
-  const [student, setStudent] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const [student, setStudent] = useState(() => {
+    // 서버에서 프리렌더링된 초기 상태가 있으면 사용
+    if (typeof window !== 'undefined' && window.__INITIAL_STATE__?.student) {
+      return window.__INITIAL_STATE__.student;
+    }
+    return null;
+  });
+  const [isLoading, setIsLoading] = useState(!student); // 초기 상태가 있으면 로딩 false
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -35,15 +40,18 @@ const StudentProgressPage = () => {
       }
     };
 
-    if (studentId) {
+    // 초기 상태가 없을 때만 데이터 fetch
+    if (studentId && !student) {
       fetchStudentData();
     }
-  }, [studentId]);
+  }, [studentId, student]);
 
   const title = student?.name ? `${student.name}님의 학습 현황` : '학습 현황';
   const description = student?.name && student?.subjects ? 
     `${student.name}님의 ${student.subjects} 수업 진도와 숙제를 확인하실 수 있습니다.` : 
     '학생의 수업 진도와 숙제를 확인하실 수 있습니다.';
+
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   // 로딩 중에도 메타데이터가 있는 HTML을 반환
   return (

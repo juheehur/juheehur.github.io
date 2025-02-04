@@ -44,11 +44,22 @@ function generateStaticHtml(student) {
   const title = `${student.name}님의 학습 현황`;
   const description = `${student.name}님의 ${student.subjects} 수업 진도와 숙제를 확인하실 수 있습니다.`;
   
+  // React 앱의 초기 상태
+  const initialState = {
+    student: {
+      id: student.id,
+      name: student.name,
+      subjects: student.subjects
+    }
+  };
+  
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <title>${title}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
   <meta name="title" content="${title}">
   <meta name="description" content="${description}">
   
@@ -72,7 +83,9 @@ function generateStaticHtml(student) {
   <meta property="kakao:title" content="${title}">
   <meta property="kakao:description" content="${description}">
   
-  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/logo192.png" />
 </head>
 <body>
   <div id="root">
@@ -85,7 +98,11 @@ function generateStaticHtml(student) {
       </div>
     </div>
   </div>
-  <script src="/static/js/main.js"></script>
+  <script>
+    window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};
+  </script>
+  <script defer="defer" src="/static/js/main.js"></script>
+  <link href="/static/css/main.css" rel="stylesheet">
 </body>
 </html>`;
 }
@@ -93,6 +110,9 @@ function generateStaticHtml(student) {
 async function main() {
   try {
     const students = await getStudentData();
+    
+    // index.html도 복사
+    const indexHtml = fs.readFileSync(path.join(__dirname, 'build', 'index.html'), 'utf8');
     
     for (const student of students) {
       const outputPath = path.join(__dirname, 'build', 'student-progress', student.id, 'index.html');
