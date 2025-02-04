@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './pages/Home';
 import Portfolio from './pages/Portfolio';
@@ -39,7 +39,7 @@ function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <Router basename="/">
+        <Router>
           <div className="App">
             <Header />
             <Routes>
