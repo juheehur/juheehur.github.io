@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase/config';
-import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, setDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, setDoc, doc, where, updateDoc } from 'firebase/firestore';
 import moment from 'moment-timezone';
 import '../styles/tutoringLog.css';
 import StudentProgress from './StudentProgress';
@@ -28,6 +28,8 @@ const TutoringLog = () => {
     endTime: '',
     note: '',
   });
+  const [scheduledSessions, setScheduledSessions] = useState([]);
+  const [selectedSchedule, setSelectedSchedule] = useState('');
 
   useEffect(() => {
     fetchStudents();
@@ -37,6 +39,15 @@ const TutoringLog = () => {
     localStorage.removeItem('monthTodos');
     localStorage.removeItem('loadedMonths');
   }, []);
+
+  useEffect(() => {
+    if (selectedStudent) {
+      fetchScheduledSessions();
+    } else {
+      setScheduledSessions([]);
+      setSelectedSchedule('');
+    }
+  }, [selectedStudent]);
 
   const fetchStudents = async () => {
     try {
@@ -65,6 +76,50 @@ const TutoringLog = () => {
       setLogs(logsData);
     } catch (error) {
       console.error('Error fetching logs:', error);
+    }
+  };
+
+  const fetchScheduledSessions = async () => {
+    try {
+      console.log('Fetching sessions for student:', selectedStudent);
+      // 1. 먼저 해당 학생의 모든 수업 기록을 가져옵니다
+      const logsQuery = query(
+        collection(db, 'tutoringLogs'),
+        where('studentId', '==', selectedStudent)
+      );
+      const logsSnapshot = await getDocs(logsQuery);
+      const existingLogs = logsSnapshot.docs.map(doc => doc.data());
+      
+      // 2. 예정된 수업을 가져옵니다
+      const sessionsQuery = query(
+        collection(db, 'tutoringSchedules'),
+        where('studentId', '==', selectedStudent)
+      );
+      
+      const sessionsSnapshot = await getDocs(sessionsQuery);
+      const sessionsData = sessionsSnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter(session => {
+          // completed가 false이거나 undefined인 세션만 포함
+          if (session.completed) return false;
+          
+          // 이미 수업 기록이 있는 세션 제외
+          const hasLog = existingLogs.some(log => 
+            log.date === session.date && 
+            log.startTime === session.startTime && 
+            log.endTime === session.endTime
+          );
+          return !hasLog;
+        })
+        .sort((a, b) => a.date.localeCompare(b.date));
+      
+      console.log('Fetched sessions:', sessionsData);
+      setScheduledSessions(sessionsData);
+    } catch (error) {
+      console.error('Error fetching scheduled sessions:', error);
     }
   };
 
@@ -116,6 +171,7 @@ const TutoringLog = () => {
       const student = students.find(s => s.id === selectedStudent);
       const duration = calculateDuration(sessionLog.startTime, sessionLog.endTime);
       
+      // Add the log
       await addDoc(collection(db, 'tutoringLogs'), {
         ...sessionLog,
         studentId: selectedStudent,
@@ -125,6 +181,15 @@ const TutoringLog = () => {
         createdAt: serverTimestamp()
       });
 
+      // If this log was created from a schedule, mark it as completed
+      if (selectedSchedule) {
+        const scheduleRef = doc(db, 'tutoringSchedules', selectedSchedule);
+        await updateDoc(scheduleRef, {
+          completed: true
+        });
+        fetchScheduledSessions(); // Refresh the schedules list
+      }
+
       setSessionLog({
         date: moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD'),
         startTime: '',
@@ -132,6 +197,7 @@ const TutoringLog = () => {
         topics: '',
         homework: '',
       });
+      setSelectedSchedule('');
       fetchRecentLogs();
     } catch (error) {
       console.error('Error adding log:', error);
@@ -365,11 +431,48 @@ const TutoringLog = () => {
               </form>
             ) : (
               <form onSubmit={handleSubmitLog} className="log-form">
+                {console.log('Current scheduledSessions:', scheduledSessions)}
+                {scheduledSessions.length > 0 ? (
+                  <div className="form-row">
+                    <select
+                      value={selectedSchedule}
+                      onChange={(e) => {
+                        const scheduleId = e.target.value;
+                        setSelectedSchedule(scheduleId);
+                        if (scheduleId) {
+                          const schedule = scheduledSessions.find(s => s.id === scheduleId);
+                          setSessionLog(prev => ({
+                            ...prev,
+                            date: schedule.date,
+                            startTime: schedule.startTime,
+                            endTime: schedule.endTime,
+                          }));
+                        }
+                      }}
+                      className="schedule-select"
+                    >
+                      <option value="">예정된 수업에서 선택...</option>
+                      {scheduledSessions.map(schedule => (
+                        <option key={schedule.id} value={schedule.id}>
+                          {moment(schedule.date).format('YYYY-MM-DD')} {schedule.startTime}-{schedule.endTime}
+                          {schedule.note ? ` (${schedule.note})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="no-schedules-message">
+                    예정된 수업이 없습니다.
+                  </div>
+                )}
                 <div className="form-row">
                   <input
                     type="date"
                     value={sessionLog.date}
-                    onChange={(e) => setSessionLog({...sessionLog, date: e.target.value})}
+                    onChange={(e) => {
+                      setSessionLog({...sessionLog, date: e.target.value});
+                      setSelectedSchedule('');
+                    }}
                     className="date-input"
                   />
                 </div>
@@ -377,7 +480,10 @@ const TutoringLog = () => {
                   <input
                     type="time"
                     value={sessionLog.startTime}
-                    onChange={(e) => setSessionLog({...sessionLog, startTime: e.target.value})}
+                    onChange={(e) => {
+                      setSessionLog({...sessionLog, startTime: e.target.value});
+                      setSelectedSchedule('');
+                    }}
                     placeholder="시작 시간"
                     className="time-input"
                   />
@@ -385,7 +491,10 @@ const TutoringLog = () => {
                   <input
                     type="time"
                     value={sessionLog.endTime}
-                    onChange={(e) => setSessionLog({...sessionLog, endTime: e.target.value})}
+                    onChange={(e) => {
+                      setSessionLog({...sessionLog, endTime: e.target.value});
+                      setSelectedSchedule('');
+                    }}
                     placeholder="종료 시간"
                     className="time-input"
                   />

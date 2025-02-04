@@ -39,7 +39,6 @@ const StudentProgress = ({ studentId }) => {
           ...studentData.data()
         };
         setStudent(studentInfo);
-        document.title = `${studentInfo.name}님의 학습 현황`;
       }
     } catch (error) {
       console.error('Error fetching student data:', error);
@@ -170,13 +169,12 @@ const StudentProgress = ({ studentId }) => {
 
   return (
     <div className="student-progress">
-      {student && (
-        <Helmet>
-          <title>{student.name}님의 학습 현황</title>
-          <meta property="og:title" content={`${student.name}님의 학습 현황`} />
-          <meta property="og:description" content={`${student.name} 학생의 과외 학습 현황과 숙제를 확인하세요.`} />
-        </Helmet>
-      )}
+      <Helmet>
+        <title>{student?.name ? `${student.name}님의 학습 현황` : '학습 현황'}</title>
+        <meta property="og:title" content={student?.name ? `${student.name}님의 학습 현황` : '학습 현황'} />
+        <meta property="og:description" content={student?.subjects ? `과목: ${student.subjects}` : ''} />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <div className="progress-header">
         <div className="progress-header-content">
           <h2>{student.name}님의 학습 현황</h2>
