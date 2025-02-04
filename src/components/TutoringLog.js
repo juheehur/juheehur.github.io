@@ -205,7 +205,7 @@ const TutoringLog = () => {
   };
 
   const handleShareProgress = (studentId) => {
-    const shareUrl = `${window.location.origin}/#/student-progress/${studentId}`;
+    const shareUrl = `${window.location.origin}/student-progress/${studentId}`;
     navigator.clipboard.writeText(shareUrl).then(() => {
       alert('공유 링크가 클립보드에 복사되었습니다.');
     });
