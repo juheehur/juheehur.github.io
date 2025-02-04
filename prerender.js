@@ -40,7 +40,7 @@ async function getStudentData() {
   }));
 }
 
-function generateStaticHtml(student) {
+function generateStaticHtml(student, assets) {
   const title = `${student.name}님의 학습 현황`;
   const description = `${student.name}님의 ${student.subjects} 수업 진도와 숙제를 확인하실 수 있습니다.`;
   
@@ -86,6 +86,7 @@ function generateStaticHtml(student) {
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="/logo192.png" />
+  ${assets.css.map(css => `<link href="${css}" rel="stylesheet">`).join('\n')}
 </head>
 <body>
   <div id="root">
@@ -101,28 +102,54 @@ function generateStaticHtml(student) {
   <script>
     window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};
   </script>
-  <script defer="defer" src="/static/js/main.js"></script>
-  <link href="/static/css/main.css" rel="stylesheet">
+  ${assets.js.map(js => `<script src="${js}"></script>`).join('\n')}
 </body>
 </html>`;
+}
+
+function getAssetManifest() {
+  const manifestPath = path.join(__dirname, 'build', 'asset-manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  
+  return {
+    js: [
+      manifest.files['main.js'],
+      manifest.files['runtime-main.js'],
+      ...(manifest.entrypoints.filter(file => file.endsWith('.js')))
+    ],
+    css: [
+      manifest.files['main.css'],
+      ...(manifest.entrypoints.filter(file => file.endsWith('.css')))
+    ]
+  };
 }
 
 async function main() {
   try {
     const students = await getStudentData();
+    const assets = getAssetManifest();
     
-    // index.html도 복사
-    const indexHtml = fs.readFileSync(path.join(__dirname, 'build', 'index.html'), 'utf8');
+    // build 디렉토리의 모든 파일을 복사
+    const buildFiles = fs.readdirSync(path.join(__dirname, 'build'));
     
     for (const student of students) {
-      const outputPath = path.join(__dirname, 'build', 'student-progress', student.id, 'index.html');
+      const studentDir = path.join(__dirname, 'build', 'student-progress', student.id);
       
       // 디렉토리가 없으면 생성
-      fs.mkdirSync(path.join(__dirname, 'build', 'student-progress', student.id), { recursive: true });
+      fs.mkdirSync(studentDir, { recursive: true });
+      
+      // static 디렉토리 복사
+      if (fs.existsSync(path.join(__dirname, 'build', 'static'))) {
+        fs.cpSync(
+          path.join(__dirname, 'build', 'static'),
+          path.join(studentDir, 'static'),
+          { recursive: true }
+        );
+      }
       
       // 정적 HTML 생성
-      const html = generateStaticHtml(student);
-      fs.writeFileSync(outputPath, html);
+      const html = generateStaticHtml(student, assets);
+      fs.writeFileSync(path.join(studentDir, 'index.html'), html);
       console.log(`Generated static HTML for student: ${student.name} (${student.id})`);
     }
     
