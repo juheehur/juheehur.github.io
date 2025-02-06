@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { db } from '../firebase/config';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import StudentProgress from '../components/StudentProgress';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -21,19 +21,29 @@ const StudentProgressPage = () => {
     }
     return null;
   });
-  const [isLoading, setIsLoading] = useState(!student); // 초기 상태가 있으면 로딩 false
+  const [isLoading, setIsLoading] = useState(!student);
 
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
         setIsLoading(true);
-        const studentDoc = await getDocs(collection(db, 'tutoringStudents'));
-        const studentData = studentDoc.docs.find(doc => doc.id === studentId);
-        if (studentData) {
-          setStudent({
-            id: studentData.id,
-            ...studentData.data()
-          });
+        // 단일 문서 조회로 변경
+        const studentRef = doc(db, 'tutoringStudents', studentId);
+        const studentDoc = await getDoc(studentRef);
+        
+        if (studentDoc.exists()) {
+          const studentData = {
+            id: studentDoc.id,
+            ...studentDoc.data()
+          };
+          setStudent(studentData);
+          
+          // 프리렌더링을 위한 초기 상태 설정
+          if (typeof window !== 'undefined') {
+            window.__INITIAL_STATE__ = {
+              student: studentData
+            };
+          }
         }
       } catch (error) {
         console.error('Error fetching student data:', error);
@@ -42,7 +52,6 @@ const StudentProgressPage = () => {
       }
     };
 
-    // 초기 상태가 없을 때만 데이터 fetch
     if (studentId && !student) {
       fetchStudentData();
     }
@@ -69,41 +78,34 @@ const StudentProgressPage = () => {
   const { title, description } = getMetaData();
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 
-  // 로딩 중에도 메타데이터가 있는 HTML을 반환
   return (
     <>
       <Helmet>
-        {/* Force override metadata */}
+        {/* Primary Meta Tags */}
         <title>{title}</title>
         <meta name="title" content={title} />
         <meta name="description" content={description} />
         
-        {/* Open Graph / Facebook / KakaoTalk */}
+        {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={currentUrl} />
-        <meta property="og:site_name" content={title} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content={null} />
+        <meta property="og:site_name" content={title} />
         
         {/* Twitter */}
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:url" content={currentUrl} />
-        <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={null} />
-
-        {/* WeChat */}
-        <meta property="wechat:title" content={title} />
-        <meta property="wechat:description" content={description} />
-        <meta property="wechat:image" content={null} />
-        <meta property="wechat:timeline_title" content={title} />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={currentUrl} />
+        <meta property="twitter:title" content={title} />
+        <meta property="twitter:description" content={description} />
         
-        {/* Naver / KakaoTalk */}
-        <meta name="naver-site-verification" content={title} />
-        <meta property="kakao:title" content={title} />
-        <meta property="kakao:description" content={description} />
-        <meta property="kakao:image" content={null} />
+        {/* Naver */}
+        <meta property="og:site_name" content={title} />
+        <meta property="og:locale" content={language === 'ko' ? 'ko_KR' : 'en_US'} />
+        
+        {/* KakaoTalk */}
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </Helmet>
       <div className="student-progress-page">
         <div className="progress-container">
