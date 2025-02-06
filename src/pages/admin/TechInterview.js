@@ -37,7 +37,7 @@ const TechInterview = () => {
         )?.id || PREDEFINED_CATEGORIES[0].id,
         difficulty: questionData.difficulty,
         type: questionData.type,
-        language: language,
+        language: questionData.language || language,
         createdAt: new Date()
       });
 

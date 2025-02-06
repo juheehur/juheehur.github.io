@@ -228,15 +228,44 @@
 
 .student-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .student-header h3 {
   margin: 0;
+  flex: 1;
+}
+
+.language-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--apple-border);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
   color: var(--apple-text-primary);
-  font-size: 18px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.language-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.language-toggle svg {
+  font-size: 16px;
+  color: var(--apple-text-primary);
+}
+
+.student-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .view-progress-btn {
@@ -254,11 +283,6 @@
 
 .view-progress-btn:hover {
   background: rgba(10, 132, 255, 0.8);
-}
-
-.student-actions {
-  display: flex;
-  gap: 8px;
 }
 
 .share-btn {

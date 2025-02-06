@@ -5,9 +5,14 @@ import moment from 'moment-timezone';
 import '../styles/tutoringLog.css';
 import StudentProgress from './StudentProgress';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations/tutoringLog';
+import { FaLanguage } from 'react-icons/fa';
 
 const TutoringLog = () => {
   const navigate = useNavigate();
+  const { language, toggleLanguage } = useLanguage();
+  const t = translations[language];
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState('');
   const [newStudent, setNewStudent] = useState({ name: '', subjects: '' });
@@ -163,7 +168,7 @@ const TutoringLog = () => {
   const handleSubmitLog = async (e) => {
     e.preventDefault();
     if (!selectedStudent || !sessionLog.startTime || !sessionLog.endTime) {
-      alert('필수 항목을 모두 입력해주세요.');
+      alert(t.requiredFields);
       return;
     }
 
@@ -207,14 +212,14 @@ const TutoringLog = () => {
   const handleShareProgress = (studentId) => {
     const shareUrl = `${window.location.origin}/student-progress/${studentId}`;
     navigator.clipboard.writeText(shareUrl).then(() => {
-      alert('공유 링크가 클립보드에 복사되었습니다.');
+      alert(t.linkCopied);
     });
   };
 
   const handleScheduleSession = async (e) => {
     e.preventDefault();
     if (!selectedStudent || !scheduleLog.date || !scheduleLog.startTime || !scheduleLog.endTime) {
-      alert('필수 항목을 모두 입력해주세요.');
+      alert(t.requiredFields);
       return;
     }
 
@@ -281,10 +286,10 @@ const TutoringLog = () => {
         note: '',
       });
       
-      alert('수업 일정이 등록되었습니다.');
+      alert(t.scheduleSuccess);
     } catch (error) {
       console.error('Error scheduling session:', error);
-      alert('일정 등록 중 오류가 발생했습니다.');
+      alert(t.scheduleError);
     }
   };
 
@@ -297,13 +302,13 @@ const TutoringLog = () => {
               onClick={() => setShowProgress(false)}
               className="back-to-log-btn"
             >
-              ← 수업 기록으로 돌아가기
+              {t.backToLog}
             </button>
             <button
               onClick={() => handleShareProgress(selectedStudentForProgress)}
               className="share-progress-btn"
             >
-              🔗 공유 링크 복사
+              {t.copyShareLink}
             </button>
           </div>
           <StudentProgress studentId={selectedStudentForProgress} />
@@ -313,7 +318,10 @@ const TutoringLog = () => {
           <div className="tutoring-form">
             <div className="student-section">
               <div className="student-header">
-                <h3>학생 관리</h3>
+                <h3>{t.studentManagement}</h3>
+                <button onClick={toggleLanguage} className="language-toggle">
+                  <FaLanguage /> {language.toUpperCase()}
+                </button>
                 {selectedStudent && (
                   <div className="student-actions">
                     <button
@@ -323,13 +331,13 @@ const TutoringLog = () => {
                       }}
                       className="view-progress-btn"
                     >
-                      진도 현황 보기
+                      {t.viewProgress}
                     </button>
                     <button
                       onClick={() => handleShareProgress(selectedStudent)}
                       className="share-btn"
                     >
-                      🔗 공유
+                      {t.share}
                     </button>
                   </div>
                 )}
@@ -340,19 +348,19 @@ const TutoringLog = () => {
                     type="text"
                     value={newStudent.name}
                     onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
-                    placeholder="새 학생 이름"
+                    placeholder={t.newStudentName}
                     className="student-input"
                   />
                   <input
                     type="text"
                     value={newStudent.subjects}
                     onChange={(e) => setNewStudent({...newStudent, subjects: e.target.value})}
-                    placeholder="과목 (예: 수학, 영어)"
+                    placeholder={t.subjects}
                     className="student-input"
                   />
                 </div>
                 <button onClick={handleAddStudent} className="add-student-btn">
-                  학생 추가
+                  {t.addStudent}
                 </button>
               </div>
               <select
@@ -360,7 +368,7 @@ const TutoringLog = () => {
                 onChange={(e) => setSelectedStudent(e.target.value)}
                 className="student-select"
               >
-                <option value="">학생 선택</option>
+                <option value="">{t.selectStudent}</option>
                 {students.map(student => (
                   <option key={student.id} value={student.id}>
                     {student.name} ({student.subjects})
@@ -374,13 +382,13 @@ const TutoringLog = () => {
                 className={`tab-btn ${!scheduleMode ? 'active' : ''}`}
                 onClick={() => setScheduleMode(false)}
               >
-                수업 기록
+                {t.classRecord}
               </button>
               <button
                 className={`tab-btn ${scheduleMode ? 'active' : ''}`}
                 onClick={() => setScheduleMode(true)}
               >
-                수업 일정
+                {t.classSchedule}
               </button>
             </div>
 
@@ -421,12 +429,12 @@ const TutoringLog = () => {
                   <textarea
                     value={scheduleLog.note}
                     onChange={(e) => setScheduleLog({...scheduleLog, note: e.target.value})}
-                    placeholder="메모 (선택사항)"
+                    placeholder={t.memo}
                     className="topics-input"
                   />
                 </div>
                 <button type="submit" className="submit-btn schedule-btn">
-                  수업 일정 등록
+                  {t.scheduleClass}
                 </button>
               </form>
             ) : (
@@ -451,7 +459,7 @@ const TutoringLog = () => {
                       }}
                       className="schedule-select"
                     >
-                      <option value="">예정된 수업에서 선택...</option>
+                      <option value="">{t.selectFromScheduled}</option>
                       {scheduledSessions.map(schedule => (
                         <option key={schedule.id} value={schedule.id}>
                           {moment(schedule.date).format('YYYY-MM-DD')} {schedule.startTime}-{schedule.endTime}
@@ -462,7 +470,7 @@ const TutoringLog = () => {
                   </div>
                 ) : (
                   <div className="no-schedules-message">
-                    예정된 수업이 없습니다.
+                    {t.noScheduledClasses}
                   </div>
                 )}
                 <div className="form-row">
@@ -508,7 +516,7 @@ const TutoringLog = () => {
                   <textarea
                     value={sessionLog.topics}
                     onChange={(e) => setSessionLog({...sessionLog, topics: e.target.value})}
-                    placeholder="수업 내용"
+                    placeholder={t.classContent}
                     className="topics-input"
                   />
                 </div>
@@ -516,19 +524,19 @@ const TutoringLog = () => {
                   <textarea
                     value={sessionLog.homework}
                     onChange={(e) => setSessionLog({...sessionLog, homework: e.target.value})}
-                    placeholder="숙제"
+                    placeholder={t.homework}
                     className="homework-input"
                   />
                 </div>
                 <button type="submit" className="submit-btn">
-                  수업 기록 저장
+                  {t.saveClassRecord}
                 </button>
               </form>
             )}
           </div>
 
           <div className="recent-logs">
-            <h3>최근 수업 기록</h3>
+            <h3>{t.recentClassRecords}</h3>
             <div className="logs-list">
               {logs.map(log => (
                 <div key={log.id} className="log-item">
@@ -548,18 +556,18 @@ const TutoringLog = () => {
                         {log.date} {log.startTime}-{log.endTime}
                       </span>
                       <span className="log-duration">
-                        {formatDuration(log.duration)}
+                        ({formatDuration(log.duration)})
                       </span>
                     </div>
                   </div>
                   {log.topics && (
                     <div className="log-topics">
-                      <strong>수업 내용:</strong> {log.topics}
+                      <strong>{t.classContent_label}</strong> {log.topics}
                     </div>
                   )}
                   {log.homework && (
                     <div className="log-homework">
-                      <strong>숙제:</strong> {log.homework}
+                      <strong>{t.homework_label}</strong> {log.homework}
                     </div>
                   )}
                 </div>

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { db } from '../firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
 import StudentProgress from '../components/StudentProgress';
+import { useLanguage } from '../context/LanguageContext';
 
 // 정적 HTML 생성을 위한 라우트 정보
 if (typeof window !== 'undefined' && window.__PRERENDER_INJECTED) {
@@ -12,6 +13,7 @@ if (typeof window !== 'undefined' && window.__PRERENDER_INJECTED) {
 
 const StudentProgressPage = () => {
   const { studentId } = useParams();
+  const { language } = useLanguage();
   const [student, setStudent] = useState(() => {
     // 서버에서 프리렌더링된 초기 상태가 있으면 사용
     if (typeof window !== 'undefined' && window.__INITIAL_STATE__?.student) {
@@ -46,11 +48,25 @@ const StudentProgressPage = () => {
     }
   }, [studentId, student]);
 
-  const title = student?.name ? `${student.name}님의 학습 현황` : '학습 현황';
-  const description = student?.name && student?.subjects ? 
-    `${student.name}님의 ${student.subjects} 수업 진도와 숙제를 확인하실 수 있습니다.` : 
-    '학생의 수업 진도와 숙제를 확인하실 수 있습니다.';
+  const getMetaData = () => {
+    const title = student?.name ? 
+      language === 'ko' ? 
+        `${student.name}님의 학습 현황` : 
+        `${student.name}'s Learning Progress` 
+      : language === 'ko' ? '학습 현황' : 'Learning Progress';
 
+    const description = student?.name && student?.subjects ? 
+      language === 'ko' ?
+        `${student.name}님의 ${student.subjects} 수업 진도와 숙제를 확인하실 수 있습니다.` :
+        `Check ${student.name}'s progress and homework for ${student.subjects} classes.`
+      : language === 'ko' ?
+        '학생의 수업 진도와 숙제를 확인하실 수 있습니다.' :
+        'Check student progress and homework.';
+
+    return { title, description };
+  };
+
+  const { title, description } = getMetaData();
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   // 로딩 중에도 메타데이터가 있는 HTML을 반환

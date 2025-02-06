@@ -4,8 +4,14 @@ import { db } from '../firebase/config';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import moment from 'moment-timezone';
 import '../styles/studentProgress.css';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations/studentProgress';
+import { FaLanguage } from 'react-icons/fa';
 
 const StudentProgress = ({ studentId }) => {
+  const { language, toggleLanguage } = useLanguage();
+  const t = translations[language];
+  
   const [student, setStudent] = useState(null);
   const [logs, setLogs] = useState([]);
   const [upcomingSessions, setUpcomingSessions] = useState([]);
@@ -144,9 +150,9 @@ const StudentProgress = ({ studentId }) => {
   const formatDuration = (duration) => {
     if (!duration) return '';
     const { hours, minutes } = duration;
-    if (hours === 0) return `${minutes}분`;
-    if (minutes === 0) return `${hours}시간`;
-    return `${hours}시간 ${minutes}분`;
+    if (hours === 0) return `${minutes}${t.minutes}`;
+    if (minutes === 0) return `${hours}${t.hours}`;
+    return `${hours}${t.hours} ${minutes}${t.minutes}`;
   };
 
   const formatUpcomingDate = (dateStr) => {
@@ -155,66 +161,69 @@ const StudentProgress = ({ studentId }) => {
     const tomorrow = moment().tz('Asia/Hong_Kong').add(1, 'day');
     
     if (date.isSame(today, 'day')) {
-      return '오늘';
+      return t.today;
     } else if (date.isSame(tomorrow, 'day')) {
-      return '내일';
+      return t.tomorrow;
     } else if (date.isSame(today, 'week')) {
-      return date.format('dddd'); // 요일
+      return date.format('dddd');
     } else {
       return date.format('M월 D일 (ddd)');
     }
   };
 
-  if (!student) return <div className="loading">Loading...</div>;
+  if (!student) return <div className="loading">{t.loading}</div>;
 
   return (
     <div className="student-progress">
       <div className="progress-header">
         <div className="progress-header-content">
-          <h2>{student.name}님의 학습 현황</h2>
+          <h2>{student.name}{t.learningStatus}</h2>
           <div className="subjects-tag">{student.subjects}</div>
         </div>
         <div className="class-info">
+          <button onClick={toggleLanguage} className="language-toggle">
+            <FaLanguage /> {language.toUpperCase()}
+          </button>
           <a href="https://cuhk.zoom.us/j/2313720278" 
              target="_blank" 
              rel="noopener noreferrer" 
              className="zoom-link">
             <span className="zoom-icon">🎥</span>
-            수업 입장하기
+            {t.enterClass}
           </a>
         </div>
       </div>
 
       <div className="stats-grid">
         <div className="stat-card total-hours">
-          <div className="stat-value">{stats.totalHours}시간</div>
-          <div className="stat-label">총 수업 시간</div>
+          <div className="stat-value">{stats.totalHours}{t.hours}</div>
+          <div className="stat-label">{t.totalHours}</div>
         </div>
         <div className="stat-card total-sessions">
-          <div className="stat-value">{stats.totalSessions}회</div>
-          <div className="stat-label">총 수업 횟수</div>
+          <div className="stat-value">{stats.totalSessions}{t.sessions}</div>
+          <div className="stat-label">{t.totalSessions}</div>
         </div>
         <div className="stat-card avg-length">
-          <div className="stat-value">{stats.averageSessionLength}분</div>
-          <div className="stat-label">평균 수업 시간</div>
+          <div className="stat-value">{stats.averageSessionLength}{t.minutes}</div>
+          <div className="stat-label">{t.avgLength}</div>
         </div>
         <div className="stat-card last-month">
-          <div className="stat-value">{stats.lastMonth.hours}시간</div>
-          <div className="stat-label">지난달 수업</div>
-          <div className="stat-sublabel">({stats.lastMonth.sessions}회)</div>
+          <div className="stat-value">{stats.lastMonth.hours}{t.hours}</div>
+          <div className="stat-label">{t.lastMonth}</div>
+          <div className="stat-sublabel">({stats.lastMonth.sessions}{t.sessions})</div>
         </div>
       </div>
 
       {logs.length > 0 && (
         <div className="latest-homework">
-          <h3>최근 숙제</h3>
+          <h3>{t.recentHomework}</h3>
           <div className="homework-card">
             <div className="homework-header">
               <div className="homework-date">
-                {moment(logs[0].date).format('M월 D일')} 숙제
+                {moment(logs[0].date).format('M월 D일')} {t.homework}
               </div>
               <div className="next-class">
-                다음 수업: {upcomingSessions[0]?.date ? moment(upcomingSessions[0].date).format('M월 D일 (ddd)') : '미정'}
+                {t.nextClass} {upcomingSessions[0]?.date ? moment(upcomingSessions[0].date).format('M월 D일 (ddd)') : t.undecided}
               </div>
             </div>
             <div className="homework-content">
@@ -224,7 +233,7 @@ const StudentProgress = ({ studentId }) => {
                 </div>
               ) : (
                 <div className="no-homework">
-                  이번 수업에는 숙제가 없습니다.
+                  {t.noHomework}
                 </div>
               )}
             </div>
@@ -234,7 +243,7 @@ const StudentProgress = ({ studentId }) => {
 
       {upcomingSessions.length > 0 && (
         <div className="upcoming-sessions">
-          <h3>예정된 수업</h3>
+          <h3>{t.upcomingSessions}</h3>
           <div className="sessions-timeline">
             {upcomingSessions.map((session, index) => (
               <div key={session.id} className="session-card">
@@ -248,7 +257,7 @@ const StudentProgress = ({ studentId }) => {
                   </div>
                   {session.duration && (
                     <div className="duration">
-                      {session.duration.hours}시간 {session.duration.minutes > 0 ? `${session.duration.minutes}분` : ''}
+                      {formatDuration(session.duration)}
                     </div>
                   )}
                 </div>
@@ -273,7 +282,7 @@ const StudentProgress = ({ studentId }) => {
             <h3 className="month-header">
               {moment(month).format('YYYY년 M월')}
               <span className="month-stats">
-                {monthLogs.length}회 수업
+                {monthLogs.length}{t.classesCounted}
               </span>
             </h3>
             <div className="month-logs">
@@ -291,12 +300,12 @@ const StudentProgress = ({ studentId }) => {
                   <div className="log-content">
                     {log.topics && (
                       <div className="log-topics">
-                        <strong>📚 수업 내용:</strong> {log.topics}
+                        <strong>{t.topics}</strong> {log.topics}
                       </div>
                     )}
                     {log.homework && (
                       <div className="log-homework">
-                        <strong>📝 숙제:</strong> {log.homework}
+                        <strong>{t.homeworkLabel}</strong> {log.homework}
                       </div>
                     )}
                   </div>

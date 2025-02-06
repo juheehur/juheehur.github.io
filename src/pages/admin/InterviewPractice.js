@@ -4,7 +4,7 @@ import { techQuestionsDb, COLLECTIONS, PREDEFINED_CATEGORIES, DIFFICULTY_LEVELS,
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import '../../styles/interviewPractice.css';
 
-const CACHE_EXPIRATION_TIME = 60 * 60 * 1000; // 1시간 (밀리초)
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour (milliseconds)
 const CACHE_KEY = 'interviewQuestions';
 const LAST_UPDATE_KEY = 'lastQuestionUpdate';
 
@@ -48,7 +48,10 @@ const InterviewPractice = () => {
       );
       if (filteredQuestions.length > 0) {
         const randomIndex = Math.floor(Math.random() * filteredQuestions.length);
-        setRandomQuestion(filteredQuestions[randomIndex]);
+        const selectedQuestion = filteredQuestions[randomIndex];
+        console.log('Random Question Data:', selectedQuestion);
+        console.log('Answer Data:', selectedQuestion.answer);
+        setRandomQuestion(selectedQuestion);
         setShowRandomAnswer(false);
       }
     }
@@ -101,18 +104,27 @@ const InterviewPractice = () => {
       for (const doc of questionsSnapshot.docs) {
         const questionData = { id: doc.id, ...doc.data() };
         
+        // 답변 가져오기
         const answerQuery = query(
           collection(techQuestionsDb, COLLECTIONS.ANSWERS),
           where('question_id', '==', doc.id)
         );
         const answerSnapshot = await getDocs(answerQuery);
         if (!answerSnapshot.empty) {
-          questionData.answer = answerSnapshot.docs[0].data();
+          const answerDoc = answerSnapshot.docs[0];
+          questionData.answer = {
+            ...answerDoc.data(),
+            id: answerDoc.id
+          };
+          console.log('Found answer for question:', doc.id, questionData.answer);
+        } else {
+          console.log('No answer found for question:', doc.id);
         }
         
         questionsData.push(questionData);
       }
       
+      console.log('All questions with answers:', questionsData);
       cacheData(questionsData);
       setQuestions(questionsData);
     } catch (error) {
@@ -194,6 +206,8 @@ const InterviewPractice = () => {
   };
 
   const handleCardFlip = () => {
+    console.log('Card Flipped. Current Question:', randomQuestion);
+    console.log('Answer Data on Flip:', randomQuestion?.answer);
     setIsCardFlipped(!isCardFlipped);
   };
 
@@ -246,15 +260,15 @@ const InterviewPractice = () => {
           <div className="header-content">
             <div>
               <h1>Interview Practice</h1>
-              <p>기술 면접 질문을 연습하고 학습하세요</p>
+              <p>Practice and learn technical interview questions</p>
               {lastUpdate && (
                 <p className="last-update">
-                  마지막 업데이트: {lastUpdate.toLocaleString()}
+                  Last Update: {lastUpdate.toLocaleString()}
                 </p>
               )}
             </div>
             <button 
-              onClick={() => window.location.href = 'http://localhost:3002/#/'} 
+              onClick={() => navigate('/')} 
               className="back-button"
             >
               <span>←</span>
@@ -273,7 +287,7 @@ const InterviewPractice = () => {
                   onChange={handleCategoryChange}
                   className="random-category-dropdown"
                 >
-                  <option value="all">모든 카테고리</option>
+                  <option value="all">All Categories</option>
                   {PREDEFINED_CATEGORIES.map(category => (
                     <option key={category.id} value={category.id}>{category.name}</option>
                   ))}
@@ -285,7 +299,7 @@ const InterviewPractice = () => {
               <button 
                 onClick={refreshData}
                 className="refresh-button"
-                title="데이터 새로고침"
+                title="Refresh Data"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
@@ -322,16 +336,36 @@ const InterviewPractice = () => {
                       {PREDEFINED_CATEGORIES.find(c => c.id === randomQuestion.category_id)?.name}
                     </span>
                   </div>
-                  <div className="flip-hint">클릭하여 답변 보기</div>
+                  <div className="flip-hint">Click to see answer</div>
                 </div>
                 <div className="random-answer-section">
-                  {randomQuestion.answer && (
+                  {randomQuestion && (
                     <div className="random-answer">
                       <h3>Answer</h3>
-                      <p>{randomQuestion.answer.answer}</p>
+                      <p>
+                        {(() => {
+                          if (!randomQuestion.answer) {
+                            console.log('No answer data available');
+                            return 'No answer available';
+                          }
+                          console.log('Displaying answer:', randomQuestion.answer);
+                          if (typeof randomQuestion.answer === 'string') return randomQuestion.answer;
+                          if (typeof randomQuestion.answer === 'object') {
+                            if (randomQuestion.answer.answer) return randomQuestion.answer.answer;
+                            return JSON.stringify(randomQuestion.answer);
+                          }
+                          return 'No answer available';
+                        })()}
+                      </p>
+                      {randomQuestion.answer && randomQuestion.answer.references && (
+                        <div className="references">
+                          <h4>References</h4>
+                          <p>{randomQuestion.answer.references}</p>
+                        </div>
+                      )}
                     </div>
                   )}
-                  <div className="flip-hint">클릭하여 질문 보기</div>
+                  <div className="flip-hint">Click to see question</div>
                 </div>
               </div>
             </div>
@@ -341,12 +375,12 @@ const InterviewPractice = () => {
         {/* Filters */}
         <div className="filters-section">
           <div className="filter-group">
-            <label>카테고리</label>
+            <label>Category</label>
             <select
               value={filters.category}
               onChange={(e) => handleFilterChange('category', e.target.value)}
             >
-              <option value="all">전체</option>
+              <option value="all">All</option>
               {PREDEFINED_CATEGORIES.map(category => (
                 <option key={category.id} value={category.id}>{category.name}</option>
               ))}
@@ -354,7 +388,7 @@ const InterviewPractice = () => {
           </div>
 
           <div className="filter-group">
-            <label>난이도</label>
+            <label>Difficulty</label>
             <select
               value={filters.difficulty}
               onChange={(e) => {
@@ -362,7 +396,7 @@ const InterviewPractice = () => {
                 handleFilterChange('difficulty', e.target.value);
               }}
             >
-              <option value="all">전체</option>
+              <option value="all">All</option>
               {DIFFICULTY_LEVELS.map(level => (
                 <option key={level} value={level}>{level}</option>
               ))}
@@ -370,12 +404,12 @@ const InterviewPractice = () => {
           </div>
 
           <div className="filter-group">
-            <label>유형</label>
+            <label>Type</label>
             <select
               value={filters.type}
               onChange={(e) => handleFilterChange('type', e.target.value)}
             >
-              <option value="all">전체</option>
+              <option value="all">All</option>
               {QUESTION_TYPES.map(type => (
                 <option key={type} value={type}>{type}</option>
               ))}
@@ -383,13 +417,13 @@ const InterviewPractice = () => {
           </div>
 
           <div className="filter-group">
-            <label>언어</label>
+            <label>Language</label>
             <select
               value={filters.language}
               onChange={(e) => handleFilterChange('language', e.target.value)}
             >
-              <option value="all">전체</option>
-              <option value="ko">한국어</option>
+              <option value="all">All</option>
+              <option value="ko">Korean</option>
               <option value="en">English</option>
             </select>
           </div>
@@ -400,16 +434,16 @@ const InterviewPractice = () => {
           {/* Questions List with Toggle Button */}
           <div className="questions-panel">
             <div className="questions-header">
-              <h2>질문 목록</h2>
+              <h2>Questions List</h2>
               <button
                 className={`unlearned-toggle ${showOnlyUnlearned ? 'active' : ''}`}
                 onClick={() => setShowOnlyUnlearned(!showOnlyUnlearned)}
-                title={showOnlyUnlearned ? "모든 문제 보기" : "학습되지 않은 문제만 보기"}
+                title={showOnlyUnlearned ? "Show all questions" : "Show only unlearned questions"}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
                   <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
                 </svg>
-                {showOnlyUnlearned ? "학습되지 않은 문제" : "전체 문제"}
+                {showOnlyUnlearned ? "Unlearned Questions" : "All Questions"}
               </button>
             </div>
             {isLoading ? (
@@ -437,7 +471,7 @@ const InterviewPractice = () => {
                           className="comfort-checkbox"
                           checked={comfortableQuestions.includes(question.id)}
                           onChange={(e) => handleComfortableToggle(question.id, e)}
-                          aria-label="학습 완료 표시"
+                          aria-label="Mark as learned"
                         />
                       </div>
                     </div>
@@ -471,9 +505,9 @@ const InterviewPractice = () => {
                       className="modal-comfort-checkbox"
                       checked={comfortableQuestions.includes(selectedQuestion.id)}
                       onChange={(e) => handleComfortableToggle(selectedQuestion.id, e)}
-                      aria-label="Mark as comfortable"
+                      aria-label="Mark as learned"
                     />
-                    <span className="modal-comfort-label">학습완료</span>
+                    <span className="modal-comfort-label">Learned</span>
                   </div>
                   <button className="modal-close" onClick={closeModal}>✕</button>
                 </div>
@@ -486,7 +520,7 @@ const InterviewPractice = () => {
                       className={`modal-answer-toggle ${showModalAnswer ? 'show' : ''}`}
                       onClick={() => setShowModalAnswer(!showModalAnswer)}
                     >
-                      {showModalAnswer ? '답변 숨기기' : '답변 보기'}
+                      {showModalAnswer ? 'Hide Answer' : 'Show Answer'}
                     </button>
                     {showModalAnswer && selectedQuestion.answer && (
                       <div className="modal-answer">
@@ -495,7 +529,7 @@ const InterviewPractice = () => {
                         </div>
                         {selectedQuestion.answer.references && (
                           <div className="modal-references">
-                            <h4>참고 자료</h4>
+                            <h4>References</h4>
                             <div className="modal-references-text">
                               {selectedQuestion.answer.references}
                             </div>
@@ -531,7 +565,7 @@ const InterviewPractice = () => {
                   className="toggle-answer"
                   onClick={() => setShowAnswer(!showAnswer)}
                 >
-                  {showAnswer ? '답변 숨기기' : '답변 보기'}
+                  {showAnswer ? 'Hide Answer' : 'Show Answer'}
                 </button>
 
                 {showAnswer && selectedQuestion.answer && (
@@ -542,7 +576,7 @@ const InterviewPractice = () => {
                     </div>
                     {selectedQuestion.answer.references && (
                       <div className="references">
-                        <h4>참고 자료</h4>
+                        <h4>References</h4>
                         <div className="references-text">
                           {selectedQuestion.answer.references}
                         </div>
