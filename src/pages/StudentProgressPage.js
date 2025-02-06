@@ -27,7 +27,6 @@ const StudentProgressPage = () => {
     const fetchStudentData = async () => {
       try {
         setIsLoading(true);
-        // 단일 문서 조회로 변경
         const studentRef = doc(db, 'tutoringStudents', studentId);
         const studentDoc = await getDoc(studentRef);
         
@@ -43,6 +42,20 @@ const StudentProgressPage = () => {
             window.__INITIAL_STATE__ = {
               student: studentData
             };
+            
+            // 메타데이터 강제 업데이트
+            const metaTags = document.getElementsByTagName('meta');
+            for (let i = 0; i < metaTags.length; i++) {
+              const tag = metaTags[i];
+              const property = tag.getAttribute('property');
+              if (property === 'og:title') {
+                tag.setAttribute('content', `${studentData.name}님의 학습 현황`);
+              } else if (property === 'og:description') {
+                tag.setAttribute('content', `${studentData.name}님의 ${studentData.subjects} 수업 진도와 숙제를 확인하실 수 있습니다.`);
+              }
+            }
+            // 타이틀 업데이트
+            document.title = `${studentData.name}님의 학습 현황`;
           }
         }
       } catch (error) {
@@ -56,6 +69,25 @@ const StudentProgressPage = () => {
       fetchStudentData();
     }
   }, [studentId, student]);
+
+  // 학생 데이터가 변경될 때마다 메타데이터 업데이트
+  useEffect(() => {
+    if (student && typeof window !== 'undefined') {
+      const { title, description } = getMetaData();
+      document.title = title;
+      
+      const metaTags = document.getElementsByTagName('meta');
+      for (let i = 0; i < metaTags.length; i++) {
+        const tag = metaTags[i];
+        const property = tag.getAttribute('property');
+        if (property === 'og:title') {
+          tag.setAttribute('content', title);
+        } else if (property === 'og:description') {
+          tag.setAttribute('content', description);
+        }
+      }
+    }
+  }, [student]);
 
   const getMetaData = () => {
     const title = student?.name ? 
