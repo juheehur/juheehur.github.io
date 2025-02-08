@@ -7,7 +7,8 @@ import StudentProgress from './StudentProgress';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../translations/tutoringLog';
-import { FaLanguage } from 'react-icons/fa';
+import { FaLanguage, FaFilePdf } from 'react-icons/fa';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const TutoringLog = () => {
   const navigate = useNavigate();
@@ -35,6 +36,50 @@ const TutoringLog = () => {
   });
   const [scheduledSessions, setScheduledSessions] = useState([]);
   const [selectedSchedule, setSelectedSchedule] = useState('');
+  const [pdfFiles, setPdfFiles] = useState([]);
+  const [pdfUrls, setPdfUrls] = useState([]);
+  const [currentUploadIndex, setCurrentUploadIndex] = useState(0);
+  const [accessToken, setAccessToken] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const login = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setAccessToken(tokenResponse.access_token);
+      if (pdfFiles.length > 0) {
+        setCurrentUploadIndex(0);
+        uploadNextPdf(tokenResponse.access_token);
+      }
+    },
+    onError: (error) => {
+      console.error('Google Login Error:', error);
+      alert(t.googleLoginError || 'Google 로그인 중 오류가 발생했습니다.');
+      setPdfFiles([]);
+    },
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    flow: 'implicit',
+    prompt: 'consent',
+    ux_mode: 'popup',
+  });
+
+  const uploadNextPdf = async (token) => {
+    if (currentUploadIndex >= pdfFiles.length) {
+      setIsUploading(false);
+      setUploadStatus('');
+      setUploadProgress(0);
+      return;
+    }
+
+    await uploadPdfToGoogleDrive(token, pdfFiles[currentUploadIndex]);
+    setCurrentUploadIndex(prev => prev + 1);
+  };
+
+  useEffect(() => {
+    if (currentUploadIndex > 0 && currentUploadIndex < pdfFiles.length && accessToken) {
+      uploadNextPdf(accessToken);
+    }
+  }, [currentUploadIndex]);
 
   useEffect(() => {
     fetchStudents();
@@ -176,25 +221,29 @@ const TutoringLog = () => {
       const student = students.find(s => s.id === selectedStudent);
       const duration = calculateDuration(sessionLog.startTime, sessionLog.endTime);
       
-      // Add the log
       await addDoc(collection(db, 'tutoringLogs'), {
         ...sessionLog,
         studentId: selectedStudent,
         studentName: student.name,
         subjects: student.subjects,
         duration,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        pdfUrls: pdfUrls, // Store all PDF URLs
       });
 
-      // If this log was created from a schedule, mark it as completed
       if (selectedSchedule) {
         const scheduleRef = doc(db, 'tutoringSchedules', selectedSchedule);
         await updateDoc(scheduleRef, {
           completed: true
         });
-        fetchScheduledSessions(); // Refresh the schedules list
+        fetchScheduledSessions();
       }
 
+      // Reset states
+      setPdfFiles([]);
+      setPdfUrls([]);
+      setCurrentUploadIndex(0);
+      
       setSessionLog({
         date: moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD'),
         startTime: '',
@@ -290,6 +339,112 @@ const TutoringLog = () => {
     } catch (error) {
       console.error('Error scheduling session:', error);
       alert(t.scheduleError);
+    }
+  };
+
+  const handlePdfChange = async (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = files.filter(file => file.type === 'application/pdf');
+    
+    if (validFiles.length === 0) {
+      alert(t.invalidFileType);
+      return;
+    }
+
+    if (files.length !== validFiles.length) {
+      alert(t.someFilesInvalid);
+    }
+
+    setPdfFiles(prev => [...prev, ...validFiles]);
+    
+    if (!accessToken) {
+      setTimeout(() => {
+        login();
+      }, 500);
+    } else {
+      setCurrentUploadIndex(pdfFiles.length);
+      uploadNextPdf(accessToken);
+    }
+  };
+
+  const uploadPdfToGoogleDrive = async (token, file) => {
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadStatus(t.startingUpload + ` (${currentUploadIndex + 1}/${pdfFiles.length})`);
+    setUploadProgress(0);
+    
+    try {
+      setUploadStatus(t.preparingFile);
+      setUploadProgress(20);
+      
+      const metadata = {
+        name: file.name,
+        mimeType: 'application/pdf',
+        parents: ['root']
+      };
+
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', file);
+
+      setUploadStatus(t.uploadingFile);
+      setUploadProgress(40);
+
+      const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: form,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      setUploadProgress(60);
+      setUploadStatus(t.configuringPermissions);
+
+      const data = await response.json();
+
+      const permissionResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${data.id}/permissions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          role: 'reader',
+          type: 'anyone',
+        }),
+      });
+
+      if (!permissionResponse.ok) {
+        throw new Error('Failed to update sharing settings');
+      }
+
+      setUploadProgress(80);
+      setUploadStatus(t.generatingLink);
+
+      const shareResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${data.id}?fields=webViewLink`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!shareResponse.ok) {
+        throw new Error('Failed to get sharing link');
+      }
+
+      const shareData = await shareResponse.json();
+      setPdfUrls(prev => [...prev, { name: file.name, url: shareData.webViewLink }]);
+      setUploadProgress(100);
+      setUploadStatus(t.uploadComplete);
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      alert(t.pdfUploadError);
+      setPdfFiles(prev => prev.filter((_, index) => index !== currentUploadIndex));
     }
   };
 
@@ -527,6 +682,48 @@ const TutoringLog = () => {
                     placeholder={t.homework}
                     className="homework-input"
                   />
+                </div>
+                <div className="form-row pdf-upload">
+                  <label className="pdf-upload-label">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handlePdfChange}
+                      multiple
+                      style={{ display: 'none' }}
+                    />
+                    <FaFilePdf /> {t.attachPdf}
+                  </label>
+                  {isUploading && (
+                    <div className="upload-status">
+                      <div className="upload-progress-bar">
+                        <div 
+                          className="upload-progress-fill" 
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                      <span className="upload-status-text">
+                        {uploadStatus} ({uploadProgress}%)
+                      </span>
+                    </div>
+                  )}
+                  {pdfUrls.length > 0 && (
+                    <div className="pdf-preview">
+                      <div className="pdf-list">
+                        {pdfUrls.map((pdf, index) => (
+                          <a 
+                            key={index}
+                            href={pdf.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="pdf-link"
+                          >
+                            <FaFilePdf /> {pdf.name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <button type="submit" className="submit-btn">
                   {t.saveClassRecord}

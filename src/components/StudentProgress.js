@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { db } from '../firebase/config';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
 import moment from 'moment-timezone';
 import '../styles/studentProgress.css';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../translations/studentProgress';
-import { FaLanguage } from 'react-icons/fa';
+import { FaLanguage, FaFilePdf, FaDownload } from 'react-icons/fa';
 
 const StudentProgress = ({ studentId }) => {
   const { language, toggleLanguage } = useLanguage();
@@ -25,33 +25,54 @@ const StudentProgress = ({ studentId }) => {
     }
   });
   const [groupedLogs, setGroupedLogs] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (studentId) {
-      fetchStudentData();
-      fetchStudentLogs();
-      fetchUpcomingSessions();
+    if (!studentId) {
+      setIsLoading(false);
+      return;
     }
+    
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        await fetchStudentData();
+        await fetchStudentLogs();
+        await fetchUpcomingSessions();
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
   }, [studentId]);
 
   const fetchStudentData = async () => {
     try {
-      const studentDoc = await getDocs(collection(db, 'tutoringStudents'));
-      const studentData = studentDoc.docs
-        .find(doc => doc.id === studentId);
-      if (studentData) {
+      const studentRef = doc(db, 'tutoringStudents', studentId);
+      const studentDoc = await getDoc(studentRef);
+      
+      if (studentDoc.exists()) {
         const studentInfo = {
-          id: studentData.id,
-          ...studentData.data()
+          id: studentDoc.id,
+          ...studentDoc.data()
         };
         setStudent(studentInfo);
+      } else {
+        console.error('Student document not found');
+        setStudent(null);
       }
     } catch (error) {
       console.error('Error fetching student data:', error);
+      setStudent(null);
     }
   };
 
   const fetchStudentLogs = async () => {
+    if (!studentId) return;
+
     try {
       const logsQuery = query(
         collection(db, 'tutoringLogs'),
@@ -63,18 +84,25 @@ const StudentProgress = ({ studentId }) => {
         ...doc.data()
       }));
       
-      logsData.sort((a, b) => {
-        if (a.date !== b.date) {
-          return b.date.localeCompare(a.date);
+      const sortedLogsData = logsData.sort((a, b) => {
+        const dateA = moment(a.date);
+        const dateB = moment(b.date);
+        if (!dateA.isSame(dateB)) {
+          return dateB.valueOf() - dateA.valueOf();
         }
-        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+        if (a.createdAt && b.createdAt) {
+          return b.createdAt.toMillis() - a.createdAt.toMillis();
+        }
+        return 0;
       });
       
-      setLogs(logsData);
-      calculateStats(logsData);
-      groupLogsByMonth(logsData);
+      setLogs(sortedLogsData);
+      calculateStats(sortedLogsData);
+      groupLogsByMonth(sortedLogsData);
     } catch (error) {
       console.error('Error fetching logs:', error);
+      setLogs([]);
+      setGroupedLogs({});
     }
   };
 
@@ -171,150 +199,212 @@ const StudentProgress = ({ studentId }) => {
     }
   };
 
-  if (!student) return <div className="loading">{t.loading}</div>;
+  const downloadPdf = async (url, filename) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert(t.downloadError);
+    }
+  };
 
-  return (
-    <div className="student-progress">
-      <div className="progress-header">
-        <div className="progress-header-content">
-          <h2>{student.name}{t.learningStatus}</h2>
-          <div className="subjects-tag">{student.subjects}</div>
-        </div>
-        <div className="class-info">
-          <button onClick={toggleLanguage} className="language-toggle">
-            <FaLanguage /> {language.toUpperCase()}
-          </button>
-          <a href="https://cuhk.zoom.us/j/2313720278" 
-             target="_blank" 
-             rel="noopener noreferrer" 
-             className="zoom-link">
-            <span className="zoom-icon">🎥</span>
-            {t.enterClass}
-          </a>
-        </div>
-      </div>
+  if (isLoading) {
+    return <div className="loading">{t.loading}</div>;
+  }
 
-      <div className="stats-grid">
-        <div className="stat-card total-hours">
-          <div className="stat-value">{stats.totalHours}{t.hours}</div>
-          <div className="stat-label">{t.totalHours}</div>
-        </div>
-        <div className="stat-card total-sessions">
-          <div className="stat-value">{stats.totalSessions}{t.sessions}</div>
-          <div className="stat-label">{t.totalSessions}</div>
-        </div>
-        <div className="stat-card avg-length">
-          <div className="stat-value">{stats.averageSessionLength}{t.minutes}</div>
-          <div className="stat-label">{t.avgLength}</div>
-        </div>
-        <div className="stat-card last-month">
-          <div className="stat-value">{stats.lastMonth.hours}{t.hours}</div>
-          <div className="stat-label">{t.lastMonth}</div>
-          <div className="stat-sublabel">({stats.lastMonth.sessions}{t.sessions})</div>
-        </div>
-      </div>
+  if (!studentId) {
+    return <div className="loading">{t.invalidStudent}</div>;
+  }
 
-      {logs.length > 0 && (
-        <div className="latest-homework">
-          <h3>{t.recentHomework}</h3>
-          <div className="homework-card">
-            <div className="homework-header">
-              <div className="homework-date">
-                {moment(logs[0].date).format('M월 D일')} {t.homework}
-              </div>
-              <div className="next-class">
-                {t.nextClass} {upcomingSessions[0]?.date ? moment(upcomingSessions[0].date).format('M월 D일 (ddd)') : t.undecided}
-              </div>
-            </div>
-            <div className="homework-content">
-              {logs[0].homework ? (
-                <div className="homework-text">
-                  {logs[0].homework}
-                </div>
-              ) : (
-                <div className="no-homework">
-                  {t.noHomework}
-                </div>
-              )}
-            </div>
+  if (!student) {
+    return <div className="loading">{t.studentNotFound}</div>;
+  }
+
+  const renderContent = () => {
+    return (
+      <>
+        <div className="progress-header">
+          <div className="progress-header-content">
+            <h2>{student?.name || ''}{t.learningStatus}</h2>
+            <div className="subjects-tag">{student?.subjects || ''}</div>
+          </div>
+          <div className="class-info">
+            <button onClick={toggleLanguage} className="language-toggle">
+              <FaLanguage /> {language.toUpperCase()}
+            </button>
+            <a href="https://cuhk.zoom.us/j/2313720278" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               className="zoom-link">
+              <span className="zoom-icon">🎥</span>
+              {t.enterClass}
+            </a>
           </div>
         </div>
-      )}
 
-      {upcomingSessions.length > 0 && (
-        <div className="upcoming-sessions">
-          <h3>{t.upcomingSessions}</h3>
-          <div className="sessions-timeline">
-            {upcomingSessions.map((session, index) => (
-              <div key={session.id} className="session-card">
-                <div className="session-date">
-                  <div className="date-label">{formatUpcomingDate(session.date)}</div>
-                  <div className="date-full">{moment(session.date).format('YYYY년 M월 D일')}</div>
+        <div className="stats-grid">
+          <div className="stat-card total-hours">
+            <div className="stat-value">{stats.totalHours}{t.hours}</div>
+            <div className="stat-label">{t.totalHours}</div>
+          </div>
+          <div className="stat-card total-sessions">
+            <div className="stat-value">{stats.totalSessions}{t.sessions}</div>
+            <div className="stat-label">{t.totalSessions}</div>
+          </div>
+          <div className="stat-card avg-length">
+            <div className="stat-value">{stats.averageSessionLength}{t.minutes}</div>
+            <div className="stat-label">{t.avgLength}</div>
+          </div>
+          <div className="stat-card last-month">
+            <div className="stat-value">{stats.lastMonth.hours}{t.hours}</div>
+            <div className="stat-label">{t.lastMonth}</div>
+            <div className="stat-sublabel">({stats.lastMonth.sessions}{t.sessions})</div>
+          </div>
+        </div>
+
+        {logs.length > 0 && (
+          <div className="latest-homework">
+            <h3>{t.recentHomework}</h3>
+            <div className="homework-card">
+              <div className="homework-header">
+                <div className="homework-date">
+                  {moment(logs[0].date).format('M월 D일')} {t.homework}
                 </div>
-                <div className="session-time">
-                  <div className="time-range">
-                    {session.startTime} - {session.endTime}
+                <div className="next-class">
+                  {t.nextClass} {upcomingSessions[0]?.date ? moment(upcomingSessions[0].date).format('M월 D일 (ddd)') : t.undecided}
+                </div>
+              </div>
+              <div className="homework-content">
+                {logs[0].homework ? (
+                  <div className="homework-text">
+                    {logs[0].homework}
                   </div>
-                  {session.duration && (
-                    <div className="duration">
-                      {formatDuration(session.duration)}
-                    </div>
-                  )}
-                </div>
-                {session.note && (
-                  <div className="session-note">
-                    {session.note}
+                ) : (
+                  <div className="no-homework">
+                    {t.noHomework}
                   </div>
                 )}
-                <div className="timeline-connector">
-                  <div className="dot"></div>
-                  {index < upcomingSessions.length - 1 && <div className="line"></div>}
-                </div>
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="progress-timeline">
-        {Object.entries(groupedLogs).map(([month, monthLogs]) => (
-          <div key={month} className="month-section">
-            <h3 className="month-header">
-              {moment(month).format('YYYY년 M월')}
-              <span className="month-stats">
-                {monthLogs.length}{t.classesCounted}
-              </span>
-            </h3>
-            <div className="month-logs">
-              {monthLogs.map(log => (
-                <div key={log.id} className="progress-log-item">
-                  <div className="log-date-section">
-                    <div className="log-date">{moment(log.date).format('M/D (ddd)')}</div>
-                    <div className="log-time">
-                      {log.startTime}-{log.endTime}
-                      <span className="log-duration">
-                        ({formatDuration(log.duration)})
-                      </span>
-                    </div>
+        {upcomingSessions.length > 0 && (
+          <div className="upcoming-sessions">
+            <h3>{t.upcomingSessions}</h3>
+            <div className="sessions-timeline">
+              {upcomingSessions.map((session, index) => (
+                <div key={session.id} className="session-card">
+                  <div className="session-date">
+                    <div className="date-label">{formatUpcomingDate(session.date)}</div>
+                    <div className="date-full">{moment(session.date).format('YYYY년 M월 D일')}</div>
                   </div>
-                  <div className="log-content">
-                    {log.topics && (
-                      <div className="log-topics">
-                        <strong>{t.topics}</strong> {log.topics}
+                  <div className="session-time">
+                    <div className="time-range">
+                      {session.startTime} - {session.endTime}
+                    </div>
+                    {session.duration && (
+                      <div className="duration">
+                        {formatDuration(session.duration)}
                       </div>
                     )}
-                    {log.homework && (
-                      <div className="log-homework">
-                        <strong>{t.homeworkLabel}</strong> {log.homework}
-                      </div>
-                    )}
+                  </div>
+                  {session.note && (
+                    <div className="session-note">
+                      {session.note}
+                    </div>
+                  )}
+                  <div className="timeline-connector">
+                    <div className="dot"></div>
+                    {index < upcomingSessions.length - 1 && <div className="line"></div>}
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        ))}
-      </div>
+        )}
+
+        <div className="progress-timeline">
+          {Object.entries(groupedLogs).map(([month, monthLogs]) => (
+            <div key={month} className="month-section">
+              <h3 className="month-header">
+                {moment(month).format('YYYY년 M월')}
+                <span className="month-stats">
+                  {monthLogs.length}{t.classesCounted}
+                </span>
+              </h3>
+              <div className="month-logs">
+                {monthLogs.map(log => (
+                  <div key={log.id} className="progress-log-item">
+                    <div className="log-date-section">
+                      <div className="log-date">{moment(log.date).format('M/D (ddd)')}</div>
+                      <div className="log-time">
+                        {log.startTime}-{log.endTime}
+                        <span className="log-duration">
+                          ({formatDuration(log.duration)})
+                        </span>
+                      </div>
+                    </div>
+                    <div className="log-content">
+                      {log.topics && (
+                        <div className="log-topics">
+                          <strong>{t.topics}</strong> {log.topics}
+                        </div>
+                      )}
+                      {log.homework && (
+                        <div className="log-homework">
+                          <strong>{t.homeworkLabel}</strong> {log.homework}
+                        </div>
+                      )}
+                      {log.pdfUrls && log.pdfUrls.length > 0 && (
+                        <div className="log-pdfs">
+                          <strong>{t.materials}:</strong>
+                          <div className="pdf-list">
+                            {log.pdfUrls.map((pdf, index) => (
+                              <div key={index} className="pdf-item">
+                                <a 
+                                  href={pdf.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="pdf-link"
+                                >
+                                  <FaFilePdf /> {pdf.name}
+                                </a>
+                                <button
+                                  onClick={() => downloadPdf(pdf.url, pdf.name)}
+                                  className="download-btn"
+                                  title={t.downloadPdf}
+                                >
+                                  <FaDownload />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  };
+
+  return (
+    <div className="student-progress">
+      {renderContent()}
     </div>
   );
 };

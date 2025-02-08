@@ -1,6 +1,8 @@
 export const translations = {
   ko: {
     loading: 'Loading...',
+    invalidStudent: '잘못된 학생 ID입니다.',
+    studentNotFound: '학생 정보를 찾을 수 없습니다.',
     learningStatus: '님의 학습 현황',
     enterClass: '수업 입장하기',
     totalHours: '총 수업 시간',
@@ -20,10 +22,16 @@ export const translations = {
     tomorrow: '내일',
     topics: '📚 수업 내용:',
     homeworkLabel: '📝 숙제:',
-    classesCounted: '회 수업'
+    classesCounted: '회 수업',
+    materials: '학습 자료',
+    downloadPdf: 'PDF 다운로드',
+    downloadError: 'PDF 다운로드 중 오류가 발생했습니다.',
+    noLogs: '아직 수업 기록이 없습니다.',
   },
   en: {
     loading: 'Loading...',
+    invalidStudent: 'Invalid student ID.',
+    studentNotFound: 'Student information not found.',
     learningStatus: "'s Learning Progress",
     enterClass: 'Enter Class',
     totalHours: 'Total Hours',
@@ -43,6 +51,10 @@ export const translations = {
     tomorrow: 'Tomorrow',
     topics: '📚 Topics:',
     homeworkLabel: '📝 Homework:',
-    classesCounted: 'classes'
+    classesCounted: 'classes',
+    materials: 'Materials',
+    downloadPdf: 'Download PDF',
+    downloadError: 'Error downloading PDF',
+    noLogs: 'No class records yet.',
   }
 }; 
