@@ -30,6 +30,8 @@ import { useAuth, AuthProvider } from './contexts/AuthContext';
 import TechInterview from './pages/admin/TechInterview';
 import InterviewPractice from './pages/admin/InterviewPractice';
 import StudentProgressPage from './pages/StudentProgressPage';
+import ContentsManagement from './pages/ContentsManagement';
+import MakeContents from './pages/MakeContents';
 import { HelmetProvider } from 'react-helmet-async';
 import { LanguageProvider } from './context/LanguageContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -71,6 +73,8 @@ function App() {
                       <Route path="/admin/add-todo" element={<ProtectedRoute adminOnly><AddTodo /></ProtectedRoute>} />
                       <Route path="/admin/todo-management" element={<ProtectedRoute adminOnly><TodoManagement /></ProtectedRoute>} />
                       <Route path="/admin/todos" element={<Navigate to="/admin/add-todo" replace />} />
+                      <Route path="/admin/contents" element={<ProtectedRoute adminOnly><ContentsManagement /></ProtectedRoute>} />
+                      <Route path="/makecontents" element={<ProtectedRoute adminOnly><MakeContents /></ProtectedRoute>} />
                       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                       <Route path="/duplicate" element={<Duplicate />} />
                       <Route path="/admin/tech-interview" element={
