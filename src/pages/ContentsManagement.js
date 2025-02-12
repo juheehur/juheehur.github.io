@@ -1092,6 +1092,10 @@ const ContentsManagement = () => {
         const contentDate = moment(content.date);
         const today = moment();
         switch (filters.dateRange) {
+          case 'today':
+            return contentDate.isSame(today, 'day');
+          case 'yesterday':
+            return contentDate.isSame(today.subtract(1, 'day'), 'day');
           case 'week':
             return contentDate.isAfter(today.subtract(1, 'week'));
           case 'month':
@@ -1131,15 +1135,49 @@ const ContentsManagement = () => {
       .filter(content => selectedLinks.has(content.id))
       .sort((a, b) => moment(b.date).diff(moment(a.date)));
 
-    const linkText = filteredContents
-      .map(content => content.link)
-      .join('\n');
-
-    navigator.clipboard.writeText(linkText).then(() => {
-      alert('링크가 클립보드에 복사되었습니다!');
-    }).catch(err => {
-      console.error('링크 복사 중 오류가 발생했습니다:', err);
+    const platformGroups = {};
+    filteredContents.forEach((content) => {
+      const platform = content.platform.toLowerCase();
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = [];
+      }
+      platformGroups[platform].push(content.link);
     });
+
+    const platformNames = {
+      youtube: '유튜브',
+      instagram: '인스타그램',
+      tiktok: '틱톡'
+    };
+
+    let text = `허주희 emily.hur.juhee@gmail.com\n총 ${filteredContents.length}개\n\n`;
+    const platformsOrder = ['youtube', 'instagram', 'tiktok'];
+    platformsOrder.forEach((platform) => {
+      if (platformGroups[platform]) {
+        text += `(${platformNames[platform]})\n`;
+        platformGroups[platform].forEach(link => {
+          text += `${link}\n`;
+        });
+        text += `\n`;
+      }
+    });
+    Object.keys(platformGroups).forEach((platform) => {
+      if (!platformsOrder.includes(platform)) {
+        text += `(${platform})\n`;
+        platformGroups[platform].forEach(link => {
+          text += `${link}\n`;
+        });
+        text += `\n`;
+      }
+    });
+
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        alert('링크가 클립보드에 복사되었습니다!');
+      })
+      .catch(err => {
+        console.error('링크 복사 중 오류가 발생했습니다:', err);
+      });
   };
 
   const getFilteredAndSortedContents = () => {
@@ -1209,6 +1247,12 @@ const ContentsManagement = () => {
       platform: 'instagram',
       name: 'leece_the_tech_guy',
       url: 'https://www.instagram.com/leece_the_tech_guy/',
+      icon: '📷'
+    },
+    {
+      platform: 'instagram',
+      name: 'diatomicarbon',
+      url: 'https://www.instagram.com/diatomicarbon/reels/',
       icon: '📷'
     }
   ];
@@ -1470,6 +1514,8 @@ const ContentsManagement = () => {
               onChange={(e) => setFilters({...filters, dateRange: e.target.value})}
             >
               <option value="all">전체 기간</option>
+              <option value="today">오늘</option>
+              <option value="yesterday">어제</option>
               <option value="week">최근 1주일</option>
               <option value="month">최근 1개월</option>
               <option value="year">최근 1년</option>

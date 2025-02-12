@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../styles/makeContents.css';
+import JSZip from 'jszip';
 
 // 환경 변수 디버깅
 console.log('Environment Variables:', {
@@ -94,16 +96,9 @@ const retryFetch = async (url, options, retries = 3, initialDelay = 1000) => {
 
 const MakeContents = () => {
   const navigate = useNavigate();
-  const [text, setText] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('ko');
-  const [voiceId, setVoiceId] = useState('');
-  const [voiceSettings, setVoiceSettings] = useState({
-    speed: 1.0,
-    pitch_shift: 0,
-    pitch_variance: 1.0
-  });
+  const [entries, setEntries] = useState([{ text: "", voiceId: "" }]);
   const [savedVoices, setSavedVoices] = useState([]);
-  const [generatedAudio, setGeneratedAudio] = useState(null);
+  const [generatedAudios, setGeneratedAudios] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [serverStatus, setServerStatus] = useState('checking');
@@ -111,15 +106,49 @@ const MakeContents = () => {
     id: '',
     name: '',
     language: 'ko',
-    settings: {
+    voice_settings: {
       speed: 1.0,
       pitch_shift: 0,
       pitch_variance: 1.0
     }
   });
+  const [voiceJsonInput, setVoiceJsonInput] = useState('');
   const [wsConnection, setWsConnection] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [progress, setProgress] = useState(null);
+  const [showVoiceManagement, setShowVoiceManagement] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkVoiceId, setBulkVoiceId] = useState("");
+
+  // Ref to hold pending TTS request resolvers
+  const pendingTTSResolvers = useRef({});
+
+  // Helper function to split text into chunks of max 'limit' characters by sentence boundaries
+  const splitTextIntoChunks = (text, limit = 200) => {
+    // Split on sentence-ending punctuation followed by whitespace
+    const sentences = text.split(/(?<=[.!?])\s+/);
+    const chunks = [];
+    let currentChunk = '';
+    sentences.forEach(sentence => {
+      if ((currentChunk + (currentChunk ? ' ' : '') + sentence).length <= limit) {
+        currentChunk += (currentChunk ? ' ' : '') + sentence;
+      } else {
+        if (currentChunk) {
+          chunks.push(currentChunk);
+        }
+        if (sentence.length > limit) {
+          for (let i = 0; i < sentence.length; i += limit) {
+            chunks.push(sentence.substring(i, i + limit));
+          }
+          currentChunk = '';
+        } else {
+          currentChunk = sentence;
+        }
+      }
+    });
+    if (currentChunk) chunks.push(currentChunk);
+    return chunks;
+  };
 
   // Check server status
   useEffect(() => {
@@ -190,11 +219,21 @@ const MakeContents = () => {
             
             case 'tts_response':
               if (data.payload.success) {
-                const audioBlob = base64ToBlob(
-                  data.payload.audio,
-                  data.payload.contentType
-                );
-                handleAudioResponse(audioBlob);
+                const audioBlob = base64ToBlob(data.payload.audio, data.payload.contentType);
+                if (data.payload.chunkId && pendingTTSResolvers.current[data.payload.chunkId]) {
+                  pendingTTSResolvers.current[data.payload.chunkId](audioBlob);
+                  delete pendingTTSResolvers.current[data.payload.chunkId];
+                } else {
+                  // If chunkId is missing, check if there's exactly one pending resolver and resolve it
+                  const pendingKeys = Object.keys(pendingTTSResolvers.current);
+                  if (pendingKeys.length === 1) {
+                    const key = pendingKeys[0];
+                    pendingTTSResolvers.current[key](audioBlob);
+                    delete pendingTTSResolvers.current[key];
+                  } else {
+                    console.warn('tts_response missing chunkId or ambiguous pending resolvers, ignoring response.');
+                  }
+                }
               }
               break;
             
@@ -241,20 +280,17 @@ const MakeContents = () => {
 
   const handleAudioResponse = (audioBlob) => {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const selectedVoice = savedVoices.find(v => v.id === voiceId);
-    const fileName = `${timestamp}_${selectedVoice?.name || voiceId}.mp3`;
+    const selectedVoice = savedVoices.find(v => v.id === entries[0].voiceId);
+    const fileName = `${timestamp}_${selectedVoice?.name || entries[0].voiceId}.mp3`;
     
-    setGeneratedAudio({
-      url: URL.createObjectURL(audioBlob),
-      fileName: fileName,
-      blob: audioBlob
-    });
+    setGeneratedAudios([{ url: URL.createObjectURL(audioBlob), fileName, blob: audioBlob }]);
     setIsGenerating(false);
   };
 
   const handleError = (error) => {
     console.error('TTS Error:', error);
-    alert(`Error generating voice: ${error.message}`);
+    const errorMsg = error && error.message ? error.message : JSON.stringify(error);
+    alert(`Error generating voice: ${errorMsg}`);
     setIsGenerating(false);
   };
 
@@ -272,6 +308,21 @@ const MakeContents = () => {
       return;
     }
 
+    if (voiceJsonInput.trim() !== '') {
+      try {
+        const parsed = JSON.parse(voiceJsonInput);
+        if (parsed.voice_settings) {
+          newVoice.voice_settings = parsed.voice_settings;
+        } else {
+          alert('JSON must contain a "voice_settings" property.');
+          return;
+        }
+      } catch (e) {
+        alert('Invalid JSON for voice settings.');
+        return;
+      }
+    }
+
     const updatedVoices = [...savedVoices, newVoice];
     setSavedVoices(updatedVoices);
     localStorage.setItem('savedVoices', JSON.stringify(updatedVoices));
@@ -280,12 +331,13 @@ const MakeContents = () => {
       id: '',
       name: '',
       language: 'ko',
-      settings: {
+      voice_settings: {
         speed: 1.0,
         pitch_shift: 0,
         pitch_variance: 1.0
       }
     });
+    setVoiceJsonInput('');
   };
 
   const handleDeleteVoice = (voiceId) => {
@@ -296,234 +348,387 @@ const MakeContents = () => {
     }
   };
 
-  const handleVoiceSelect = (voice) => {
-    setVoiceId(voice.id);
-    setVoiceSettings(voice.settings);
-    setSelectedLanguage(voice.language);
-  };
-
-  const generateVoice = async () => {
-    if (!text || !voiceId) {
-      alert('Please enter text and select a voice');
+  // -------------------- New Helper Functions for multi-entry generation --------------------
+  const generateVoiceForEntry = async (entry, entryIndex) => {
+    if (!entry.text || !entry.voiceId) {
+      alert(`Entry ${entryIndex + 1} is missing text or voice selection.`);
       return;
     }
+    if (!wsConnection || connectionStatus !== 'connected') {
+      alert('Server connection is not available. Please wait for reconnection.');
+      throw new Error('WebSocket not connected');
+    }
+    const selectedVoice = savedVoices.find(v => v.id === entry.voiceId);
+    if (!selectedVoice) {
+      alert(`Selected voice for entry ${entryIndex + 1} not found.`);
+      return;
+    }
+    const language = selectedVoice.language || 'ko';
+    const settings = selectedVoice.voice_settings || selectedVoice.settings || { speed: 1.0, pitch_shift: 0, pitch_variance: 1.0 };
+    
+    const chunks = splitTextIntoChunks(entry.text, 200);
+    for (let i = 0; i < chunks.length; i++) {
+      const chunkId = `entry_${entryIndex}_chunk_${i}`;
+      try {
+        await new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            if (pendingTTSResolvers.current[chunkId]) {
+              delete pendingTTSResolvers.current[chunkId];
+            }
+            reject(new Error('TTS processing timeout for chunk ' + i));
+          }, 20000); // 20 second timeout
 
-    if (connectionStatus !== 'connected' || !wsConnection) {
+          pendingTTSResolvers.current[chunkId] = (blob) => {
+            clearTimeout(timeoutId);
+            resolve(blob);
+          };
+
+          try {
+            wsConnection.send(JSON.stringify({
+              type: 'tts_request',
+              payload: {
+                text: chunks[i],
+                voiceId: entry.voiceId,
+                language: language,
+                settings: settings,
+                apiKey: SUPERTONE_API.KEY,
+                chunkId: chunkId,
+                totalChunks: chunks.length
+              }
+            }));
+          } catch (error) {
+            clearTimeout(timeoutId);
+            delete pendingTTSResolvers.current[chunkId];
+            reject(error);
+          }
+        }).then((blob) => {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const fileName = `${timestamp}_${selectedVoice.name}_${i + 1}.mp3`;
+          setGeneratedAudios(prev => [...prev, { url: URL.createObjectURL(blob), fileName, blob }]);
+        });
+      } catch (error) {
+        console.error(`Error generating chunk ${i} for entry ${entryIndex + 1}:`, error);
+        alert(`Error generating a portion of entry ${entryIndex + 1}: ${error.message || JSON.stringify(error)}`);
+        throw error;
+      }
+    }
+  };
+
+  const waitForWsConnection = async (timeout = 20000) => {
+    if (connectionStatus === 'connected') return;
+    return new Promise((resolve, reject) => {
+      const start = Date.now();
+      const interval = setInterval(() => {
+        if (connectionStatus === 'connected') {
+          clearInterval(interval);
+          resolve();
+        } else if (Date.now() - start > timeout) {
+          clearInterval(interval);
+          reject(new Error('Timed out waiting for WebSocket connection'));
+        }
+      }, 100);
+    });
+  };
+
+  const generateVoices = async () => {
+    if (!wsConnection || connectionStatus !== 'connected') {
       alert('Server connection is not available. Please wait for reconnection.');
       return;
     }
-
     setIsGenerating(true);
-    setProgress(null);
-
-    try {
-      wsConnection.send(JSON.stringify({
-        type: 'tts_request',
-        payload: {
-          text,
-          voiceId,
-          language: selectedLanguage,
-          settings: {
-            pitch_shift: voiceSettings.pitch_shift || 0,
-            pitch_variance: voiceSettings.pitch_variance || 1.0,
-            speed: voiceSettings.speed || 1.0
-          }
+    for (let i = 0; i < entries.length; i++) {
+      if (!wsConnection || connectionStatus !== 'connected') {
+        try {
+          await waitForWsConnection();
+        } catch (error) {
+          alert('WebSocket connection not available for entry ' + (i + 1));
+          continue;
         }
-      }));
-    } catch (error) {
-      console.error('Error sending WebSocket message:', error);
-      alert('Failed to send request to server');
-      setIsGenerating(false);
+      }
+      const entry = entries[i];
+      if (entry.text && entry.voiceId) {
+        try {
+          await generateVoiceForEntry(entry, i);
+        } catch (error) {
+          console.error(`Failed to generate voice for entry ${i + 1}:`, error);
+          alert(`Failed to generate voice for entry ${i + 1}: ${error.message || JSON.stringify(error)}`);
+        }
+      }
     }
+    setIsGenerating(false);
   };
+  // ----------------------------------------------------------------------------------------
 
-  const downloadAudio = () => {
-    if (!generatedAudio) return;
-    
+  const downloadAudio = (audio) => {
+    if (!audio) return;
     const a = document.createElement('a');
-    a.href = generatedAudio.url;
-    a.download = generatedAudio.fileName;
+    a.href = audio.url;
+    a.download = audio.fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   };
 
-  // Render connection status
-  const renderConnectionStatus = () => {
-    const statusStyles = {
-      connected: { color: 'green' },
-      disconnected: { color: 'red' },
-      error: { color: 'orange' }
-    };
+  const handleBulkSplit = () => {
+    const lines = bulkText.split(/\r?\n/).map(line => line.trim()).filter(line => line !== "");
+    if (lines.length === 0) {
+      alert("No text detected.");
+      return;
+    }
+    const defaultVoiceId = bulkVoiceId || entries[0].voiceId; // use bulkVoiceId if set, otherwise fallback
+    const newEntries = lines.map(line => ({ text: line, voiceId: defaultVoiceId }));
+    setEntries(newEntries);
+    setBulkText("");
+  };
 
-    return (
-      <div style={statusStyles[connectionStatus] || {}}>
-        Server Status: {connectionStatus}
-        {progress && (
-          <div>
-            {progress.status === 'downloading' ? (
-              <progress value={progress.progress} max="1" />
-            ) : (
-              <span>{progress.message}</span>
-            )}
-          </div>
-        )}
-      </div>
-    );
+  const downloadAllAsZip = async () => {
+    if (generatedAudios.length === 0) {
+      alert("No MP3 files generated.");
+      return;
+    }
+    const zip = new JSZip();
+    generatedAudios.forEach(audio => {
+      zip.file(audio.fileName, audio.blob);
+    });
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(content);
+      a.download = "mp3_files.zip";
+      a.click();
+    });
+  };
+
+  const handleBulkKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (e.shiftKey) {
+        // Shift+Enter: Allow normal line break
+        return;
+      } else {
+        // Enter only: Trigger split
+        e.preventDefault();
+        handleBulkSplit();
+      }
+    }
   };
 
   return (
-    <div>
-      <h1>Text-to-Speech Generator</h1>
-      {renderConnectionStatus()}
-      
-      {/* Voice Management Section */}
-      <div>
-        <button onClick={() => setShowVoiceModal(true)}>Add New Voice</button>
-        <div>
-          <h3>Saved Voices</h3>
-          {savedVoices.map((voice) => (
-            <div key={voice.id} style={{ 
-              padding: '10px', 
-              margin: '5px', 
-              border: voiceId === voice.id ? '2px solid blue' : '1px solid gray',
-              borderRadius: '5px'
-            }}>
-              <div>Name: {voice.name}</div>
-              <div>ID: {voice.id}</div>
-              <div>Language: {voice.language}</div>
-              <div>Settings: 
-                <pre>{JSON.stringify(voice.settings, null, 2)}</pre>
-              </div>
-              <button onClick={() => handleVoiceSelect(voice)}>Select</button>
-              <button onClick={() => handleDeleteVoice(voice.id)}>Delete</button>
+    <div className="make-contents-container">
+      <div className="make-contents-header">
+        <h1>Text-to-Speech Generator</h1>
+        <div className={`server-status ${connectionStatus}`}>
+          Server Status: {connectionStatus}
+          {progress && (
+            <div className="progress-container">
+              {progress.status === 'downloading' ? (
+                <div className="progress-bar">
+                  <div 
+                    className="progress-bar-fill" 
+                    style={{ width: `${progress.progress * 100}%` }}
+                  />
+                </div>
+              ) : (
+                <span>{progress.message}</span>
+              )}
             </div>
-          ))}
+          )}
         </div>
       </div>
 
-      {/* Voice Modal */}
-      {showVoiceModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '5px',
-            width: '400px'
-          }}>
-            <h2>Add New Voice</h2>
-            <div>
-              <label>Voice Name:</label>
-              <input
-                type="text"
-                value={newVoice.name}
-                onChange={(e) => setNewVoice({...newVoice, name: e.target.value})}
-                placeholder="Enter voice name"
-              />
+      <div className="main-content">
+        <div className="text-entries">
+          <div className="text-entries-header">
+            <h2>Text Entries</h2>
+            <button className="manage-voices-button" onClick={() => setShowVoiceModal(true)}>
+              Manage Voices
+            </button>
+          </div>
+
+          <div className="bulk-text-section">
+            <textarea 
+              className="bulk-textarea"
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              onKeyDown={handleBulkKeyDown}
+              placeholder="Quick add multiple entries: Paste your text here, one entry per line. Press Enter to split (Shift+Enter for new line)"
+            />
+            <div className="bulk-controls">
+              <select
+                value={bulkVoiceId}
+                onChange={(e) => setBulkVoiceId(e.target.value)}
+                className="voice-select"
+              >
+                <option value="">Select voice for all entries</option>
+                {savedVoices.map(voice => (
+                  <option key={voice.id} value={voice.id}>{voice.name}</option>
+                ))}
+              </select>
+              <button className="bulk-split-button" onClick={handleBulkSplit}>
+                Convert to Entries
+              </button>
             </div>
-            <div>
-              <label>Voice ID:</label>
+          </div>
+
+          <div className="entries-list">
+            {entries.map((entry, index) => (
+              <div key={index} className="text-entry">
+                <div className="entry-header">
+                  <span className="entry-number">#{index + 1}</span>
+                  <select
+                    value={entry.voiceId}
+                    onChange={(e) => {
+                      const newEntries = [...entries];
+                      newEntries[index].voiceId = e.target.value;
+                      setEntries(newEntries);
+                    }}
+                    className="voice-select"
+                  >
+                    <option value="">Select voice</option>
+                    {savedVoices.map(voice => (
+                      <option key={voice.id} value={voice.id}>{voice.name}</option>
+                    ))}
+                  </select>
+                  {entries.length > 1 && (
+                    <button 
+                      className="remove-entry-button"
+                      onClick={() => {
+                        const newEntries = entries.filter((_, i) => i !== index);
+                        setEntries(newEntries);
+                      }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  value={entry.text}
+                  onChange={(e) => {
+                    const newEntries = [...entries];
+                    newEntries[index].text = e.target.value;
+                    setEntries(newEntries);
+                  }}
+                  placeholder="Enter your text here..."
+                  className="entry-textarea"
+                />
+                <div className="entry-footer">
+                  <span className="character-count">
+                    {entry.text.length} / 200 characters
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="entries-actions">
+            <button 
+              className="add-entry-button"
+              onClick={() => setEntries([...entries, { text: "", voiceId: entries[0]?.voiceId || "" }])}
+            >
+              + Add New Entry
+            </button>
+            <button
+              className="generate-button"
+              onClick={generateVoices}
+              disabled={isGenerating}
+            >
+              {isGenerating ? 'Generating...' : 'Generate All'}
+            </button>
+          </div>
+        </div>
+
+        {generatedAudios.length > 0 && (
+          <div className="output-section">
+            <h2>Generated Audio Files</h2>
+            <div className="audio-files-list">
+              {generatedAudios.map((audio, idx) => (
+                <div key={audio.fileName} className="audio-file-item">
+                  <span className="audio-file-name">MP3 #{idx + 1}</span>
+                  <div className="audio-file-actions">
+                    <audio controls src={audio.url} className="audio-player" />
+                    <button 
+                      className="download-button"
+                      onClick={() => downloadAudio(audio)}
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {generatedAudios.length > 1 && (
+                <button
+                  className="download-all-button"
+                  onClick={downloadAllAsZip}
+                >
+                  Download All as ZIP
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Voice Management Modal */}
+      {showVoiceModal && (
+        <div className="modal-overlay" onClick={() => setShowVoiceModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Voice Management</h2>
+              <button className="close-modal" onClick={() => setShowVoiceModal(false)}>×</button>
+            </div>
+            <div className="voice-list">
+              {savedVoices.map((voice) => (
+                <div key={voice.id} className="voice-item">
+                  <div className="voice-info">
+                    <span className="voice-name">{voice.name}</span>
+                    <span className="voice-id">ID: {voice.id}</span>
+                    <span className="voice-language">Language: {voice.language}</span>
+                  </div>
+                  <div className="voice-actions">
+                    <button 
+                      className="delete-voice"
+                      onClick={() => handleDeleteVoice(voice.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="add-voice-form">
+              <h3>Add New Voice</h3>
               <input
                 type="text"
+                placeholder="Voice ID"
                 value={newVoice.id}
                 onChange={(e) => setNewVoice({...newVoice, id: e.target.value})}
-                placeholder="e.g., qpu1kEUrM5UtU3FknfLp5G"
               />
-            </div>
-            <div>
-              <label>Language:</label>
+              <input
+                type="text"
+                placeholder="Voice Name"
+                value={newVoice.name}
+                onChange={(e) => setNewVoice({...newVoice, name: e.target.value})}
+              />
               <select
                 value={newVoice.language}
                 onChange={(e) => setNewVoice({...newVoice, language: e.target.value})}
               >
                 <option value="ko">Korean</option>
                 <option value="en">English</option>
-                <option value="ja">Japanese</option>
               </select>
-            </div>
-            <div>
-              <label>Speed:</label>
-              <input
-                type="number"
-                step="0.1"
-                value={newVoice.settings.speed}
-                onChange={(e) => setNewVoice({
-                  ...newVoice,
-                  settings: {...newVoice.settings, speed: parseFloat(e.target.value)}
-                })}
+              <textarea
+                placeholder="Voice Settings JSON (optional)"
+                value={voiceJsonInput}
+                onChange={(e) => setVoiceJsonInput(e.target.value)}
               />
-            </div>
-            <div>
-              <label>Pitch Shift:</label>
-              <input
-                type="number"
-                value={newVoice.settings.pitch_shift}
-                onChange={(e) => setNewVoice({
-                  ...newVoice,
-                  settings: {...newVoice.settings, pitch_shift: parseInt(e.target.value)}
-                })}
-              />
-            </div>
-            <div>
-              <label>Pitch Variance:</label>
-              <input
-                type="number"
-                step="0.1"
-                value={newVoice.settings.pitch_variance}
-                onChange={(e) => setNewVoice({
-                  ...newVoice,
-                  settings: {...newVoice.settings, pitch_variance: parseFloat(e.target.value)}
-                })}
-              />
-            </div>
-            <div>
-              <button onClick={handleSaveVoice}>Save Voice</button>
-              <button onClick={() => setShowVoiceModal(false)}>Cancel</button>
+              <button onClick={handleSaveVoice}>Add Voice</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Text Input Section */}
-      <div>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          maxLength={200}
-          placeholder="Enter text (max 200 characters)"
-        />
-        <p>{text.length}/200</p>
-      </div>
-
-      {/* Generate Button */}
-      <button
-        onClick={generateVoice}
-        disabled={!text || !voiceId || isGenerating}
+      <button 
+        className="back-button"
+        onClick={() => navigate('/admin/contents')}
       >
-        {isGenerating ? 'Generating...' : 'Generate Voice'}
-      </button>
-
-      {/* Output Section */}
-      {generatedAudio && (
-        <div>
-          <button onClick={downloadAudio}>
-            Download MP3 ({generatedAudio.fileName})
-          </button>
-        </div>
-      )}
-
-      {/* Back Button */}
-      <button onClick={() => navigate('/admin/contents')}>
         Back to Contents Management
       </button>
     </div>
