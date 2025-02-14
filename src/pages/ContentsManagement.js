@@ -687,6 +687,40 @@ const CreateButton = styled.button`
   }
 `;
 
+const TitleCell = styled.td`
+  position: relative;
+  padding-right: 30px !important;
+
+  .edit-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+    cursor: pointer;
+    color: #1a73e8;
+    font-size: 16px;
+  }
+
+  &:hover .edit-icon {
+    opacity: 1;
+  }
+
+  input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #1a73e8;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+
+    &:focus {
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+    }
+  }
+`;
+
 const ContentsManagement = () => {
   const [contents, setContents] = useState([]);
   const [accounts, setAccounts] = useState([]);
@@ -701,6 +735,10 @@ const ContentsManagement = () => {
     account: '',
     language: '',
     dateRange: 'all'
+  });
+  const [sortConfig, setSortConfig] = useState({
+    key: 'date',
+    direction: 'desc'
   });
   const [newContent, setNewContent] = useState({
     platform: 'instagram',
@@ -721,6 +759,8 @@ const ContentsManagement = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedLinks, setSelectedLinks] = useState(new Set());
+  const [editingTitleId, setEditingTitleId] = useState(null);
+  const [editingTitleValue, setEditingTitleValue] = useState('');
   const navigate = useNavigate();
 
   const generateRandomColor = (platform = '', accountName = '') => {
@@ -1084,7 +1124,7 @@ const ContentsManagement = () => {
   };
 
   const getFilteredContents = () => {
-    return contents.filter(content => {
+    let filtered = contents.filter(content => {
       if (filters.platform && content.platform !== filters.platform) return false;
       if (filters.account && content.accountName !== filters.account) return false;
       if (filters.language && content.isKorean !== (filters.language === 'korean')) return false;
@@ -1108,6 +1148,43 @@ const ContentsManagement = () => {
       }
       return true;
     });
+
+    // Apply sorting
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        if (sortConfig.key === 'date') {
+          const dateA = moment(a[sortConfig.key]);
+          const dateB = moment(b[sortConfig.key]);
+          if (sortConfig.direction === 'asc') {
+            return dateA.diff(dateB);
+          }
+          return dateB.diff(dateA);
+        }
+        
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filtered;
+  };
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return '↕️';
+    return sortConfig.direction === 'asc' ? '↑' : '↓';
   };
 
   const filteredContents = getFilteredContents().filter(content =>
@@ -1132,43 +1209,26 @@ const ContentsManagement = () => {
         const contentDate = moment(content.date);
         return contentDate.isBetween(startDate, endDate, 'day', '[]');
       })
-      .filter(content => selectedLinks.has(content.id))
-      .sort((a, b) => moment(b.date).diff(moment(a.date)));
+      .filter(content => selectedLinks.has(content.id));
 
-    const platformGroups = {};
-    filteredContents.forEach((content) => {
-      const platform = content.platform.toLowerCase();
-      if (!platformGroups[platform]) {
-        platformGroups[platform] = [];
+    // 제목별로 콘텐츠 그룹화
+    const groupedByTitle = filteredContents.reduce((acc, content) => {
+      if (!acc[content.title]) {
+        acc[content.title] = [];
       }
-      platformGroups[platform].push(content.link);
-    });
+      acc[content.title].push(content);
+      return acc;
+    }, {});
 
-    const platformNames = {
-      youtube: '유튜브',
-      instagram: '인스타그램',
-      tiktok: '틱톡'
-    };
+    let text = `허주희_emily.hur.juhee@gmail.com\n총 ${filteredContents.length}개\n\n`;
 
-    let text = `허주희 emily.hur.juhee@gmail.com\n총 ${filteredContents.length}개\n\n`;
-    const platformsOrder = ['youtube', 'instagram', 'tiktok'];
-    platformsOrder.forEach((platform) => {
-      if (platformGroups[platform]) {
-        text += `(${platformNames[platform]})\n`;
-        platformGroups[platform].forEach(link => {
-          text += `${link}\n`;
-        });
-        text += `\n`;
-      }
-    });
-    Object.keys(platformGroups).forEach((platform) => {
-      if (!platformsOrder.includes(platform)) {
-        text += `(${platform})\n`;
-        platformGroups[platform].forEach(link => {
-          text += `${link}\n`;
-        });
-        text += `\n`;
-      }
+    // 각 제목별로 플랫폼과 링크 정리
+    Object.entries(groupedByTitle).forEach(([title, contents]) => {
+      text += `(제목: ${title})\n`;
+      contents.forEach(content => {
+        text += `${content.platform} - ${content.link}\n`;
+      });
+      text += '\n';
     });
 
     navigator.clipboard.writeText(text)
@@ -1256,6 +1316,42 @@ const ContentsManagement = () => {
       icon: '📷'
     }
   ];
+
+  const handleTitleEdit = async (contentId, newTitle) => {
+    try {
+      const contentRef = doc(db, 'contents', contentId);
+      await updateDoc(contentRef, {
+        title: newTitle,
+        updatedAt: new Date()
+      });
+      
+      setContents(contents.map(content => 
+        content.id === contentId 
+          ? { ...content, title: newTitle }
+          : content
+      ));
+      
+      setEditingTitleId(null);
+      setEditingTitleValue('');
+    } catch (error) {
+      console.error('Error updating title:', error);
+    }
+  };
+
+  const handleTitleEditKeyDown = (e, contentId) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTitleEdit(contentId, editingTitleValue);
+    } else if (e.key === 'Escape') {
+      setEditingTitleId(null);
+      setEditingTitleValue('');
+    }
+  };
+
+  const startTitleEdit = (content) => {
+    setEditingTitleId(content.id);
+    setEditingTitleValue(content.title);
+  };
 
   return (
     <Container>
@@ -1525,11 +1621,21 @@ const ContentsManagement = () => {
         <table>
           <thead>
             <tr>
-              <th>날짜</th>
-              <th>플랫폼</th>
-              <th>계정</th>
-              <th>언어</th>
-              <th>제목</th>
+              <th onClick={() => handleSort('date')} style={{ cursor: 'pointer' }}>
+                날짜 {getSortIcon('date')}
+              </th>
+              <th onClick={() => handleSort('platform')} style={{ cursor: 'pointer' }}>
+                플랫폼 {getSortIcon('platform')}
+              </th>
+              <th onClick={() => handleSort('accountName')} style={{ cursor: 'pointer' }}>
+                계정 {getSortIcon('accountName')}
+              </th>
+              <th onClick={() => handleSort('isKorean')} style={{ cursor: 'pointer' }}>
+                언어 {getSortIcon('isKorean')}
+              </th>
+              <th onClick={() => handleSort('title')} style={{ cursor: 'pointer' }}>
+                제목 {getSortIcon('title')}
+              </th>
               <th>링크</th>
               <th>작업</th>
             </tr>
@@ -1550,7 +1656,35 @@ const ContentsManagement = () => {
                   </div>
                 </td>
                 <td>{content.isKorean ? '한국어' : '영어'}</td>
-                <td>{content.title}</td>
+                <TitleCell>
+                  {editingTitleId === content.id ? (
+                    <input
+                      type="text"
+                      value={editingTitleValue}
+                      onChange={(e) => setEditingTitleValue(e.target.value)}
+                      onKeyDown={(e) => handleTitleEditKeyDown(e, content.id)}
+                      onBlur={() => {
+                        if (editingTitleValue !== content.title) {
+                          handleTitleEdit(content.id, editingTitleValue);
+                        } else {
+                          setEditingTitleId(null);
+                        }
+                      }}
+                      autoFocus
+                    />
+                  ) : (
+                    <>
+                      {content.title}
+                      <span 
+                        className="edit-icon" 
+                        onClick={() => startTitleEdit(content)}
+                        title="제목 수정"
+                      >
+                        ✎
+                      </span>
+                    </>
+                  )}
+                </TitleCell>
                 <td>
                   <a href={content.link} target="_blank" rel="noopener noreferrer">
                     보기
