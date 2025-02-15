@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/makeContents.css';
 import JSZip from 'jszip';
+import { db } from '../firebase/config';
+import { collection, query, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 
 // 환경 변수 디버깅
 console.log('Environment Variables:', {
@@ -294,15 +296,27 @@ const MakeContents = () => {
     setIsGenerating(false);
   };
 
-  // localStorage에서 저장된 voice 설정들을 불러옴
+  // Firebase에서 저장된 voices를 불러옴
   useEffect(() => {
-    const saved = localStorage.getItem('savedVoices');
-    if (saved) {
-      setSavedVoices(JSON.parse(saved));
-    }
+    const fetchVoices = async () => {
+      try {
+        const voicesRef = collection(db, 'voices');
+        const voicesSnapshot = await getDocs(voicesRef);
+        const voicesList = voicesSnapshot.docs.map(doc => ({
+          ...doc.data(),
+          firebaseId: doc.id // Firebase document ID 저장
+        }));
+        setSavedVoices(voicesList);
+      } catch (error) {
+        console.error('Error fetching voices:', error);
+        alert('음성 설정을 불러오는데 실패했습니다.');
+      }
+    };
+
+    fetchVoices();
   }, []);
 
-  const handleSaveVoice = () => {
+  const handleSaveVoice = async () => {
     if (!newVoice.id || !newVoice.name) {
       alert('Please fill in all fields');
       return;
@@ -323,28 +337,47 @@ const MakeContents = () => {
       }
     }
 
-    const updatedVoices = [...savedVoices, newVoice];
-    setSavedVoices(updatedVoices);
-    localStorage.setItem('savedVoices', JSON.stringify(updatedVoices));
-    setShowVoiceModal(false);
-    setNewVoice({
-      id: '',
-      name: '',
-      language: 'ko',
-      voice_settings: {
-        speed: 1.0,
-        pitch_shift: 0,
-        pitch_variance: 1.0
-      }
-    });
-    setVoiceJsonInput('');
+    try {
+      const voicesRef = collection(db, 'voices');
+      const docRef = await addDoc(voicesRef, {
+        ...newVoice,
+        createdAt: new Date()
+      });
+
+      const savedVoice = {
+        ...newVoice,
+        firebaseId: docRef.id
+      };
+
+      setSavedVoices(prev => [...prev, savedVoice]);
+      setShowVoiceModal(false);
+      setNewVoice({
+        id: '',
+        name: '',
+        language: 'ko',
+        voice_settings: {
+          speed: 1.0,
+          pitch_shift: 0,
+          pitch_variance: 1.0
+        }
+      });
+      setVoiceJsonInput('');
+    } catch (error) {
+      console.error('Error saving voice:', error);
+      alert('음성 설정 저장에 실패했습니다.');
+    }
   };
 
-  const handleDeleteVoice = (voiceId) => {
+  const handleDeleteVoice = async (voiceId, firebaseId) => {
     if (window.confirm('Are you sure you want to delete this voice?')) {
-      const updatedVoices = savedVoices.filter(voice => voice.id !== voiceId);
-      setSavedVoices(updatedVoices);
-      localStorage.setItem('savedVoices', JSON.stringify(updatedVoices));
+      try {
+        const voiceRef = doc(db, 'voices', firebaseId);
+        await deleteDoc(voiceRef);
+        setSavedVoices(prev => prev.filter(voice => voice.firebaseId !== firebaseId));
+      } catch (error) {
+        console.error('Error deleting voice:', error);
+        alert('음성 설정 삭제에 실패했습니다.');
+      }
     }
   };
 
@@ -676,7 +709,7 @@ const MakeContents = () => {
             </div>
             <div className="voice-list">
               {savedVoices.map((voice) => (
-                <div key={voice.id} className="voice-item">
+                <div key={voice.firebaseId} className="voice-item">
                   <div className="voice-info">
                     <span className="voice-name">{voice.name}</span>
                     <span className="voice-id">ID: {voice.id}</span>
@@ -685,7 +718,7 @@ const MakeContents = () => {
                   <div className="voice-actions">
                     <button 
                       className="delete-voice"
-                      onClick={() => handleDeleteVoice(voice.id)}
+                      onClick={() => handleDeleteVoice(voice.id, voice.firebaseId)}
                     >
                       Delete
                     </button>
