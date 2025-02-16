@@ -400,6 +400,9 @@ const ReelsIdeaSpace = () => {
         updatedAt: new Date()
       };
 
+      console.log('Saving note with ID:', editingId);
+      console.log('Note data:', noteData);
+
       if (editingId) {
         await updateDoc(doc(db, collectionName, editingId), noteData);
       } else {
@@ -446,7 +449,7 @@ const ReelsIdeaSpace = () => {
     }
   };
 
-  const toggleScriptCheck = (scriptId) => {
+  const toggleScriptCheck = async (scriptId) => {
     setCheckedScripts(prev => {
       const newChecked = new Set(prev);
       if (newChecked.has(scriptId)) {
@@ -456,6 +459,17 @@ const ReelsIdeaSpace = () => {
       }
       return newChecked;
     });
+
+    try {
+      const scriptRef = doc(db, 'reelsScripts', scriptId);
+      await updateDoc(scriptRef, {
+        checked: checkedScripts.has(scriptId) ? false : true
+      });
+      console.log(`Updated script ${scriptId} check status to:`, !checkedScripts.has(scriptId)); // Log the updated check status
+    } catch (error) {
+      console.error('Error updating script check status:', error);
+      alert('체크 상태를 업데이트하는데 실패했습니다.');
+    }
   };
 
   const getCheckedScripts = () => {
