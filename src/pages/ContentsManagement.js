@@ -1,725 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase/config';
 import { collection, query, getDocs, addDoc, where, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import moment from 'moment';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { useNavigate } from 'react-router-dom';
 import '../styles/contentsManagement.css';
-
-const Container = styled.div`
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-`;
-
-const Header = styled.div`
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  
-  h1 {
-    color: #333;
-    margin-bottom: 10px;
-  }
-`;
-
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: relative;
-
-  h2 {
-    margin-bottom: 20px;
-    color: #333;
-    font-size: 1.2rem;
-  }
-
-  input, select {
-    margin: 10px 0;
-    padding: 12px;
-    width: 100%;
-    border: 1px solid #e1e1e1;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: white;
-
-    &:focus {
-      outline: none;
-      border-color: #1a73e8;
-      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
-    }
-  }
-
-  .account-section {
-    margin: 10px 0;
-    
-    .add-account {
-      background: none;
-      border: none;
-      color: #1a73e8;
-      padding: 0;
-      font-size: 14px;
-      cursor: pointer;
-      margin-top: 5px;
-      width: auto;
-
-      &:hover {
-        text-decoration: underline;
-        background: none;
-      }
-    }
-  }
-
-  button {
-    margin-top: 20px;
-    width: 100%;
-    padding: 12px;
-    background: #1a73e8;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    &:hover {
-      background: #1557b0;
-    }
-  }
-
-  .close-button {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: #666;
-    cursor: pointer;
-    padding: 5px;
-    width: auto;
-    margin: 0;
-
-    &:hover {
-      color: #333;
-      background: none;
-    }
-  }
-
-  .action-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-
-    button {
-      margin-top: 0;
-      flex: 1;
-
-      &.secondary {
-        background: #666;
-        &:hover {
-          background: #555;
-        }
-      }
-    }
-  }
-`;
-
-const ContentList = styled.div`
-  margin-top: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  h2 {
-    margin-bottom: 20px;
-    color: #333;
-    font-size: 1.2rem;
-  }
-
-  .content-item {
-    padding: 15px;
-    border-bottom: 1px solid #e1e1e1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .platform-badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 500;
-      margin-right: 8px;
-    }
-
-    .instagram {
-      background: #e1306c;
-      color: white;
-    }
-
-    .youtube {
-      background: #ff0000;
-      color: white;
-    }
-
-    .tiktok {
-      background: #000000;
-      color: white;
-    }
-
-    a {
-      color: #1a73e8;
-      text-decoration: none;
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-`;
-
-const LinkExportSection = styled.div`
-  margin-top: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-
-    h2 {
-      color: #333;
-      font-size: 1.2rem;
-      margin: 0;
-    }
-
-    .total-count {
-      color: #666;
-      font-size: 0.9rem;
-    }
-  }
-
-  .date-filter {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
-    align-items: center;
-
-    input[type="date"] {
-      padding: 8px;
-      border: 1px solid #e1e1e1;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-  }
-
-  .select-all {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 10px 0;
-    padding: 8px;
-    background: #f8f9fa;
-    border-radius: 4px;
-
-    input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
-    }
-
-    label {
-      font-size: 14px;
-      color: #333;
-      cursor: pointer;
-      user-select: none;
-    }
-  }
-
-  .link-list {
-    margin: 20px 0;
-    max-height: 400px;
-    overflow-y: auto;
-  }
-
-  .link-item {
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    border-bottom: 1px solid #f0f0f0;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .checkbox {
-      margin-right: 12px;
-    }
-
-    .date {
-      color: #666;
-      font-size: 0.9em;
-      margin-right: 12px;
-      min-width: 100px;
-    }
-
-    .link {
-      color: #1a73e8;
-      text-decoration: none;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      flex: 1;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  .copy-button {
-    background: #1a73e8;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 10px;
-
-    &:hover {
-      background: #1557b0;
-    }
-
-    &:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-  }
-`;
-
-const CalendarWrapper = styled.div`
-  margin: 20px 0;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  .fc-daygrid-day-events {
-    margin-top: 8px !important;
-    position: relative;
-  }
-
-  .fc-daygrid-day-top {
-    flex-direction: row !important;
-    margin-bottom: 4px;
-    padding: 4px;
-    position: relative;
-  }
-
-  .fc-daygrid-day-number {
-    float: left;
-    margin-right: auto;
-  }
-
-  .fc-event {
-    margin: 2px 0;
-    padding: 4px 6px;
-  }
-
-  .fc-daygrid-day-frame {
-    min-height: 120px;
-    padding: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .fc-daygrid-day {
-    position: relative;
-  }
-`;
-
-const PlatformBadge = styled.span`
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 12px;
-  margin-right: 4px;
-  color: white;
-  background-color: ${props => 
-    props.platform === 'instagram' ? '#e1306c' :
-    props.platform === 'youtube' ? '#ff0000' :
-    props.platform === 'tiktok' ? '#000000' : '#1a73e8'
-  };
-`;
-
-const AddButton = styled.button`
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  background: #1a73e8;
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s;
-  font-size: 14px;
-  line-height: 1;
-  padding: 0;
-  margin-left: auto;
-
-  &:hover {
-    background: #1557b0;
-  }
-
-  .fc-daygrid-day:hover & {
-    opacity: 1;
-  }
-`;
-
-const DataTable = styled.div`
-  margin-top: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  .table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-
-    h2 {
-      color: #333;
-      font-size: 1.2rem;
-      margin: 0;
-    }
-  }
-
-  .filters {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-
-    select {
-      padding: 8px;
-      border: 1px solid #e1e1e1;
-      border-radius: 4px;
-      background: white;
-    }
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #e1e1e1;
-    }
-
-    th {
-      font-weight: 600;
-      color: #666;
-      background: #f8f9fa;
-    }
-
-    tr:hover {
-      background: #f8f9fa;
-    }
-  }
-`;
-
-const LanguageToggle = styled.div`
-  display: flex;
-  gap: 16px;
-  margin: 10px 0;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e1e1e1;
-
-  .radio-group {
-    display: flex;
-    gap: 20px;
-  }
-
-  .radio-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-  }
-
-  input[type="radio"] {
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    cursor: pointer;
-  }
-
-  label {
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .language-icon {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-  }
-`;
-
-const DotContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  justify-content: flex-start;
-  min-height: 16px;
-  padding: 4px;
-  margin: 4px 0;
-`;
-
-const DotIndicator = styled.div`
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: ${props => props.color};
-  display: inline-block;
-  margin: 0;
-  opacity: 1;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-`;
-
-const StatsContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin: 20px 0;
-`;
-
-const StatCard = styled.div`
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  text-align: center;
-
-  h3 {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-  }
-
-  .number {
-    font-size: 1.8rem;
-    font-weight: 600;
-    color: #1a73e8;
-  }
-`;
-
-const SearchContainer = styled.div`
-  margin: 20px 0;
-  
-  input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #e1e1e1;
-    border-radius: 4px;
-    font-size: 14px;
-    
-    &:focus {
-      outline: none;
-      border-color: #1a73e8;
-      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
-    }
-  }
-`;
-
-const AccountLinksContainer = styled.div`
-  margin: 20px 0;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  h3 {
-    margin-bottom: 15px;
-    color: #333;
-    font-size: 1rem;
-  }
-
-  .accounts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 15px;
-  }
-
-  .account-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    color: #333;
-    padding: 10px;
-    border-radius: 8px;
-    transition: all 0.2s;
-
-    &:hover {
-      background: #f5f5f5;
-      transform: translateY(-2px);
-    }
-
-    .platform-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 8px;
-      font-size: 20px;
-      color: white;
-
-      &.instagram {
-        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-      }
-
-      &.youtube {
-        background: #FF0000;
-      }
-
-      &.tiktok {
-        background: #000000;
-      }
-    }
-
-    .account-name {
-      font-size: 12px;
-      text-align: center;
-      color: #666;
-      max-width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-`;
-
-const ActionButton = styled.button`
-  background: none;
-  border: none;
-  color: #1a73e8;
-  cursor: pointer;
-  padding: 4px 8px;
-  font-size: 14px;
-  transition: all 0.2s;
-
-  &:hover {
-    text-decoration: underline;
-  }
-
-  &.delete {
-    color: #dc3545;
-    font-size: 16px;
-    padding: 4px;
-    
-    &:hover {
-      text-decoration: none;
-      opacity: 0.8;
-    }
-  }
-`;
-
-const ActionButtonGroup = styled.div`
-  display: flex;
-  gap: 4px;
-  align-items: center;
-`;
-
-const CreateButton = styled.button`
-  background: #1a73e8;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  
-  &:hover {
-    background: #1557b0;
-  }
-`;
-
-const TitleCell = styled.td`
-  position: relative;
-  padding-right: 30px !important;
-
-  .edit-icon {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    opacity: 0;
-    transition: opacity 0.2s;
-    cursor: pointer;
-    color: #1a73e8;
-    font-size: 16px;
-  }
-
-  &:hover .edit-icon {
-    opacity: 1;
-  }
-
-  input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #1a73e8;
-    border-radius: 4px;
-    font-size: 14px;
-    outline: none;
-
-    &:focus {
-      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
-    }
-  }
-`;
 
 const ContentsManagement = () => {
   const [contents, setContents] = useState([]);
@@ -1079,7 +366,7 @@ const ContentsManagement = () => {
             }}>
               {arg.dayNumberText}
             </span>
-            <AddButton
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleDateClick(arg);
@@ -1087,19 +374,20 @@ const ContentsManagement = () => {
               }}
             >
               +
-            </AddButton>
+            </button>
           </div>
-          <DotContainer>
+          <div className="dot-container">
             {Object.entries(accountContents).map(([colorKey, data]) => (
               Array(data.count).fill(0).map((_, index) => (
-                <DotIndicator 
+                <div 
                   key={`${colorKey}-${index}`} 
-                  color={data.color}
+                  className="dot-indicator"
+                  style={{ backgroundColor: data.color }}
                   title={`${data.accountName} (${data.count}개)`}
-                />
+                ></div>
               ))
             ))}
-          </DotContainer>
+          </div>
         </div>
       </div>
     );
@@ -1280,6 +568,12 @@ const ContentsManagement = () => {
       icon: '▶'
     },
     {
+      platform: 'youtube',
+      name: 'static_int_p',
+      url: 'https://www.youtube.com/@static_int_p/shorts',
+      icon: '▶'
+    },
+    {
       platform: 'tiktok',
       name: 'static_int_p',
       url: 'https://www.tiktok.com/@static_int_p',
@@ -1313,6 +607,12 @@ const ContentsManagement = () => {
       platform: 'instagram',
       name: 'diatomicarbon',
       url: 'https://www.instagram.com/diatomicarbon/reels/',
+      icon: '📷'
+    },
+    {
+      platform: 'instagram',
+      name: 'var_int_j',
+      url: 'https://www.instagram.com/var_int_j/',
       icon: '📷'
     }
   ];
@@ -1354,45 +654,50 @@ const ContentsManagement = () => {
   };
 
   return (
-    <Container>
-      <Header>
+    <div className="container">
+      <div className="header">
         <h1>콘텐츠 관리</h1>
-        <CreateButton onClick={() => navigate('/makecontents')}>
-          콘텐츠 생성하기
-        </CreateButton>
-      </Header>
+        <div className="header-buttons">
+          <button className="create-button" onClick={() => navigate('/admin/reels-idea-space')}>
+            릴스 아이디어 공간
+          </button>
+          <button className="create-button" onClick={() => navigate('/admin/makecontents')}>
+            콘텐츠 생성하기
+          </button>
+        </div>
+      </div>
 
-      <StatsContainer>
-        <StatCard>
+      <div className="stats-container">
+        <div className="stat-card">
           <h3>전체 콘텐츠</h3>
           <div className="number">{stats.total}</div>
-        </StatCard>
+        </div>
         {Object.entries(stats.byPlatform).map(([platform, count]) => (
-          <StatCard key={platform}>
+          <div className="stat-card" key={platform}>
             <h3>{platform.toUpperCase()}</h3>
             <div className="number">{count}</div>
-          </StatCard>
+          </div>
         ))}
-        <StatCard>
+        <div className="stat-card">
           <h3>한국어 콘텐츠</h3>
           <div className="number">{stats.byLanguage.korean}</div>
-        </StatCard>
-        <StatCard>
+        </div>
+        <div className="stat-card">
           <h3>영어 콘텐츠</h3>
           <div className="number">{stats.byLanguage.english}</div>
-        </StatCard>
-      </StatsContainer>
+        </div>
+      </div>
 
-      <SearchContainer>
+      <div className="search-container">
         <input
           type="text"
           placeholder="콘텐츠 검색 (제목 또는 계정명)"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-      </SearchContainer>
+      </div>
 
-      <AccountLinksContainer>
+      <div className="account-links-container">
         <h3>내 SNS 계정</h3>
         <div className="accounts-grid">
           {accountLinks.map((account, index) => (
@@ -1410,9 +715,9 @@ const ContentsManagement = () => {
             </a>
           ))}
         </div>
-      </AccountLinksContainer>
+      </div>
 
-      <CalendarWrapper>
+      <div className="calendar-wrapper">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
@@ -1442,14 +747,14 @@ const ContentsManagement = () => {
             }
           }}
         />
-      </CalendarWrapper>
+      </div>
 
       {showModal && (
-        <Modal onClick={() => {
+        <div className="modal" onClick={() => {
           setShowModal(false);
           setEditingContent(null);
         }}>
-          <ModalContent onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <button className="close-button" onClick={() => {
               setShowModal(false);
               setEditingContent(null);
@@ -1520,7 +825,7 @@ const ContentsManagement = () => {
                 )}
               </div>
 
-              <LanguageToggle>
+              <div className="language-toggle">
                 <div className="radio-group">
                   <div className="radio-option">
                     <input
@@ -1553,7 +858,7 @@ const ContentsManagement = () => {
                     </label>
                   </div>
                 </div>
-              </LanguageToggle>
+              </div>
 
               <input
                 type="text"
@@ -1571,11 +876,11 @@ const ContentsManagement = () => {
                 {editingContent ? '수정하기' : '추가하기'}
               </button>
             </form>
-          </ModalContent>
-        </Modal>
+          </div>
+        </div>
       )}
 
-      <DataTable>
+      <div className="data-table">
         <div className="table-header">
           <h2>전체 콘텐츠 목록</h2>
           <div className="filters">
@@ -1645,79 +950,46 @@ const ContentsManagement = () => {
               <tr key={index}>
                 <td>{moment(content.date).format('YYYY-MM-DD')}</td>
                 <td>
-                  <PlatformBadge platform={content.platform}>
-                    {content.platform}
-                  </PlatformBadge>
-                </td>
-                <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <DotIndicator color={accountColors[`${content.platform}-${content.accountName}`] || generateRandomColor(content.platform, content.accountName)} />
+                    <div className="dot-indicator" style={{ backgroundColor: accountColors[`${content.platform}-${content.accountName}`] || generateRandomColor(content.platform, content.accountName) }} />
                     {content.accountName}
                   </div>
                 </td>
                 <td>{content.isKorean ? '한국어' : '영어'}</td>
-                <TitleCell>
-                  {editingTitleId === content.id ? (
-                    <input
-                      type="text"
-                      value={editingTitleValue}
-                      onChange={(e) => setEditingTitleValue(e.target.value)}
-                      onKeyDown={(e) => handleTitleEditKeyDown(e, content.id)}
-                      onBlur={() => {
-                        if (editingTitleValue !== content.title) {
-                          handleTitleEdit(content.id, editingTitleValue);
-                        } else {
-                          setEditingTitleId(null);
-                        }
-                      }}
-                      autoFocus
-                    />
-                  ) : (
-                    <>
-                      {content.title}
-                      <span 
-                        className="edit-icon" 
-                        onClick={() => startTitleEdit(content)}
-                        title="제목 수정"
-                      >
-                        ✎
-                      </span>
-                    </>
-                  )}
-                </TitleCell>
+                <td>{content.title}</td>
                 <td>
                   <a href={content.link} target="_blank" rel="noopener noreferrer">
                     보기
                   </a>
                 </td>
                 <td>
-                  <ActionButtonGroup>
-                    <ActionButton onClick={() => handleEditContent(content)}>
+                  <div className="action-button-group">
+                    <button onClick={() => handleEditContent(content)}>
                       수정
-                    </ActionButton>
-                    <ActionButton 
+                    </button>
+                    <button 
                       className="delete"
                       onClick={() => handleDeleteContent(content.id)}
                       title="삭제"
                     >
                       ×
-                    </ActionButton>
-                  </ActionButtonGroup>
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </DataTable>
+      </div>
 
-      <ContentList>
+      <div className="content-list">
         <h2>{selectedDate.format('YYYY년 MM월 DD일')} 콘텐츠</h2>
         {getSelectedDateContents().map((content, index) => (
           <div key={index} className="content-item">
             <div>
-              <PlatformBadge platform={content.platform}>
+              <div className="platform-badge platform-{content.platform}">
                 {content.platform}
-              </PlatformBadge>
+              </div>
               <strong>{content.accountName}</strong>
               <p>{content.title}</p>
               <a href={content.link} target="_blank" rel="noopener noreferrer">
@@ -1726,9 +998,9 @@ const ContentsManagement = () => {
             </div>
           </div>
         ))}
-      </ContentList>
+      </div>
 
-      <LinkExportSection>
+      <div className="link-export-section">
         <div className="section-header">
           <h2>콘텐츠 링크 모아보기</h2>
           <span className="total-count">
@@ -1787,8 +1059,8 @@ const ContentsManagement = () => {
         >
           선택한 링크 복사하기 ({selectedLinks.size}개)
         </button>
-      </LinkExportSection>
-    </Container>
+      </div>
+    </div>
   );
 };
 

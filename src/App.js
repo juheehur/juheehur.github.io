@@ -35,6 +35,7 @@ import MakeContents from './pages/MakeContents';
 import { HelmetProvider } from 'react-helmet-async';
 import { LanguageProvider } from './context/LanguageContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import ReelsIdeaSpace from './pages/ReelsIdeaSpace';
 
 // Check if we're in the GitHub Pages environment
 const isGithubPages = process.env.REACT_APP_DEPLOY_TARGET === 'github';
@@ -74,7 +75,8 @@ function App() {
                       <Route path="/admin/todo-management" element={<ProtectedRoute adminOnly><TodoManagement /></ProtectedRoute>} />
                       <Route path="/admin/todos" element={<Navigate to="/admin/add-todo" replace />} />
                       <Route path="/admin/contents" element={<ProtectedRoute adminOnly><ContentsManagement /></ProtectedRoute>} />
-                      <Route path="/makecontents" element={<ProtectedRoute adminOnly><MakeContents /></ProtectedRoute>} />
+                      <Route path="/admin/makecontents" element={<ProtectedRoute adminOnly><MakeContents /></ProtectedRoute>} />
+                      <Route path="/admin/reels-idea-space" element={<ProtectedRoute adminOnly><ReelsIdeaSpace /></ProtectedRoute>} />
                       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                       <Route path="/duplicate" element={<Duplicate />} />
                       <Route path="/admin/tech-interview" element={
