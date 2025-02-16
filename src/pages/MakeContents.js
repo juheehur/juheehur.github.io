@@ -306,6 +306,7 @@ const MakeContents = () => {
           ...doc.data(),
           firebaseId: doc.id // Firebase document ID 저장
         }));
+        console.log('Fetched voices:', voicesList.map(voice => ({ id: voice.id, name: voice.name }))); // Log voiceId and name for each voice
         setSavedVoices(voicesList);
       } catch (error) {
         console.error('Error fetching voices:', error);
@@ -392,6 +393,7 @@ const MakeContents = () => {
       throw new Error('WebSocket not connected');
     }
     const selectedVoice = savedVoices.find(v => v.id === entry.voiceId);
+    console.log(`Generating voice for entry ${entryIndex}:`, selectedVoice);
     if (!selectedVoice) {
       alert(`Selected voice for entry ${entryIndex + 1} not found.`);
       return;
@@ -591,8 +593,8 @@ const MakeContents = () => {
                 className="voice-select"
               >
                 <option value="">Select voice for all entries</option>
-                {savedVoices.map(voice => (
-                  <option key={voice.id} value={voice.id}>{voice.name}</option>
+                {savedVoices.map((voice, index) => (
+                  <option key={`${voice.id}-${index}`} value={voice.id}>{voice.name}</option>
                 ))}
               </select>
               <button className="bulk-split-button" onClick={handleBulkSplit}>
@@ -611,13 +613,14 @@ const MakeContents = () => {
                     onChange={(e) => {
                       const newEntries = [...entries];
                       newEntries[index].voiceId = e.target.value;
+                      console.log(`Selected voiceId for entry ${index}:`, e.target.value);
                       setEntries(newEntries);
                     }}
                     className="voice-select"
                   >
                     <option value="">Select voice</option>
-                    {savedVoices.map(voice => (
-                      <option key={voice.id} value={voice.id}>{voice.name}</option>
+                    {savedVoices.map((voice, index) => (
+                      <option key={`${voice.id}-${index}`} value={voice.id}>{voice.name}</option>
                     ))}
                   </select>
                   {entries.length > 1 && (
