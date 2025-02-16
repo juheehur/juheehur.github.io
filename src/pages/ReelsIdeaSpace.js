@@ -335,6 +335,7 @@ const ReelsIdeaSpace = () => {
   const [selectedColor, setSelectedColor] = useState('#ffffff');
   const [editingId, setEditingId] = useState(null);
   const [newBgMusic, setNewBgMusic] = useState({ title: '', mood: '' });
+  const [checkedScripts, setCheckedScripts] = useState(new Set());
 
   const colors = ['#ffffff', '#fff8dc', '#f0fff0', '#f0f8ff', '#ffe4e1', '#e6e6fa'];
 
@@ -445,6 +446,22 @@ const ReelsIdeaSpace = () => {
     }
   };
 
+  const toggleScriptCheck = (scriptId) => {
+    setCheckedScripts(prev => {
+      const newChecked = new Set(prev);
+      if (newChecked.has(scriptId)) {
+        newChecked.delete(scriptId);
+      } else {
+        newChecked.add(scriptId);
+      }
+      return newChecked;
+    });
+  };
+
+  const getCheckedScripts = () => {
+    return scripts.filter(script => checkedScripts.has(script.id));
+  };
+
   return (
     <Container>
       <Header>
@@ -452,6 +469,9 @@ const ReelsIdeaSpace = () => {
         <BackButton onClick={() => navigate('/admin/contents')}>
           콘텐츠 관리로 돌아가기
         </BackButton>
+        <button onClick={() => setScripts(getCheckedScripts())}>
+          체크된 대본 보기
+        </button>
       </Header>
 
       <Workspace>
@@ -461,8 +481,19 @@ const ReelsIdeaSpace = () => {
             <AddButton onClick={() => handleAddNote('script')}>+ 새 대본</AddButton>
           </h2>
           <NoteGrid>
-            {scripts.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate()).map(script => (
+            {scripts.sort((a, b) => {
+              const aChecked = checkedScripts.has(a.id);
+              const bChecked = checkedScripts.has(b.id);
+              if (aChecked && !bChecked) return 1;
+              if (!aChecked && bChecked) return -1;
+              return b.createdAt?.toDate() - a.createdAt?.toDate();
+            }).map(script => (
               <Note key={script.id} color={script.color}>
+                <input 
+                  type="checkbox" 
+                  checked={checkedScripts.has(script.id)} 
+                  onChange={() => toggleScriptCheck(script.id)}
+                />
                 <div className="date">
                   {moment(script.createdAt?.toDate()).format('YYYY-MM-DD HH:mm')}
                 </div>

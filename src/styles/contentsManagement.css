@@ -332,152 +332,199 @@
 
 .modal-content {
   background: white;
-  padding: 30px;
-  border-radius: 8px;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: relative;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
 }
 
-.modal-content h2 {
-  margin-bottom: 20px;
+.modal-header {
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e1e1e1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
   color: #333;
   font-size: 1.2rem;
-}
-
-.modal-content input,
-.modal-content select {
-  margin: 10px 0;
-  padding: 12px;
-  width: 100%;
-  border: 1px solid #e1e1e1;
-  border-radius: 4px;
-  font-size: 14px;
-  background-color: white;
-}
-
-.modal-content input:focus,
-.modal-content select:focus {
-  outline: none;
-  border-color: #1a73e8;
-  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
-}
-
-.account-section {
-  margin: 10px 0;
-}
-
-.add-account {
-  background: none;
-  border: none;
-  color: #1a73e8;
-  padding: 0;
-  font-size: 14px;
-  cursor: pointer;
-  margin-top: 5px;
-  width: auto;
-}
-
-.add-account:hover {
-  text-decoration: underline;
-  background: none;
-}
-
-.modal-content button {
-  margin-top: 20px;
-  width: 100%;
-  padding: 12px;
-  background: #1a73e8;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.modal-content button:hover {
-  background: #1557b0;
+  font-weight: 600;
 }
 
 .close-button {
-  position: absolute;
-  top: 15px;
-  right: 15px;
   background: none;
   border: none;
-  font-size: 20px;
   color: #666;
   cursor: pointer;
-  padding: 5px;
-  width: auto;
-  margin: 0;
+  padding: 4px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  transition: all 0.2s;
 }
 
 .close-button:hover {
+  background: #e9ecef;
   color: #333;
-  background: none;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
+.modal-body {
+  padding: 24px;
 }
 
-.action-buttons button {
-  margin-top: 0;
-  flex: 1;
+.form-group {
+  margin-bottom: 20px;
 }
 
-.action-buttons button.secondary {
-  background: #666;
+.form-group:last-child {
+  margin-bottom: 0;
 }
 
-.action-buttons button.secondary:hover {
-  background: #555;
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
 }
 
-.language-toggle {
-  display: flex;
-  gap: 16px;
-  margin: 10px 0;
+.platform-select {
+  width: 100%;
   padding: 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
   border: 1px solid #e1e1e1;
-}
-
-.radio-group {
-  display: flex;
-  gap: 20px;
-}
-
-.radio-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.radio-option input[type="radio"] {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  cursor: pointer;
-}
-
-.radio-option label {
+  border-radius: 6px;
   font-size: 14px;
   color: #333;
+  background-color: white;
+  transition: all 0.2s;
   cursor: pointer;
-  user-select: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
 }
 
-.language-icon {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
+.platform-select:hover {
+  border-color: #1a73e8;
+}
+
+.platform-select:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+}
+
+.account-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.account-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e1e1e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  margin-bottom: 12px;
+}
+
+.add-account-button {
+  background: none;
+  border: none;
+  color: #1a73e8;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.add-account-button:hover {
+  background: rgba(26, 115, 232, 0.1);
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e1e1e1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.input-field:hover {
+  border-color: #1a73e8;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-top: 1px solid #e1e1e1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-footer button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-button {
+  background: white;
+  border: 1px solid #e1e1e1;
+  color: #666;
+}
+
+.cancel-button:hover {
+  background: #f8f9fa;
+  border-color: #666;
+  color: #333;
+}
+
+.submit-button {
+  background: #1a73e8;
+  border: none;
+  color: white;
+}
+
+.submit-button:hover {
+  background: #1557b0;
+  transform: translateY(-1px);
+}
+
+.submit-button:active {
+  transform: translateY(0);
 }
 
 .content-list {
@@ -780,4 +827,38 @@
 .action-button-group button.delete:hover {
   text-decoration: none;
   opacity: 0.8;
+}
+
+/* Add styles for the new language selection buttons */
+
+.language-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.language-button {
+  padding: 10px 20px;
+  background: #f0f0f0;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.language-button:hover {
+  background: #e0e0e0;
+  color: #1a73e8;
+}
+
+.language-button.selected {
+  background: #1a73e8;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 } 

@@ -574,6 +574,12 @@ const ContentsManagement = () => {
       icon: '▶'
     },
     {
+      platform: 'youtube',
+      name: 'diatomicc2',
+      url: 'https://www.youtube.com/@diatomicc2',
+      icon: '▶'
+    },
+    {
       platform: 'tiktok',
       name: 'static_int_p',
       url: 'https://www.tiktok.com/@static_int_p',
@@ -755,127 +761,167 @@ const ContentsManagement = () => {
           setEditingContent(null);
         }}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="close-button" onClick={() => {
-              setShowModal(false);
-              setEditingContent(null);
-            }}>×</button>
-            <h2>{editingContent ? '콘텐츠 수정' : `${selectedDate.format('YYYY년 MM월 DD일')} 콘텐츠 추가`}</h2>
-            <form onSubmit={handleAddContent}>
-              <select
-                value={newContent.platform}
-                onChange={(e) => {
-                  setNewContent({
-                    ...newContent,
-                    platform: e.target.value,
-                    accountName: ''
-                  });
+            <div className="modal-header">
+              <h2>{editingContent ? '콘텐츠 수정' : `${selectedDate.format('YYYY년 MM월 DD일')} 콘텐츠 추가`}</h2>
+              <button 
+                className="close-button"
+                onClick={() => {
+                  setShowModal(false);
+                  setEditingContent(null);
                 }}
               >
-                <option value="instagram">Instagram</option>
-                <option value="youtube">YouTube</option>
-                <option value="tiktok">TikTok</option>
-              </select>
+                ×
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <form onSubmit={handleAddContent}>
+                <div className="form-group">
+                  <label className="form-label">플랫폼</label>
+                  <select
+                    className="platform-select"
+                    value={newContent.platform}
+                    onChange={(e) => {
+                      setNewContent({
+                        ...newContent,
+                        platform: e.target.value,
+                        accountName: ''
+                      });
+                    }}
+                  >
+                    <option value="instagram">Instagram</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="tiktok">TikTok</option>
+                  </select>
+                </div>
 
-              <div className="account-section">
-                {!showAccountInput ? (
-                  <>
-                    <select
-                      value={newContent.accountName}
-                      onChange={(e) => setNewContent({...newContent, accountName: e.target.value})}
-                    >
-                      <option value="">계정 선택</option>
-                      {getFilteredAccounts().map(account => (
-                        <option key={account.id} value={account.name}>
-                          {account.name}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      className="add-account"
-                      onClick={() => setShowAccountInput(true)}
-                    >
-                      + 새 계정 추가
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <input
-                      type="text"
-                      placeholder="새 계정명 입력"
-                      value={newAccount}
-                      onChange={(e) => setNewAccount(e.target.value)}
-                    />
-                    <div className="action-buttons">
-                      <button
-                        type="button"
-                        onClick={handleAddAccount}
-                      >
-                        추가
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary"
-                        onClick={() => setShowAccountInput(false)}
-                      >
-                        취소
-                      </button>
+                <div className="form-group">
+                  <div className="account-section">
+                    <div className="account-header">
+                      <label className="form-label">계정</label>
+                      {!showAccountInput && (
+                        <button
+                          type="button"
+                          className="add-account-button"
+                          onClick={() => setShowAccountInput(true)}
+                        >
+                          + 새 계정 추가
+                        </button>
+                      )}
                     </div>
-                  </>
-                )}
-              </div>
+                    
+                    {!showAccountInput ? (
+                      <select
+                        className="account-select"
+                        value={newContent.accountName}
+                        onChange={(e) => setNewContent({...newContent, accountName: e.target.value})}
+                      >
+                        <option value="">계정 선택</option>
+                        {getFilteredAccounts().map(account => (
+                          <option key={account.id} value={account.name}>
+                            {account.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          className="input-field"
+                          placeholder="새 계정명 입력"
+                          value={newAccount}
+                          onChange={(e) => setNewAccount(e.target.value)}
+                        />
+                        <div className="modal-footer" style={{ marginTop: '12px', padding: '0' }}>
+                          <button
+                            type="button"
+                            className="cancel-button"
+                            onClick={() => setShowAccountInput(false)}
+                          >
+                            취소
+                          </button>
+                          <button
+                            type="button"
+                            className="submit-button"
+                            onClick={handleAddAccount}
+                          >
+                            추가
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
 
-              <div className="language-toggle">
-                <div className="radio-group">
-                  <div className="radio-option">
-                    <input
-                      type="radio"
-                      id="korean"
-                      name="language"
-                      checked={isKorean}
-                      onChange={() => {
+                <div className="form-group">
+                  <label className="form-label">언어</label>
+                  <div className="language-buttons">
+                    <button 
+                      type="button"
+                      className={`language-button ${isKorean ? 'selected' : ''}`}
+                      onClick={() => {
                         setIsKorean(true);
                         setNewContent({...newContent, isKorean: true});
                       }}
-                    />
-                    <label htmlFor="korean">
+                    >
                       🇰🇷 한국어
-                    </label>
-                  </div>
-                  <div className="radio-option">
-                    <input
-                      type="radio"
-                      id="english"
-                      name="language"
-                      checked={!isKorean}
-                      onChange={() => {
+                    </button>
+                    <button 
+                      type="button"
+                      className={`language-button ${!isKorean ? 'selected' : ''}`}
+                      onClick={() => {
                         setIsKorean(false);
                         setNewContent({...newContent, isKorean: false});
                       }}
-                    />
-                    <label htmlFor="english">
+                    >
                       🇺🇸 English
-                    </label>
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              <input
-                type="text"
-                placeholder="콘텐츠 제목"
-                value={newContent.title}
-                onChange={(e) => setNewContent({...newContent, title: e.target.value})}
-              />
-              <input
-                type="text"
-                placeholder="콘텐츠 링크"
-                value={newContent.link}
-                onChange={(e) => setNewContent({...newContent, link: e.target.value})}
-              />
-              <button type="submit">
+                <div className="form-group">
+                  <label className="form-label">콘텐츠 제목</label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder="콘텐츠 제목을 입력하세요"
+                    value={newContent.title}
+                    onChange={(e) => setNewContent({...newContent, title: e.target.value})}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">콘텐츠 링크</label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder="콘텐츠 링크를 입력하세요"
+                    value={newContent.link}
+                    onChange={(e) => setNewContent({...newContent, link: e.target.value})}
+                  />
+                </div>
+              </form>
+            </div>
+
+            <div className="modal-footer">
+              <button 
+                type="button"
+                className="cancel-button"
+                onClick={() => {
+                  setShowModal(false);
+                  setEditingContent(null);
+                }}
+              >
+                취소
+              </button>
+              <button 
+                type="button"
+                className="submit-button"
+                onClick={handleAddContent}
+              >
                 {editingContent ? '수정하기' : '추가하기'}
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
