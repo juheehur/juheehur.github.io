@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "buildCommand": "npm run build:prerender",
+  "outputDirectory": "build",
+  "framework": "create-react-app",
+  "env": {
+    "SKIP_PRERENDER": "true"
+  }
+} 

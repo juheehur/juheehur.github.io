@@ -1,0 +1,313 @@
+.goals-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.goals-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 20px;
+}
+
+.tab-btn {
+  padding: 8px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  color: #666;
+  position: relative;
+}
+
+.tab-btn:hover {
+  color: #007AFF;
+}
+
+.tab-btn.active {
+  background: none;
+  color: #007AFF;
+  font-weight: 500;
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #007AFF;
+}
+
+.back-btn {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.goal-form, .habit-form {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.goal-input, .habit-input,
+.goal-description, .habit-description {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.goal-description, .habit-description {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.goal-category, .habit-category,
+.goal-date, .habit-date {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.add-goal-btn, .add-habit-btn {
+  padding: 8px 20px;
+  background-color: #4ECDC4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-goal-btn:hover, .add-habit-btn:hover {
+  background-color: #45b7aa;
+}
+
+.goals-list, .habits-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.goal-card, .habit-card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.goal-card-header, .habit-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.goal-card-header h3, .habit-card-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.delete-goal-btn, .delete-habit-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #999;
+  padding: 0 5px;
+}
+
+.goal-description-text, .habit-description-text {
+  color: #666;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.goal-card-footer, .habit-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.goal-category-tag, .habit-category-tag {
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: white;
+  font-size: 12px;
+}
+
+.goal-date-tag, .habit-date-tag {
+  color: #666;
+  font-size: 12px;
+}
+
+/* Habit specific styles */
+.habits-calendar-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.habit-progress {
+  margin: 15px 0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #4ECDC4;
+  transition: width 0.3s ease;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.streak-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #666;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.calendar-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-section .react-calendar {
+  width: 100%;
+  border: none;
+  font-family: inherit;
+}
+
+.habit-marker {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ddd;
+  margin: 2px;
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.habit-marker.completed {
+  background-color: #4ECDC4;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .habits-calendar-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .calendar-section {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .goals-list, .habits-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .goals-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+.habit-goal-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.habit-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.habit-goal-link {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+.habit-target-input {
+  width: 150px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.habit-target-input::placeholder {
+  color: #999;
+}
+
+.habit-target-input::-webkit-inner-spin-button,
+.habit-target-input::-webkit-outer-spin-button {
+  opacity: 1;
+} 

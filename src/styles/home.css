@@ -1,0 +1,1370 @@
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 5%;
+  background-color: #000000;
+  color: white;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  padding: 40px 0;
+  background-color: #000;
+  color: #fff;
+}
+
+.content-wrapper {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+  padding-top: 5%;
+}
+
+.content-section {
+  flex: 1;
+  padding-right: 5%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: 3%;
+}
+
+.image-section {
+  flex: 1;
+  position: relative;
+  max-height: 70vh;
+  min-height: 450px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  margin-top: 3%;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+  transform: perspective(1000px) rotateY(-5deg);
+  transition: transform 0.3s ease;
+}
+
+.profile-image:hover {
+  transform: perspective(1000px) rotateY(0deg);
+}
+
+/* Role Tags */
+
+
+.desktop-role-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  justify-content: center;
+  width: 90%;
+  max-width: 800px;
+}
+
+.role-tags {
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+}
+
+.role-tag {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.role-tag:hover {
+  background: rgba(26, 109, 255, 0.2);
+}
+
+.role-tag.active {
+  background: #1a6dff;
+}
+
+.role-tag.active:hover {
+  background: #004bcc;
+}
+
+/* Title and Subtitle */
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: -20px;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+  font-family: 'Courier New', monospace;
+  color: #ffff;
+  white-space: pre-wrap;
+  min-height: 200px;
+  display: flex;
+  align-items: flex-start;
+  overflow: visible;
+}
+
+.title-container {
+  height: 200px;
+  overflow: visible;
+  margin-bottom: 1.5rem;
+  margin-top: -20px;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: #999999;
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.button {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primary-button {
+  background-color: #1a6dff;
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: #004bcc;
+  transform: translateY(-2px);
+}
+
+.secondary-button {
+  background-color: transparent;
+  color: white;
+  border: 2px solid #1a6dff;
+}
+
+.secondary-button:hover {
+  background-color: rgba(26, 109, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Mobile Styles */
+@media screen and (max-width: 768px) {
+  .home-container {
+    padding: 0;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+
+  .content-wrapper {
+    flex-direction: column;
+    margin-top: 20px;
+  }
+
+  .content-section {
+    width: 100%;
+    padding: 0;
+    margin-top: 0;
+  }
+
+  .image-section {
+    width: 100%;
+    height: 60vh;
+    margin: 20px 0;
+    border-radius: 30px;
+  }
+
+  .title-container {
+    height: 150px;
+    min-height: 150px;
+    max-height: 150px;
+    margin: 0 0 40px 0;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .title {
+    font-size: 1.1rem;
+    margin: 0;
+    height: auto;
+    min-height: unset;
+    overflow: visible;
+    width: 100%;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+    margin: 0 0 24px 0;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .button-group {
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .button {
+    flex: 1;
+    padding: 14px 20px;
+    font-size: 0.9375rem;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+
+  .role-tags {
+    display: none;
+  }
+
+}
+
+/* Testimonials Section */
+.testimonials-section {
+  padding: 100px 0;
+  background: linear-gradient(180deg, #000000 0%, #0A0A0A 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.testimonials-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 60px;
+  padding: 0 5%;
+}
+
+.testimonials-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 0;
+}
+
+.answer-button {
+  padding: 12px 24px;
+  background: rgba(26, 109, 255, 0.1);
+  border: 1px solid #1a6dff;
+  border-radius: 8px;
+  color: #1a6dff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.answer-button:hover {
+  background: rgba(26, 109, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.testimonials-carousel {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  overflow: hidden;
+  padding: 0 20px;
+}
+
+.testimonials-slider {
+  display: flex;
+  transition: none;
+}
+
+.testimonials-slider.transitioning {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.testimonial-slide {
+  min-width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  opacity: 0.3;
+  transform: scale(0.9);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.testimonial-slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.testimonial-quote {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 40px;
+  position: relative;
+  transition: all 0.3s ease;
+  transform: perspective(1000px) rotateY(5deg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.testimonial-quote:hover {
+  transform: perspective(1000px) rotateY(0deg) translateY(-5px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.quote-icon {
+  color: rgba(26, 109, 255, 0.3);
+  margin-bottom: 20px;
+  transform: rotate(-10deg);
+  display: inline-block;
+}
+
+.quote-content {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 20px 0;
+  font-style: italic;
+}
+
+.quote-author {
+  font-size: 1rem;
+  color: #1a6dff;
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.5s forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slider-controls {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px;
+  pointer-events: none;
+}
+
+.slider-arrow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+}
+
+.slider-arrow:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.slider-arrow.prev {
+  margin-right: auto;
+}
+
+.slider-arrow.next {
+  margin-left: auto;
+}
+
+@media screen and (max-width: 768px) {
+  .testimonials-section {
+    padding: 60px 0;
+  }
+
+  .testimonials-header {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 0 20px;
+  }
+
+  .testimonials-title {
+    font-size: 1.8rem;
+  }
+
+  .testimonial-quote {
+    padding: 30px;
+  }
+
+  .quote-content {
+    font-size: 1.1rem;
+  }
+
+  .slider-controls {
+    padding: 0 20px;
+  }
+
+  .slider-arrow {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Todos Section */
+.todos-section {
+  padding: 2rem;
+  background-color: #000000;
+  color: white;
+}
+
+.todos-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.todos-title {
+  font-size: 3.5rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.schedule-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 0 auto;
+  position: relative;
+  max-width: 300px;
+}
+
+.schedule-tab {
+  position: relative;
+  padding: 0.5rem 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.schedule-tab.active {
+  color: white;
+}
+
+.tab-text {
+  position: relative;
+  z-index: 1;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #1a6dff;
+  transform-origin: left;
+  animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.todos-view-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.view-button {
+  padding: 0.7rem 1.5rem;
+  border: 1px solid rgba(26, 109, 255, 0.3);
+  background: transparent;
+  color: #1a6dff;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.view-button:hover {
+  background: rgba(26, 109, 255, 0.1);
+  border-color: rgba(26, 109, 255, 0.5);
+}
+
+.view-button.active {
+  background: #1a6dff;
+  color: white;
+  border-color: #1a6dff;
+}
+
+.todos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.todo-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s ease;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.todo-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.todo-card h3,
+.todo-card p {
+  color: white;
+  margin: 0;
+}
+
+.todo-task {
+  font-size: 1.1rem;
+  color: white !important;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.todo-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.todo-location {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.todo-location::before {
+  content: "📍";
+  font-size: 0.9rem;
+}
+
+.todo-time {
+  color: #1a6dff !important;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.todo-time::before {
+  content: "🕒";
+  font-size: 0.9rem;
+}
+
+.no-todos {
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 2.5rem;
+  color: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.95rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Calendar Styles */
+.calendar-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.home-calendar .react-calendar {
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.125em;
+  padding: 0.5rem;
+}
+
+.home-calendar .react-calendar__navigation {
+  display: flex;
+  margin-bottom: 1rem;
+  padding: 0 0.5rem;
+}
+
+.home-calendar .react-calendar__navigation button {
+  color: white !important;
+  min-width: 44px;
+  background: none;
+  font-size: 1rem;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.home-calendar .react-calendar__month-view__weekdays {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.home-calendar .react-calendar__month-view__weekdays__weekday {
+  padding: 0.5rem;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.home-calendar .react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.home-calendar .react-calendar__month-view__days__day {
+  color: white !important;
+}
+
+.home-calendar .react-calendar__month-view__days__day--neighboringMonth {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.home-calendar .react-calendar__tile {
+  position: relative;
+  height: 70px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 0 !important;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  color: white !important;
+}
+
+.home-calendar .react-calendar__tile > abbr {
+  color: white !important;
+}
+
+.home-calendar .react-calendar__tile--now {
+  background: rgba(26, 109, 255, 0.2) !important;
+  border-color: rgba(26, 109, 255, 0.4) !important;
+}
+
+.home-calendar .react-calendar__tile--active {
+  background: #1a6dff !important;
+  border-color: #1a6dff !important;
+}
+
+.home-calendar .calendar-todos {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.home-calendar .todo-count {
+  background: #1a6dff;
+  color: white !important;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+/* Todo Styles */
+.home-todos .todo-item {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.home-todos .todo-task {
+  color: white !important;
+}
+
+.home-todos .todo-details {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.home-todos .todo-time {
+  color: #1a6dff !important;
+}
+
+.home-todos .todo-location {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .home-calendar .react-calendar__tile {
+    height: 60px !important;
+  }
+
+  .home-calendar .calendar-todos {
+    top: 28px;
+  }
+
+  .home-calendar .todo-count {
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    margin-top: 10px;
+  }
+
+  .todos-section {
+    padding: 1rem;
+  }
+
+  .todos-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0;
+  }
+
+  .todo-card {
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    margin: 0;
+  }
+
+  .todo-task {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .todo-info {
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .todo-time {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(26, 109, 255, 0.1);
+    border-radius: 6px;
+    color: #1a6dff !important;
+  }
+
+  .todo-time::before {
+    display: none;
+  }
+
+  .todo-location {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .todo-location::before {
+    display: none;
+  }
+
+  .no-todos {
+    padding: 2rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    margin: 0;
+  }
+
+  .todos-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .todos-view-buttons {
+    margin-bottom: 1rem;
+  }
+
+  .view-button {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+
+  .schedule-tabs {
+    gap: 1.5rem;
+  }
+
+  .schedule-tab {
+    font-size: 1rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: rgba(28, 28, 30, 0.95);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: modalSlideUp 0.3s ease-out;
+}
+
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(80vh - 60px);
+}
+
+.modal-todo-item {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.modal-todo-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.todo-time-column {
+  min-width: 80px;
+  text-align: right;
+}
+
+.todo-time {
+  color: #1a6dff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.todo-end-time {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+}
+
+.todo-content-column {
+  flex: 1;
+}
+
+.todo-content-column h4 {
+  color: white;
+  font-size: 1rem;
+  margin: 0 0 4px 0;
+  font-weight: 500;
+}
+
+.todo-content-column .todo-location {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Home Todo Styles - Independent from addTodo.css */
+.home-view-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.home-view-button {
+  padding: 0.7rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.home-view-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.home-view-button.active {
+  background: #1a6dff;
+  color: white;
+  border-color: #1a6dff;
+}
+
+.home-todos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.home-todo-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.home-todo-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.home-todo-card h3,
+.home-todo-card p {
+  color: white !important;
+  margin: 0;
+}
+
+.home-todo-task {
+  font-size: 1.1rem;
+  color: white !important;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.home-todo-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.home-todo-location {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.home-todo-location::before {
+  content: "📍";
+  font-size: 0.9rem;
+}
+
+.home-todo-time {
+  color: white !important;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.home-todo-time::before {
+  content: "🕒";
+  font-size: 0.9rem;
+}
+
+.home-no-todos {
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 2.5rem;
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.95rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Mobile Styles for Home Todos */
+@media (max-width: 768px) {
+  .home-todos-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0;
+  }
+
+  .home-todo-card {
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    margin: 0;
+  }
+
+  .home-todo-task {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .home-todo-info {
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .home-todo-time {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: white !important;
+  }
+
+  .home-todo-time::before {
+    display: none;
+  }
+
+  .home-todo-location {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  .home-todo-location::before {
+    display: none;
+  }
+
+  .home-no-todos {
+    padding: 2rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    margin: 0;
+  }
+}
+
+/* Home Modal Styles - New Design */
+.home-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.home-modal-content {
+  background: rgba(18, 18, 18, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: modalSlideUp 0.3s ease-out;
+}
+
+.home-modal-header {
+  padding: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.home-modal-header h3 {
+  color: white !important;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.home-modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.home-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.home-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: calc(85vh - 81px);
+}
+
+.home-modal-todo-item {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.home-modal-todo-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.home-todo-time-column {
+  min-width: 90px;
+  text-align: right;
+  padding-right: 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.home-todo-time {
+  color: #1a6dff !important;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: block;
+}
+
+.home-todo-end-time {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.home-todo-content-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-todo-content-column h4 {
+  color: white !important;
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.home-todo-content-column .home-todo-location {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 0.9rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.home-todo-content-column .home-todo-location::before {
+  content: "📍";
+  font-size: 1rem;
+}
+
+.home-modal-no-todos {
+  text-align: center;
+  padding: 40px 24px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  margin: 12px 0;
+}
+
+@media (max-width: 768px) {
+  .home-modal-content {
+    margin: 0;
+    max-height: 90vh;
+    border-radius: 16px;
+  }
+
+  .home-modal-header {
+    padding: 20px;
+  }
+
+  .home-modal-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .home-modal-body {
+    padding: 16px;
+  }
+
+  .home-modal-todo-item {
+    padding: 14px;
+    margin-bottom: 10px;
+    gap: 16px;
+  }
+
+  .home-todo-time-column {
+    min-width: 80px;
+    padding-right: 14px;
+  }
+
+  .home-todo-content-column h4 {
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+
+  .home-todo-content-column .home-todo-location {
+    font-size: 0.85rem;
+  }
+
+  .home-modal-no-todos {
+    padding: 32px 20px;
+    font-size: 0.95rem;
+  }
+}
+

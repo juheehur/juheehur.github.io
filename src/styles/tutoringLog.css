@@ -1,0 +1,526 @@
+.tutoring-log {
+  background: var(--apple-dark-surface);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.tutoring-form {
+  margin-bottom: 24px;
+}
+
+.student-section {
+  margin-bottom: 20px;
+}
+
+.add-student {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.student-inputs {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+}
+
+.student-input {
+  flex: 1;
+  background: var(--apple-dark-elevated);
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.add-student-btn {
+  background: var(--apple-accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.student-select {
+  width: 100%;
+  background: var(--apple-dark-elevated);
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-inputs .duration {
+  color: var(--apple-text-secondary);
+  font-size: 14px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+.date-input,
+.time-input,
+.subject-input {
+  background: var(--apple-dark-elevated);
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.topics-input,
+.homework-input {
+  width: 100%;
+  min-height: 80px;
+  background: var(--apple-dark-elevated);
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.submit-btn {
+  background: var(--apple-success);
+  color: black;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.recent-logs {
+  margin-top: 30px;
+}
+
+.recent-logs h3 {
+  color: var(--apple-text-primary);
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.log-item {
+  background: var(--apple-dark-elevated);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.log-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-name {
+  font-weight: 600;
+  color: var(--apple-text-primary);
+}
+
+.student-subjects {
+  color: var(--apple-text-secondary);
+  font-size: 13px;
+}
+
+.log-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.log-duration {
+  color: var(--apple-accent);
+  font-size: 13px;
+  padding: 2px 6px;
+  background: rgba(10, 132, 255, 0.1);
+  border-radius: 4px;
+}
+
+.log-date {
+  color: var(--apple-text-secondary);
+  font-size: 14px;
+}
+
+.log-subject {
+  color: var(--apple-accent);
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.log-topics,
+.log-homework {
+  color: var(--apple-text-secondary);
+  font-size: 14px;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.log-topics strong,
+.log-homework strong {
+  color: var(--apple-text-primary);
+}
+
+@media (max-width: 768px) {
+  .tutoring-log {
+    padding: 16px;
+    margin: 16px 0;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .student-inputs {
+    flex-direction: column;
+  }
+
+  .log-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .log-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.student-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.student-header h3 {
+  margin: 0;
+  flex: 1;
+}
+
+
+.language-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.language-toggle svg {
+  font-size: 16px;
+  color: var(--apple-text-primary);
+}
+
+.student-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.view-progress-btn {
+  background: var(--apple-accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.view-progress-btn:hover {
+  background: rgba(10, 132, 255, 0.8);
+}
+
+.share-btn {
+  background: var(--apple-dark-elevated);
+  color: var(--apple-text-primary);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.share-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.share-btn-small {
+  background: none;
+  border: none;
+  color: var(--apple-text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.share-btn-small:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--apple-text-primary);
+}
+
+.share-progress-btn {
+  background: var(--apple-dark-elevated);
+  color: var(--apple-accent);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.share-progress-btn:hover {
+  background: rgba(10, 132, 255, 0.1);
+}
+
+.progress-nav {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.back-to-log-btn {
+  background: var(--apple-dark-elevated);
+  color: var(--apple-accent);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.back-to-log-btn:hover {
+  background: rgba(10, 132, 255, 0.1);
+}
+
+.form-tabs {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: none;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--apple-text-secondary);
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--apple-accent);
+}
+
+.tab-btn.active {
+  color: var(--apple-accent);
+}
+
+.tab-btn.active::after {
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--apple-accent);
+}
+
+.schedule-btn {
+  background: var(--apple-accent);
+  color: white;
+}
+
+.schedule-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--apple-border);
+  border-radius: 8px;
+  background-color: var(--apple-dark-elevated);
+  color: var(--apple-text-primary);
+  font-size: 14px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.schedule-select:hover {
+  border-color: var(--apple-accent);
+}
+
+.schedule-select:focus {
+  outline: none;
+  border-color: var(--apple-accent);
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
+}
+
+.schedule-select option {
+  padding: 8px;
+  background-color: var(--apple-dark-elevated);
+  color: var(--apple-text-primary);
+}
+
+.no-schedules-message {
+  color: var(--apple-text-secondary);
+  font-size: 14px;
+  padding: 12px;
+  background-color: var(--apple-dark-elevated);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.pdf-upload {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pdf-upload-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pdf-upload-label:hover {
+  background-color: #e0e0e0;
+}
+
+.uploading-text {
+  color: #666;
+  font-style: italic;
+}
+
+.pdf-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pdf-preview a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.pdf-preview a:hover {
+  text-decoration: underline;
+}
+
+.upload-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.upload-progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: var(--apple-dark-elevated);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.upload-progress-fill {
+  height: 100%;
+  background-color: var(--apple-accent);
+  transition: width 0.3s ease;
+}
+
+.upload-status-text {
+  font-size: 0.9rem;
+  color: var(--apple-text-secondary);
+}
+
+.pdf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.pdf-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--apple-accent);
+  text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(10, 132, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.pdf-link:hover {
+  background-color: rgba(10, 132, 255, 0.2);
+  text-decoration: none;
+}
+
+.pdf-link svg {
+  color: var(--apple-accent);
+} 
