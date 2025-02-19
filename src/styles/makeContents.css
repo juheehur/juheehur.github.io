@@ -82,14 +82,6 @@
   100% { opacity: 1; }
 }
 
-/* Main Content */
-.main-content {
-  background: white;
-  border-radius: 16px;
-  box-shadow: var(--shadow-lg);
-  padding: 32px;
-}
-
 /* Text Entries Section */
 .text-entries-header {
   display: flex;

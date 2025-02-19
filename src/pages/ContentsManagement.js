@@ -855,10 +855,10 @@ const ContentsManagement = () => {
 
                 <div className="form-group">
                   <label className="form-label">언어</label>
-                  <div className="language-buttons">
+                  <div className="lang-btns">
                     <button 
                       type="button"
-                      className={`language-button ${isKorean ? 'selected' : ''}`}
+                      className={`lang-btn ${isKorean ? 'selected' : ''}`}
                       onClick={() => {
                         setIsKorean(true);
                         setNewContent({...newContent, isKorean: true});
@@ -868,7 +868,7 @@ const ContentsManagement = () => {
                     </button>
                     <button 
                       type="button"
-                      className={`language-button ${!isKorean ? 'selected' : ''}`}
+                      className={`lang-btn ${!isKorean ? 'selected' : ''}`}
                       onClick={() => {
                         setIsKorean(false);
                         setNewContent({...newContent, isKorean: false});

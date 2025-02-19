@@ -52,6 +52,14 @@ const AddTodo = () => {
     fetchGoals();
     fetchCategoryColors();
     fetchTodayHabits();
+    
+    // 현재 월 데이터를 즉시 로드
+    const currentMonth = moment().format('YYYY-MM');
+    fetchMonthTodos(currentMonth);
+    
+    // 다음 달 데이터도 미리 로드 (UX 향상)
+    const nextMonth = moment().add(1, 'month').format('YYYY-MM');
+    fetchMonthTodos(nextMonth);
 
     return () => {
       if (unsubscribeTodayTodos) unsubscribeTodayTodos();
@@ -1038,15 +1046,24 @@ const AddTodo = () => {
                 <Calendar
                   onChange={setSelectedDate}
                   value={selectedDate}
+                  onActiveStartDateChange={({ activeStartDate }) => {
+                    const monthStr = moment(activeStartDate).format('YYYY-MM');
+                    fetchMonthTodos(monthStr);
+                    // 다음 달도 미리 로드
+                    const nextMonthStr = moment(activeStartDate).add(1, 'month').format('YYYY-MM');
+                    fetchMonthTodos(nextMonthStr);
+                  }}
                   tileContent={({ date }) => {
                     const dateStr = moment(date).format('YYYY-MM-DD');
                     const count = getTodoCount(date);
-                    return count !== null ? (
+                    return (
                       <div className="calendar-todos">
-                        {count > 0 && <div className="todo-count">{count}</div>}
+                        {count !== null ? (
+                          count > 0 && <div className="todo-count">{count}</div>
+                        ) : (
+                          <div className="loading-dot">•</div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="calendar-todos loading">...</div>
                     );
                   }}
                 />

@@ -294,8 +294,6 @@ INVEST NOW!`;
         </div>
         <div className="content-wrapper">
           <div className="content-section">
-            <div className="language-toggle">
-            </div>
             <div className="title-container">
               <pre 
                 className="title" 
