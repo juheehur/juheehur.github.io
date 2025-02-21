@@ -16,12 +16,13 @@ const ContentsManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [showAccountInput, setShowAccountInput] = useState(false);
   const [newAccount, setNewAccount] = useState('');
-  const [isKorean, setIsKorean] = useState(false);
+  const [isKorean, setIsKorean] = useState(true);
   const [filters, setFilters] = useState({
     platform: '',
     account: '',
     language: '',
-    dateRange: 'all'
+    dateRange: 'all',
+    onlyMyVoice: false
   });
   const [sortConfig, setSortConfig] = useState({
     key: 'date',
@@ -33,7 +34,8 @@ const ContentsManagement = () => {
     title: '',
     link: '',
     date: moment().format('YYYY-MM-DD'),
-    isKorean: false
+    isKorean: true,
+    isMyVoice: false
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({
@@ -217,9 +219,10 @@ const ContentsManagement = () => {
         title: '',
         link: '',
         date: selectedDate.format('YYYY-MM-DD'),
-        isKorean: false
+        isKorean: true,
+        isMyVoice: false
       });
-      setIsKorean(false);
+      setIsKorean(true);
       setEditingContent(null);
       setShowModal(false);
       fetchContents();
@@ -497,7 +500,8 @@ const ContentsManagement = () => {
         const contentDate = moment(content.date);
         return contentDate.isBetween(startDate, endDate, 'day', '[]');
       })
-      .filter(content => selectedLinks.has(content.id));
+      .filter(content => selectedLinks.has(content.id))
+      .filter(content => !filters.onlyMyVoice || content.isMyVoice);
 
     // 제목별로 콘텐츠 그룹화
     const groupedByTitle = filteredContents.reduce((acc, content) => {
@@ -512,9 +516,12 @@ const ContentsManagement = () => {
 
     // 각 제목별로 플랫폼과 링크 정리
     Object.entries(groupedByTitle).forEach(([title, contents]) => {
-      text += `(제목: ${title})\n`;
       contents.forEach(content => {
-        text += `${content.platform} - ${content.link}\n`;
+        if (content.isMyVoice) {
+          text += `#보이스클로닝챌린지(허주희)_(emily.hur.juhee@gmail.com)(${content.link})\n`;
+        } else {
+          text += `${content.platform} - ${content.link}\n`;
+        }
       });
       text += '\n';
     });
@@ -657,6 +664,27 @@ const ContentsManagement = () => {
   const startTitleEdit = (content) => {
     setEditingTitleId(content.id);
     setEditingTitleValue(content.title);
+  };
+
+  const updateSelectedLinksBasedOnFilter = (onlyMyVoice) => {
+    const filteredContents = contents
+      .filter(content => {
+        if (!startDate || !endDate) return true;
+        const contentDate = moment(content.date);
+        return contentDate.isBetween(startDate, endDate, 'day', '[]');
+      })
+      .filter(content => !onlyMyVoice || content.isMyVoice);
+
+    // 현재 선택된 링크들 중에서 필터 조건에 맞는 것만 유지
+    const newSelectedLinks = new Set();
+    selectedLinks.forEach(linkId => {
+      const content = contents.find(c => c.id === linkId);
+      if (content && (!onlyMyVoice || content.isMyVoice)) {
+        newSelectedLinks.add(linkId);
+      }
+    });
+    
+    setSelectedLinks(newSelectedLinks);
   };
 
   return (
@@ -900,6 +928,18 @@ const ContentsManagement = () => {
                     onChange={(e) => setNewContent({...newContent, link: e.target.value})}
                   />
                 </div>
+
+                <div className="form-group">
+                  <div className="checkbox-wrapper">
+                    <input
+                      type="checkbox"
+                      id="isMyVoice"
+                      checked={newContent.isMyVoice}
+                      onChange={(e) => setNewContent({...newContent, isMyVoice: e.target.checked})}
+                    />
+                    <label htmlFor="isMyVoice">내 목소리</label>
+                  </div>
+                </div>
               </form>
             </div>
 
@@ -929,10 +969,11 @@ const ContentsManagement = () => {
       <div className="data-table">
         <div className="table-header">
           <h2>전체 콘텐츠 목록</h2>
-          <div className="filters">
+          <div className="contents-filters">
             <select
               value={filters.platform}
               onChange={(e) => setFilters({...filters, platform: e.target.value})}
+              className="contents-filter-select"
             >
               <option value="">모든 플랫폼</option>
               <option value="instagram">Instagram</option>
@@ -942,6 +983,7 @@ const ContentsManagement = () => {
             <select
               value={filters.account}
               onChange={(e) => setFilters({...filters, account: e.target.value})}
+              className="contents-filter-select"
             >
               <option value="">모든 계정</option>
               {accounts.map(account => (
@@ -951,6 +993,7 @@ const ContentsManagement = () => {
             <select
               value={filters.language}
               onChange={(e) => setFilters({...filters, language: e.target.value})}
+              className="contents-filter-select"
             >
               <option value="">모든 언어</option>
               <option value="korean">한국어</option>
@@ -959,6 +1002,7 @@ const ContentsManagement = () => {
             <select
               value={filters.dateRange}
               onChange={(e) => setFilters({...filters, dateRange: e.target.value})}
+              className="contents-filter-select"
             >
               <option value="all">전체 기간</option>
               <option value="today">오늘</option>
@@ -967,6 +1011,18 @@ const ContentsManagement = () => {
               <option value="month">최근 1개월</option>
               <option value="year">최근 1년</option>
             </select>
+            <label className="filter-checkbox">
+              <input
+                type="checkbox"
+                checked={filters.onlyMyVoice}
+                onChange={(e) => {
+                  const newValue = e.target.checked;
+                  setFilters({...filters, onlyMyVoice: newValue});
+                  updateSelectedLinksBasedOnFilter(newValue);
+                }}
+              />
+              내 목소리만 보기
+            </label>
           </div>
         </div>
         <table>
@@ -1053,20 +1109,34 @@ const ContentsManagement = () => {
             총 {getFilteredAndSortedContents().length}개의 콘텐츠
           </span>
         </div>
-        <div className="date-filter">
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            placeholder="시작 날짜"
-          />
-          <span>~</span>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            placeholder="종료 날짜"
-          />
+        <div className="export-filters">
+          <div className="date-filter">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              placeholder="시작 날짜"
+            />
+            <span>~</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              placeholder="종료 날짜"
+            />
+          </div>
+          <label className="filter-checkbox">
+            <input
+              type="checkbox"
+              checked={filters.onlyMyVoice}
+              onChange={(e) => {
+                const newValue = e.target.checked;
+                setFilters({...filters, onlyMyVoice: newValue});
+                updateSelectedLinksBasedOnFilter(newValue);
+              }}
+            />
+            내 목소리만 보기
+          </label>
         </div>
         <div className="select-all">
           <input
