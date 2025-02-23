@@ -1058,7 +1058,23 @@ const ContentsManagement = () => {
                   </div>
                 </td>
                 <td>{content.isKorean ? '한국어' : '영어'}</td>
-                <td>{content.title}</td>
+                <td className="title-cell">
+                  {editingTitleId === content.id ? (
+                    <input
+                      type="text"
+                      value={editingTitleValue}
+                      onChange={(e) => setEditingTitleValue(e.target.value)}
+                      onKeyDown={(e) => handleTitleEditKeyDown(e, content.id)}
+                      onBlur={() => handleTitleEdit(content.id, editingTitleValue)}
+                      autoFocus
+                    />
+                  ) : (
+                    <div onClick={() => startTitleEdit(content)}>
+                      {content.title}
+                      <span className="edit-icon">✎</span>
+                    </div>
+                  )}
+                </td>
                 <td>
                   <a href={content.link} target="_blank" rel="noopener noreferrer">
                     보기
