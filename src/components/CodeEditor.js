@@ -5,7 +5,7 @@ import { python } from '@codemirror/lang-python';
 import { css } from '@codemirror/lang-css';
 import { html } from '@codemirror/lang-html';
 import { markdown } from '@codemirror/lang-markdown';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { EditorView } from '@codemirror/view';
 
 const languageMap = {
   javascript: javascript({ jsx: true }),
@@ -24,90 +24,85 @@ const judgeLanguageIds = {
 const RAPIDAPI_KEY = 'f699223cd9msh5186af48a1d2c49p1e149djsndf91bd53aef8';
 const RAPIDAPI_HOST = 'judge0-ce.p.rapidapi.com';
 
-function CodeEditor({ code, onChange, language = 'javascript', readOnly = false }) {
+function CodeEditor({ code, onChange, language = 'javascript', readOnly = false, onRun }) {
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState(null);
   const [stdin, setStdin] = useState('');
   const [showInput, setShowInput] = useState(false);
+  const [isCompiling, setIsCompiling] = useState(false);
 
   const extensions = [
     languageMap[language] || javascript(),
-    oneDark
+    EditorView.theme({
+      '&': {
+        backgroundColor: '#ffffff',
+        height: '100%'
+      },
+      '.cm-content': {
+        color: '#333333',
+        caretColor: '#333333'
+      },
+      '.cm-cursor': {
+        borderLeftColor: '#333333'
+      },
+      '.cm-gutters': {
+        backgroundColor: '#f8f9fa',
+        color: '#6e7681',
+        border: 'none'
+      },
+      '.cm-activeLineGutter': {
+        backgroundColor: '#f0f1f2'
+      },
+      '.cm-line': {
+        fontFamily: "'Fira Code', monospace"
+      },
+      '.cm-selectionBackground': {
+        backgroundColor: '#d7d4f0'
+      },
+      '.cm-matchingBracket': {
+        backgroundColor: '#e5e5e5',
+        color: 'inherit'
+      },
+      '.cm-activeLine': {
+        backgroundColor: '#f8f9fa'
+      }
+    })
   ];
 
-  const runCode = async () => {
-    if (!judgeLanguageIds[language]) {
-      setError('Code execution is only supported for JavaScript and Python');
-      return;
-    }
-
-    setIsRunning(true);
-    setError(null);
-    setOutput('');
-
+  const handleRunCode = async () => {
+    if (!code.trim()) return;
+    
     try {
-      // Create submission
-      const response = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'X-RapidAPI-Host': RAPIDAPI_HOST,
-          'X-RapidAPI-Key': RAPIDAPI_KEY,
-        },
-        body: JSON.stringify({
-          source_code: code,
-          language_id: judgeLanguageIds[language],
-          stdin: stdin,
-          wait: false
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit code');
-      }
-
-      const { token } = await response.json();
-      if (!token) {
-        throw new Error('No token received from the API');
-      }
-
-      // Poll for results
-      let attempts = 10;
-      const getResult = async () => {
-        const resultResponse = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${token}`, {
-          headers: {
-            'X-RapidAPI-Host': RAPIDAPI_HOST,
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-          },
-        });
-
-        if (!resultResponse.ok) {
-          throw new Error('Failed to fetch results');
-        }
-
-        const result = await resultResponse.json();
-
-        if (result.status?.id <= 2 && attempts > 0) { // In Queue or Processing
-          attempts--;
-          setTimeout(getResult, 1000);
-        } else {
-          if (result.stderr) {
-            setError(result.stderr);
-          } else if (result.compile_output) {
-            setError(result.compile_output);
-          } else {
-            setOutput(result.stdout || 'No output');
+      setIsCompiling(true);
+      
+      // 실제 API 호출 대신 임시 테스트 로직 사용
+      const simulateExecution = (pythonCode) => {
+        // 간단한 Python 코드 실행 시뮬레이션
+        if (pythonCode.includes('print')) {
+          const match = pythonCode.match(/print\(['"](.*)['"]\)/);
+          if (match) {
+            return match[1];  // print 문자열 반환
           }
-          setIsRunning(false);
         }
+        return 'No output';  // 기본 출력
       };
 
-      await getResult();
-    } catch (err) {
-      console.error('Code execution error:', err);
-      setError(err.message || 'Failed to execute code. Please try again.');
-      setIsRunning(false);
+      // 코드 실행 시뮬레이션
+      const output = simulateExecution(code);
+      setOutput(output);
+      
+      // 실행 결과를 상위 컴포넌트로 전달
+      if (onRun) {
+        onRun(output);
+      }
+
+    } catch (error) {
+      console.error('Compilation error:', error);
+      setOutput('실행 중 오류가 발생했습니다.');
+      throw error;
+    } finally {
+      setIsCompiling(false);
     }
   };
 
@@ -116,7 +111,6 @@ function CodeEditor({ code, onChange, language = 'javascript', readOnly = false 
       <CodeMirror
         value={code}
         height="200px"
-        theme={oneDark}
         extensions={extensions}
         onChange={onChange}
         readOnly={readOnly}
@@ -156,11 +150,11 @@ function CodeEditor({ code, onChange, language = 'javascript', readOnly = false 
               {showInput ? 'Hide Input' : 'Show Input'}
             </button>
             <button 
-              onClick={runCode} 
-              disabled={isRunning}
+              onClick={handleRunCode} 
+              disabled={isCompiling}
               className="run-code-btn"
             >
-              {isRunning ? 'Running...' : 'Run Code'}
+              {isCompiling ? 'Compiling...' : 'Run Code'}
             </button>
           </div>
           {showInput && (

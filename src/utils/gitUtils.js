@@ -41,7 +41,9 @@ export const pushCodeToGithub = async (title, content, fileName) => {
       return null;
     }
 
-    const combinedCode = pythonCodeBlocks.join('\n\n');
+    // 마지막 Python 코드 블록만 사용
+    const lastPythonCode = pythonCodeBlocks[pythonCodeBlocks.length - 1];
+
     const cleanFileName = fileName.trim()
       .toLowerCase()
       .replace(/[^a-z0-9가-힣\s]/g, '')
@@ -54,7 +56,7 @@ export const pushCodeToGithub = async (title, content, fileName) => {
         repo: REPO_NAME,
         path: cleanFileName,
         message: `Add solution: ${title}`,
-        content: btoa(unescape(encodeURIComponent(combinedCode))),
+        content: btoa(unescape(encodeURIComponent(lastPythonCode))), // 마지막 코드만 사용
         committer: {
           name: process.env.REACT_APP_GITHUB_USERNAME,
           email: process.env.REACT_APP_GITHUB_EMAIL

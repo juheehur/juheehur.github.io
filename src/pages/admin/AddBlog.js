@@ -12,7 +12,6 @@ import '../../styles/addBlog.css';
 function AddBlog() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [readTime, setReadTime] = useState('');
   const [coverImage, setCoverImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -21,7 +20,11 @@ function AddBlog() {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
   const textareaRef = useRef(null);
-  const [postType, setPostType] = useState('');
+  const [postType, setPostType] = useState('coding test');
+  const [showCompiler, setShowCompiler] = useState(true);
+  const [pythonCode, setPythonCode] = useState('');
+  const [compilerOutput, setCompilerOutput] = useState('');
+  const [isCompiling, setIsCompiling] = useState(false);
   const [existingTypes, setExistingTypes] = useState([]);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [codeEditorOpen, setCodeEditorOpen] = useState(false);
@@ -29,6 +32,7 @@ function AddBlog() {
   const [selectedLanguage, setSelectedLanguage] = useState('javascript');
   const [isGitPushing, setIsGitPushing] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [customType, setCustomType] = useState('');
 
   // 프로젝트 목록 가져오기
   useEffect(() => {
@@ -270,11 +274,10 @@ function AddBlog() {
       const blogPost = {
         title,
         content,
-        readTime: parseInt(readTime),
         coverImageUrl: imageUrl,
         date: new Date().toISOString(),
         author: 'Your Name',
-        postType: selectedProject ? null : postType,
+        postType: postType === 'general' ? customType : postType,
         relatedProject: selectedProject ? {
           id: selectedProject,
           title: projectData.title,
@@ -300,9 +303,14 @@ function AddBlog() {
     }
   };
 
-  const handleTypeSelect = (type) => {
+  const handlePostTypeChange = (type) => {
     setPostType(type);
-    setShowTypeDropdown(false);
+    if (type === 'general') {
+      setShowCompiler(false);
+      setCustomType('');
+    } else {
+      setShowCompiler(true);
+    }
   };
 
   const handleCodeInsert = () => {
@@ -338,211 +346,222 @@ function AddBlog() {
     }
   };
 
+  // Python 코드 실행 함수 수정
+  const runPythonCode = async () => {
+    if (!pythonCode.trim()) {
+      setCompilerOutput('코드를 입력해주세요.');
+      return;
+    }
+
+    setIsCompiling(true);
+    try {
+      // 코드와 실행 결과를 본문에 삽입
+      const codeBlock = `\`\`\`python\n${pythonCode}\n\`\`\`\n\n실행 결과:\n\`\`\`\n${compilerOutput}\n\`\`\`\n`;
+      
+      // 기존 content에 추가
+      setContent(prev => {
+        if (textareaRef.current && textareaRef.current.selectionStart !== undefined) {
+          const start = textareaRef.current.selectionStart;
+          const end = textareaRef.current.selectionEnd;
+          return prev.substring(0, start) + codeBlock + prev.substring(end);
+        }
+        return prev + codeBlock;
+      });
+
+    } catch (error) {
+      console.error('Compiler error:', error);
+      setCompilerOutput('컴파일 에러: ' + error.message);
+    } finally {
+      setIsCompiling(false);
+    }
+  };
+
   return (
     <div className="add-blog">
-      <h2>Add New Blog Post</h2>
+      <h2>새 블로그 포스트 작성</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Title:</label>
-          <textarea
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className="title-textarea"
-            placeholder="Enter title..."
-            rows="2"
-          />
+          <div className="post-type-selector">
+            <button
+              type="button"
+              className={`type-button ${postType === 'general' ? 'active' : ''}`}
+              onClick={() => handlePostTypeChange('general')}
+            >
+              일반 글
+            </button>
+            <button
+              type="button"
+              className={`type-button ${postType === 'coding test' ? 'active' : ''}`}
+              onClick={() => handlePostTypeChange('coding test')}
+            >
+              코딩 테스트 기록
+            </button>
+          </div>
         </div>
 
-        <div className="form-group content-group">
-          <div className="content-header">
-            <label>Content: (Markdown supported)</label>
-            <div className="content-actions">
-              <button 
-                type="button" 
-                onClick={() => setCodeEditorOpen(!codeEditorOpen)}
-                className="preview-toggle"
-              >
-                {codeEditorOpen ? 'Close Code Editor' : 'Add Code'}
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setPreviewMode(!previewMode)}
-                className="preview-toggle"
-              >
-                {previewMode ? 'Edit' : 'Preview'}
-              </button>
-            </div>
-          </div>
-          
-          {codeEditorOpen && (
-            <div className="code-editor-split">
-              <div className="markdown-content">
-                <h4>Current Content:</h4>
-                <ReactMarkdown 
-                  rehypePlugins={[rehypeRaw]} 
-                  remarkPlugins={[remarkGfm]}
-                >
-                  {content}
-                </ReactMarkdown>
-              </div>
-              <div className="code-editor-container">
-                <select
-                  value={selectedLanguage}
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
-                  className="language-select"
-                >
-                  <option value="javascript">JavaScript</option>
-                  <option value="python">Python</option>
-                  <option value="css">CSS</option>
-                  <option value="html">HTML</option>
-                  <option value="markdown">Markdown</option>
-                </select>
-                <CodeEditor
-                  code={codeContent}
-                  onChange={(value) => setCodeContent(value)}
-                  language={selectedLanguage}
-                />
-                <button 
-                  type="button" 
-                  onClick={handleCodeInsert}
-                  className="insert-code-btn"
-                >
-                  Insert Code
-                </button>
-              </div>
-            </div>
-          )}
-          
-          {previewMode ? (
-            <div className="markdown-preview">
-              <ReactMarkdown 
-                rehypePlugins={[rehypeRaw]} 
-                remarkPlugins={[remarkGfm]}
-              >
-                {content}
-              </ReactMarkdown>
-            </div>
-          ) : (
-            <div 
-              className={`textarea-wrapper ${isDragging ? 'dragging' : ''}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
+        <button type="submit" disabled={loading || isGitPushing} className="blog-publish-button">
+          {loading ? 'Publishing...' : isGitPushing ? 'Pushing to GitHub...' : 'Publish Post'}
+        </button>
+
+        {postType === 'coding test' ? (
+          <div className="coding-test-layout">
+            <div className="left-panel">
+              <textarea
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="title-textarea"
+                placeholder="문제 제목을 입력하세요..."
+              />
               <textarea
                 ref={textareaRef}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 required
-                rows="15"
-                placeholder="Write your content in markdown format... Drag and drop images here"
+                className="problem-description"
+                placeholder="문제 설명, 제한사항, 입출력 예시 등을 작성하세요..."
               />
-              {isDragging && (
-                <div className="drag-overlay">
-                  Drop image here
-                </div>
-              )}
+              <input
+                type="text"
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
+                placeholder="GitHub 파일명 (선택사항)"
+                className="file-name-input"
+              />
             </div>
-          )}
-        </div>
 
-        <div className="form-group">
-          <label>Related Project (Optional):</label>
-          <select
-            value={selectedProject}
-            onChange={(e) => setSelectedProject(e.target.value)}
-          >
-            <option value="">Select a project</option>
-            {projects.map(project => (
-              <option key={project.id} value={project.id}>
-                {project.title}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Read Time (minutes):</label>
-          <input
-            type="number"
-            value={readTime}
-            onChange={(e) => setReadTime(e.target.value)}
-            required
-            min="1"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Cover Image:</label>
-          <div 
-            className="cover-image-input"
-            onPaste={handlePaste}
-            tabIndex="0"
-          >
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/gif"
-              onChange={handleImageChange}
-            />
-            <div id="cover-image-preview" className="cover-image-preview"></div>
-            <p className="help-text">You can also paste (Ctrl+V) an image here</p>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Post Type:</label>
-          <div className="type-input-container">
-            <input
-              type="text"
-              value={postType}
-              onChange={(e) => setPostType(e.target.value)}
-              onFocus={() => setShowTypeDropdown(true)}
-              disabled={selectedProject}
-              placeholder="타입을 입력하세요 (예: 일기, 미니프로젝트...)"
-            />
-            {showTypeDropdown && existingTypes.length > 0 && !selectedProject && (
-              <div className="type-suggestions">
-                {existingTypes
-                  .filter(type => type.toLowerCase().includes(postType.toLowerCase()))
-                  .map(type => (
-                    <div
-                      key={type}
-                      className="type-suggestion-item"
-                      onClick={() => handleTypeSelect(type)}
-                    >
-                      #{type}
-                    </div>
-                  ))}
+            <div className="right-panel">
+              <div className="python-compiler form-group">
+                <CodeEditor
+                  code={pythonCode}
+                  onChange={setPythonCode}
+                  language="python"
+                  onRun={(output) => {
+                    setCompilerOutput(output);
+                    runPythonCode();
+                  }}
+                />
               </div>
-            )}
+            </div>
           </div>
-          {selectedProject && (
-            <small className="help-text">
-              * 프로젝트가 연결된 글은 타입을 선택할 수 없습니다.
-            </small>
-          )}
-        </div>
+        ) : (
+          <>
+            <div className="general-post-content">
+              <div className="form-group title-group">
+                <label>Title:</label>
+                <textarea
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  className="title-textarea"
+                  placeholder="제목을 입력하세요..."
+                  rows="1"
+                />
+              </div>
 
-        {postType === 'coding test' && (
-          <div className="form-group">
-            <label>GitHub File Name (Optional):</label>
-            <input
-              type="text"
-              value={fileName}
-              onChange={(e) => setFileName(e.target.value)}
-              placeholder="Enter file name (without .py extension)"
-              className="file-name-input"
-            />
-            <small className="help-text">
-              * Leave empty to use the post title as file name
-            </small>
-          </div>
+              <div className="form-group content-group">
+                <div className="content-header">
+                  <button 
+                    type="button" 
+                    onClick={() => setPreviewMode(!previewMode)}
+                    className="preview-toggle"
+                  >
+                    {previewMode ? 'Edit' : 'Preview'}
+                  </button>
+                </div>
+                
+                {previewMode ? (
+                  <div className="markdown-preview">
+                    <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
+                      {content}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="textarea-wrapper">
+                    <textarea
+                      ref={textareaRef}
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      required
+                      placeholder="내용을 입력하세요..."
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="post-options">
+              <div className="form-group">
+                <label>Related Project (Optional):</label>
+                <select
+                  value={selectedProject}
+                  onChange={(e) => setSelectedProject(e.target.value)}
+                >
+                  <option value="">Select a project</option>
+                  {projects.map(project => (
+                    <option key={project.id} value={project.id}>
+                      {project.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Cover Image:</label>
+                <div 
+                  className="cover-image-input"
+                  onPaste={handlePaste}
+                  tabIndex="0"
+                >
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif"
+                    onChange={handleImageChange}
+                  />
+                  <div id="cover-image-preview" className="cover-image-preview"></div>
+                  <p className="help-text">You can also paste (Ctrl+V) an image here</p>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Post Type:</label>
+                <div className="type-input-container">
+                  <input
+                    type="text"
+                    value={customType}
+                    onChange={(e) => setCustomType(e.target.value)}
+                    onFocus={() => setShowTypeDropdown(true)}
+                    disabled={selectedProject}
+                    placeholder="타입을 입력하세요 (예: 일기, 미니프로젝트...)"
+                  />
+                  {showTypeDropdown && existingTypes.length > 0 && !selectedProject && (
+                    <div className="type-suggestions">
+                      {existingTypes
+                        .filter(type => type.toLowerCase().includes(customType.toLowerCase()))
+                        .map(type => (
+                          <div
+                            key={type}
+                            className="type-suggestion-item"
+                            onClick={() => {
+                              setCustomType(type);
+                              setShowTypeDropdown(false);
+                            }}
+                          >
+                            #{type}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+                {selectedProject && (
+                  <small className="help-text">
+                    * 프로젝트가 연결된 글은 타입을 선택할 수 없습니다.
+                  </small>
+                )}
+              </div>
+            </div>
+          </>
         )}
-
-        <button type="submit" disabled={loading || isGitPushing}>
-          {loading ? 'Publishing...' : isGitPushing ? 'Pushing to GitHub...' : 'Publish Post'}
-        </button>
       </form>
     </div>
   );
