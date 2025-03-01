@@ -637,9 +637,8 @@ const AddTodo = () => {
   };
 
   const isToday = (dateStr) => {
-    const today = moment().tz('Asia/Hong_Kong').startOf('day');
-    const date = moment(dateStr).tz('Asia/Hong_Kong').startOf('day');
-    return date.isSame(today);
+    const today = moment().tz('Asia/Hong_Kong').format('YYYY-MM-DD');
+    return dateStr === today;
   };
 
   const todayTodos = addedTodos.filter(todo => isToday(todo.date));
@@ -808,6 +807,35 @@ const AddTodo = () => {
     }
   };
 
+  const handleDelete = async (todo) => {
+    try {
+      // Firestore에서 todo 삭제
+      const todoRef = doc(db, `todos/${todo.date}/todos/${todo.id}`);
+      await deleteDoc(todoRef);
+
+      // 로컬 상태 업데이트
+      setAddedTodos(prev => prev.filter(t => !(t.id === todo.id && t.date === todo.date)));
+      
+      // monthTodos 상태 업데이트
+      const monthStr = moment(todo.date).format('YYYY-MM');
+      setMonthTodos(prev => ({
+        ...prev,
+        [monthStr]: prev[monthStr]?.filter(t => !(t.id === todo.id && t.date === todo.date)) || []
+      }));
+
+      toast.success('🗑️ Todo deleted', {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+      toast.error('❌ Failed to delete todo', {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
+  };
+
   const TodoItem = ({ todo, onToggleComplete }) => {
     const [isPostponing, setIsPostponing] = useState(false);
     const [postponeReason, setPostponeReason] = useState('');
@@ -828,6 +856,11 @@ const AddTodo = () => {
       e.stopPropagation();
       setIsPostponing(false);
       setPostponeReason('');
+    };
+
+    const handleDeleteClick = (e) => {
+      e.stopPropagation();
+      handleDelete(todo);
     };
 
     const handleNotificationClick = (e) => {
@@ -861,13 +894,22 @@ const AddTodo = () => {
         </div>
         <div className="todo-actions">
           {!isPostponing ? (
-            <button 
-              onClick={handlePostponeClick}
-              className="postpone-btn"
-              title="미루기"
-            >
-              ⏳
-            </button>
+            <>
+              <button 
+                onClick={handlePostponeClick}
+                className="postpone-btn action-btn"
+                title="미루기"
+              >
+                ⏳
+              </button>
+              <button 
+                onClick={handleDeleteClick}
+                className="delete-btn action-btn"
+                title="삭제"
+              >
+                ×
+              </button>
+            </>
           ) : (
             <div className="postpone-form" onClick={e => e.stopPropagation()}>
               <input
@@ -1024,7 +1066,7 @@ const AddTodo = () => {
                   {/* Selected Date Todos */}
                   {selectedDate && !isToday(moment(selectedDate).format('YYYY-MM-DD')) && (
                     <div className="selected-date-todos">
-                      <h3>{moment(selectedDate).tz('Asia/Hong_Kong').format('YYYY-MM-DD ddd')}</h3>
+                      <h3>{moment(selectedDate).format('YYYY-MM-DD ddd')}</h3>
                       <div className="added-todos">
                         {monthTodos[moment(selectedDate).format('YYYY-MM')]
                           ?.filter(todo => todo.date === moment(selectedDate).format('YYYY-MM-DD'))
@@ -1044,7 +1086,12 @@ const AddTodo = () => {
               {/* Calendar Section */}
               <div className="calendar-section">
                 <Calendar
-                  onChange={setSelectedDate}
+                  onChange={(date) => {
+                    // 선택된 날짜를 Hong Kong 시간대로 변환하되, 날짜 정보만 유지
+                    const selectedDateStr = moment(date).format('YYYY-MM-DD');
+                    const hongKongDate = moment.tz(selectedDateStr, 'YYYY-MM-DD', 'Asia/Hong_Kong').toDate();
+                    setSelectedDate(hongKongDate);
+                  }}
                   value={selectedDate}
                   onActiveStartDateChange={({ activeStartDate }) => {
                     const monthStr = moment(activeStartDate).format('YYYY-MM');
@@ -1054,8 +1101,9 @@ const AddTodo = () => {
                     fetchMonthTodos(nextMonthStr);
                   }}
                   tileContent={({ date }) => {
+                    // 날짜 정보만 사용하여 비교
                     const dateStr = moment(date).format('YYYY-MM-DD');
-                    const count = getTodoCount(date);
+                    const count = getTodoCount(dateStr);
                     return (
                       <div className="calendar-todos">
                         {count !== null ? (
