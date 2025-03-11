@@ -131,23 +131,19 @@ const StudentProgress = ({ studentId }) => {
   };
 
   const calculateStats = (logsData) => {
-    const totalSessions = logsData.length;
     let totalMinutes = 0;
-    let lastMonthMinutes = 0;
-    let lastMonthSessions = 0;
+    let totalSessions = 0;
     
-    const lastMonthStart = moment().subtract(1, 'month').startOf('month');
-    const lastMonthEnd = moment().subtract(1, 'month').endOf('month');
+    const currentMonthStart = moment().startOf('month');
+    const currentMonthEnd = moment().endOf('month');
 
     logsData.forEach(log => {
-      if (log.duration) {
-        const minutes = (log.duration.hours * 60) + log.duration.minutes;
-        totalMinutes += minutes;
-
-        const logDate = moment(log.date);
-        if (logDate.isBetween(lastMonthStart, lastMonthEnd, 'day', '[]')) {
-          lastMonthMinutes += minutes;
-          lastMonthSessions++;
+      const logDate = moment(log.date);
+      if (logDate.isBetween(currentMonthStart, currentMonthEnd, 'day', '[]')) {
+        if (log.duration) {
+          const minutes = (log.duration.hours * 60) + log.duration.minutes;
+          totalMinutes += minutes;
+          totalSessions++;
         }
       }
     });
@@ -157,8 +153,8 @@ const StudentProgress = ({ studentId }) => {
       averageSessionLength: totalSessions ? Math.round((totalMinutes / totalSessions) * 10) / 10 : 0,
       totalSessions,
       lastMonth: {
-        hours: Math.round((lastMonthMinutes / 60) * 10) / 10,
-        sessions: lastMonthSessions
+        hours: 0,
+        sessions: 0
       }
     });
   };
